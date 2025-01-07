@@ -15,7 +15,9 @@ app.get("/send-generation", async (req, res) => {
 });
 
 app.get("/check-status", async (req, res) => {
-  const data = await checkBatchStatus("1");
+  // const data = await checkBatchStatus("1");
+  const data = await checkBatchStatus('batch_677d070c405881909d5c6373fea1ab91');
+  // batch_677d070dfd008190ad9b8a48cf6717e4
   res.send(data);
 });
 

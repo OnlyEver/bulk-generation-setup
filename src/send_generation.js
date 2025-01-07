@@ -48,14 +48,13 @@ export async function sendGeneration() {
     body: {
       model: "gpt-4o-mini", // Specify the model.
       messages: [
-        { role: "system", content: returnTypologyPrompt }, // System message.
+        { role: "system", content: returnTypologyPrompt() }, // System message.
         {
           role: "user", content:
             parseData(doc.content, ['See also', 'References', 'Further reading', 'External links', 'Notes and references', 'Bibliography', 'Notes', 'Cited sources'],
               ['table', 'empty_line']),
         }, // User message (use doc content or default).
       ],
-      max_tokens: 1000, // Maximum tokens for the re sponse.
     },
   }));
 

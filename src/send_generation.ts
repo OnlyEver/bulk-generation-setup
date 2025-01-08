@@ -2,19 +2,16 @@ import OpenAI from "openai";
 import fs from "fs";
 import fsPromise from "fs/promises";
 
-import { prepareBatch } from "./prepare_batch.js";
-import { checkBatchStatus } from "./check_batch_status.js";
+import { prepareBatch } from "./prepare_batch";
+import { checkBatchStatus } from "./check_batch_status";
 import { MongoClient } from "mongodb";
-import { returnTypologyPrompt } from "../prompts/typology_prompt.js";
-import { parseData } from "./parse_source_content.js";
-import { config } from "../config.js";
-
-
+import { returnTypologyPrompt } from "./prompts/typology_prompt";
+import { parseData } from "./parse_source_content";
+import { config } from "./config";
 
 export async function sendGeneration() {
-
-  const dbName = 'onlyever';
-  const db_uri = 'mongodb://localhost:27017';
+  const dbName = "onlyever";
+  const db_uri = "mongodb://localhost:27017";
   const client = new MongoClient(db_uri);
   const database = client.db(dbName);
   const collection = database.collection("_source");
@@ -50,41 +47,49 @@ export async function sendGeneration() {
       messages: [
         { role: "system", content: returnTypologyPrompt() }, // System message.
         {
-          role: "user", content:
-            parseData(doc.content, ['See also', 'References', 'Further reading', 'External links', 'Notes and references', 'Bibliography', 'Notes', 'Cited sources'],
-              ['table', 'empty_line']),
+          role: "user",
+          content: parseData(
+            doc.content,
+            [
+              "See also",
+              "References",
+              "Further reading",
+              "External links",
+              "Notes and references",
+              "Bibliography",
+              "Notes",
+              "Cited sources",
+            ],
+            ["table", "empty_line"]
+          ),
         }, // User message (use doc content or default).
       ],
     },
   }));
 
-
   // Write the batch data to a local file
-  const filePath = "./batchinput.jsonl";
+  const filePath = "./batchinputonl";
   await fsPromise.writeFile(
     filePath,
     batchData.map((entry) => JSON.stringify(entry)).join("\n"),
-    'utf-8'
+    "utf-8"
   );
 
-
   const openai = new OpenAI({
-    apiKey: config.openAiKey
+    apiKey: config.openAiKey,
   });
   const file = await openai.files.create({
-    file: fs.createReadStream("./batchinput.jsonl"),
+    file: fs.createReadStream("./batchinputonl"),
     purpose: "batch",
   });
 
   await prepareBatch(file.id);
-
 
   const data = {
     generation: "Generation will be handled here",
   };
   return data;
 }
-
 
 // const batchData = [
 

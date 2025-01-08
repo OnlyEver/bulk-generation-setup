@@ -128,10 +128,6 @@ json
 
 `;
 
-
-
-
-
-export function returnTypologyPrompt(){
-    return typologyPromptString;
+export function returnTypologyPrompt() {
+  return typologyPromptString;
 }

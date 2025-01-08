@@ -23,8 +23,10 @@ const parse_source_content_1 = require("./parse_source_content");
 const config_1 = require("./config");
 function sendGeneration() {
     return __awaiter(this, void 0, void 0, function* () {
-        const dbName = "onlyever";
-        const db_uri = "mongodb://localhost:27017";
+        // const dbName = "onlyever";
+        const dbName = "bulk_generation";
+        // const db_uri = "mongodb://localhost:27017";
+        const db_uri = config_1.config.dbUri || "mongodb://localhost:27017";
         const client = new mongodb_1.MongoClient(db_uri);
         const database = client.db(dbName);
         const collection = database.collection("_source");

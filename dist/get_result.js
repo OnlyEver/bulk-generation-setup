@@ -28,7 +28,22 @@ function getResult(fileid) {
         // return JSON.parse(pa);
     });
 }
-// JSON.parse( parseJsonlFile(fileContents.toString())[0].response.body.choices[0].message.content)
+// const readJsonlFile = async (file:) => {
+//   try {
+//     // Read the entire JSONL file as a string
+//     const fileContent = await fs.readFile(filePath, "utf8");
+//     // Split the content into lines and parse each as JSON
+//     const data = fileContent
+//       .split("\n") // Split by newlines
+//       .filter((line) => line.trim() !== "") // Remove empty lines
+//       .map((line) => JSON.parse(line)); // Parse JSON strings into objects
+//     console.log("Parsed JSONL Data:", data);
+//     return data;
+//   } catch (error) {
+//     console.error("Error reading JSONL file:", error);
+//     throw error;
+//   }
+// };
 const parseJsonlFile = (content) => {
     try {
         // Read the JSONL file content

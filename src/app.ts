@@ -8,6 +8,7 @@ import {
   closeGenerationQueue,
 } from "./queue-implementation/generation-queue";
 import { generationWorker } from "./queue-implementation/generation_worker";
+import { handleQueueCompletion } from "./queue-implementation/on-queue-complete/handle_queue_completion";
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -41,6 +42,9 @@ const PORT = process.env.PORT || 3000;
 
 const generationData = {
   id: "1",
+  sources_ids: [],
+  bloom_level: 1,
+  type: "breadth", //"depth",
   name: "Generation 1",
 };
 // await closeGenerationQueue();
@@ -50,6 +54,7 @@ const generationData = {
   generationWorker.on("completed", (job: any) => {
     console.log("Generation job completed", job.id);
     generationWorker.close();
+    handleQueueCompletion(job.data);
   });
   generationWorker.on("failed", (job: any, err: any) => {
     console.log("Generation job failed", job.id, err.message);

@@ -5,7 +5,7 @@ import fsPromise from "fs/promises";
 import { returnTypologyPrompt } from "./1.batch-prepare/fetch-prompts/typology_prompt";
 import { parseData } from "./1.batch-prepare/parse_source_content";
 import { config } from "../config";
-import { delay } from "../helper_function/delay_helper";
+import { delay } from "../utils/delay_helper";
 
 import { sourceCollection } from "../mongodb/connection";
 
@@ -70,10 +70,8 @@ export async function sendGeneration() {
     purpose: "batch",
   });
 
-  await prepareBatch(file.id);
-  const batchStatus = await poolBatchStatus(
-    "batch_677e2d19065081909e98849d40dd11ed"
-  );
+  const batch = await prepareBatch(file.id);
+  const batchStatus = await poolBatchStatus(batch.id);
 
   if (batchStatus.status == "completed") {
     //get results

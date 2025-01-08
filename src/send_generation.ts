@@ -1,45 +1,18 @@
 import OpenAI from "openai";
 import fs from "fs";
 import fsPromise from "fs/promises";
-
-import { prepareBatch } from "./prepare_batch";
+import { prepareBatch } from "./create_batch";
 import { checkBatchStatus } from "./check_batch_status";
-import { MongoClient } from "mongodb";
 import { returnTypologyPrompt } from "./prompts/typology_prompt";
 import { parseData } from "./parse_source_content";
 import { config } from "./config";
+import { delay } from "./helper_function/delay_helper";
+import { cancelBatch } from "./cancel_batch";
+import { sourceCollection } from "./mongodb/connection";
+import { getResult } from "./get_result";
 
 export async function sendGeneration() {
-  // const dbName = "onlyever";
-  const dbName = "bulk_generation";
-  // const db_uri = "mongodb://localhost:27017";
-  const db_uri = config.dbUri || "mongodb://localhost:27017";
-  const client = new MongoClient(db_uri);
-  const database = client.db(dbName);
-  const collection = database.collection("_source");
-
-  let docs = await collection.find({}).toArray();
-  let fields = [
-    "Sciences",
-    "Technology & Engineering",
-    "Humanities & Cultural Studies",
-    "Social Sciences & Global Studies",
-    "Business & Management",
-    "Health & Medicine",
-    "Environmental Studies & Earth Sciences",
-    "Education, Learning & Personal Development",
-    "Creative & Performing Arts",
-    "Law, Governance & Ethics",
-    "Recreation, Lifestyle & Practical Skills",
-    "Technology & Media Literacy",
-    "Philosophy & Critical Thinking",
-    "Space & Astronomical Sciences",
-    "Agriculture & Food Sciences",
-    "Trades & Craftsmanship",
-    "Reference & Indexing",
-    "Other",
-  ];
-
+  let docs = await sourceCollection.find({}).toArray();
   const customId = (doc: any) => {
     return JSON.stringify({
       'id': doc._id.toString(),
@@ -54,7 +27,7 @@ export async function sendGeneration() {
     url: "/v1/chat/completions", // API endpoint.
     body: {
       model: "gpt-4o-mini",
-      // response_format: { type: 'json_object' }, // Specify the model.
+      response_format: { type: 'json_object' }, // Specify the model.
       messages: [
         { role: "system", content: returnTypologyPrompt() }, // System message.
         {
@@ -95,39 +68,66 @@ export async function sendGeneration() {
   });
 
   await prepareBatch(file.id);
+  const batchStatus = await poolBatchStatus('batch_677e2d19065081909e98849d40dd11ed');
 
-  const data = {
-    generation: "Generation will be handled here",
-  };
-  return data;
+  if (batchStatus.status == 'completed') {
+    //get results
+
+  }
+  else {
+    //handle failure
+  }
+
+  const fileData = await getResult(batchStatus.file!);
+  return fileData;
+
+
+
+
+  // const data = {
+  //   generation: "Generation will be handled here",
+  // };
+  // return data;
 }
 
-// const batchData = [
+async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
+  const batchStatus = await checkBatchStatus(batchId);
+  console.log('pooling');
 
-//   {
-//     custom_id: "request-1",  // A unique identifier for this specific request in the batch
-//     method: "POST",  // HTTP method
-//     url: "/v1/chat/completions",  // The endpoint for the OpenAI API to request chat completions
-//     body: {  // The payload (data) for the API request
-//       model: "gpt-4o-mini",
-//       messages: [
-//         { role: "system", content: "You are a helpful assistant." },  // A system message that sets the behavior of the assistant
-//         { role: "user", content: "Hello world!" },  // The user's message, initiating the conversation
-//       ],
-//       max_tokens: 1000,  // The maximum number of tokens (words, phrases) the model is allowed to generate in response
-//     },
-//   },
-//   {
-//     custom_id: "request-2",
-//     method: "POST",
-//     url: "/v1/chat/completions",
-//     body: {
-//       model: "gpt-4o-mini",
-//       messages: [
-//         { role: "system", content: "You are an unhelpful assistant." },
-//         { role: "user", content: "Hello world!" },
-//       ],
-//       max_tokens: 1000,
-//     },
-//   },
-// ];
+  if (batchStatus.status == 'failed') {
+    //cancel batch
+    await cancelBatch(batchId);
+    return {
+      id: batchStatus.id,
+      status: 'failed',
+      file: batchStatus.error_file_id
+    }
+
+  }
+  else if (batchStatus.status != 'completed') {
+    await delay(10);
+    return await poolBatchStatus(batchId);
+  }
+  else if (batchStatus.status == 'completed') {
+    return {
+      id: batchStatus.id,
+      status: 'completed',
+      file: batchStatus.output_file_id
+
+    }
+  } else {
+    return {
+      id: 'sda',
+      status: 'failed',
+
+    }
+  }
+}
+
+
+type BatchStatus = {
+  id: string;
+  status: string;
+  file?: string;
+};
+

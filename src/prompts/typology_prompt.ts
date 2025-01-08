@@ -129,5 +129,5 @@ json
 `;
 
 export function returnTypologyPrompt() {
-  return typologyPromptString;
+    return typologyPromptString;
 }

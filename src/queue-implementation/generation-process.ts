@@ -1,10 +1,12 @@
-const generationComplete = () =>
-  new Promise((res, rej) => setTimeout(() => res(), 2 * 1000));
+import { sendGeneration } from "../send_generation";
 
-export async function generationProcess(data) {
+const generationComplete = () =>
+  new Promise<void>((res, rej) => setTimeout(() => res(), 2 * 1000));
+
+export async function generationProcess(data: any) {
   console.log("Generation process started");
   // handle generation here
-  await generationComplete();
+  const generationinfo = await sendGeneration();
   console.log("Generation process completed");
   return "Success";
 }

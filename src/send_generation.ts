@@ -90,33 +90,3 @@ export async function sendGeneration() {
   };
   return data;
 }
-
-// const batchData = [
-
-//   {
-//     custom_id: "request-1",  // A unique identifier for this specific request in the batch
-//     method: "POST",  // HTTP method
-//     url: "/v1/chat/completions",  // The endpoint for the OpenAI API to request chat completions
-//     body: {  // The payload (data) for the API request
-//       model: "gpt-4o-mini",
-//       messages: [
-//         { role: "system", content: "You are a helpful assistant." },  // A system message that sets the behavior of the assistant
-//         { role: "user", content: "Hello world!" },  // The user's message, initiating the conversation
-//       ],
-//       max_tokens: 1000,  // The maximum number of tokens (words, phrases) the model is allowed to generate in response
-//     },
-//   },
-//   {
-//     custom_id: "request-2",
-//     method: "POST",
-//     url: "/v1/chat/completions",
-//     body: {
-//       model: "gpt-4o-mini",
-//       messages: [
-//         { role: "system", content: "You are an unhelpful assistant." },
-//         { role: "user", content: "Hello world!" },
-//       ],
-//       max_tokens: 1000,
-//     },
-//   },
-// ];

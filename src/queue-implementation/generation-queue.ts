@@ -14,4 +14,5 @@ export async function addGenerationTask(data: any) {
 
 export async function closeGenerationQueue() {
   await generationQueue.close();
+  console.log("Generation queue closed");
 }

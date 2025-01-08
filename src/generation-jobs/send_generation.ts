@@ -66,7 +66,7 @@ export async function sendGeneration() {
     apiKey: config.openAiKey,
   });
   const file = await openai.files.create({
-    file: fs.createReadStream("./batchinputonl"),
+    file: fs.createReadStream("./batchinput.jsonl"),
     purpose: "batch",
   });
 

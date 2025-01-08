@@ -1,7 +1,7 @@
 import express from "express";
-import { sendGeneration } from "./send_generation";
-import { checkBatchStatus } from "./check_batch_status";
-import { getResult } from "./get_result";
+import { sendGeneration } from "./generation-jobs/send_generation";
+import { checkBatchStatus } from "./generation-jobs/3.batch-status/check_batch_status";
+import { getResult } from "./generation-jobs/4.batch-result/get_result";
 const app = express();
 
 const PORT = process.env.PORT || 3000;

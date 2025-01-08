@@ -1,25 +1,28 @@
 import OpenAI from "openai";
 import fs from "fs";
 import fsPromise from "fs/promises";
-import { prepareBatch } from "./create_batch";
-import { checkBatchStatus } from "./check_batch_status";
-import { returnTypologyPrompt } from "./prompts/typology_prompt";
-import { parseData } from "./parse_source_content";
-import { config } from "./config";
-import { delay } from "./helper_function/delay_helper";
-import { cancelBatch } from "./cancel_batch";
-import { sourceCollection } from "./mongodb/connection";
-import { getResult } from "./get_result";
+
+import { returnTypologyPrompt } from "./1.batch-prepare/fetch-prompts/typology_prompt";
+import { parseData } from "./1.batch-prepare/parse_source_content";
+import { config } from "../config";
+import { delay } from "../helper_function/delay_helper";
+
+import { sourceCollection } from "../mongodb/connection";
+
+import { prepareBatch } from "./2.batch-creation/create_batch";
+import { getResult } from "./4.batch-result/get_result";
+import { checkBatchStatus } from "./3.batch-status/check_batch_status";
+import { cancelBatch } from "./3.batch-status/cancel_batch";
 
 export async function sendGeneration() {
   let docs = await sourceCollection.find({}).toArray();
   const customId = (doc: any) => {
     return JSON.stringify({
-      'id': doc._id.toString(),
-      'type': 'typology',
-      'bloom_level': 1,
+      id: doc._id.toString(),
+      type: "typology",
+      bloom_level: 1,
     });
-  }
+  };
 
   const batchData = docs.map((doc, index) => ({
     custom_id: customId(doc), // Unique identifier for each request.
@@ -27,7 +30,7 @@ export async function sendGeneration() {
     url: "/v1/chat/completions", // API endpoint.
     body: {
       model: "gpt-4o-mini",
-      response_format: { type: 'json_object' }, // Specify the model.
+      response_format: { type: "json_object" }, // Specify the model.
       messages: [
         { role: "system", content: returnTypologyPrompt() }, // System message.
         {
@@ -68,21 +71,18 @@ export async function sendGeneration() {
   });
 
   await prepareBatch(file.id);
-  const batchStatus = await poolBatchStatus('batch_677e2d19065081909e98849d40dd11ed');
+  const batchStatus = await poolBatchStatus(
+    "batch_677e2d19065081909e98849d40dd11ed"
+  );
 
-  if (batchStatus.status == 'completed') {
+  if (batchStatus.status == "completed") {
     //get results
-
-  }
-  else {
+  } else {
     //handle failure
   }
 
   const fileData = await getResult(batchStatus.file!);
   return fileData;
-
-
-
 
   // const data = {
   //   generation: "Generation will be handled here",
@@ -92,42 +92,35 @@ export async function sendGeneration() {
 
 async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
   const batchStatus = await checkBatchStatus(batchId);
-  console.log('pooling');
+  console.log("pooling");
 
-  if (batchStatus.status == 'failed') {
+  if (batchStatus.status == "failed") {
     //cancel batch
     await cancelBatch(batchId);
     return {
       id: batchStatus.id,
-      status: 'failed',
-      file: batchStatus.error_file_id
-    }
-
-  }
-  else if (batchStatus.status != 'completed') {
+      status: "failed",
+      file: batchStatus.error_file_id,
+    };
+  } else if (batchStatus.status != "completed") {
     await delay(10);
     return await poolBatchStatus(batchId);
-  }
-  else if (batchStatus.status == 'completed') {
+  } else if (batchStatus.status == "completed") {
     return {
       id: batchStatus.id,
-      status: 'completed',
-      file: batchStatus.output_file_id
-
-    }
+      status: "completed",
+      file: batchStatus.output_file_id,
+    };
   } else {
     return {
-      id: 'sda',
-      status: 'failed',
-
-    }
+      id: "sda",
+      status: "failed",
+    };
   }
 }
-
 
 type BatchStatus = {
   id: string;
   status: string;
   file?: string;
 };
-

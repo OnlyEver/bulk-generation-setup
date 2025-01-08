@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { config } from "./config";
+import { config } from "../../config";
 import fs from "fs/promises";
 export async function getResult(fileid: string) {
   const openai = new OpenAI({
@@ -7,7 +7,6 @@ export async function getResult(fileid: string) {
   });
   const fileResponse = await openai.files.content(fileid);
   const fileContents = await fileResponse.text();
-
 
   console.log(fileContents);
   const parsedString = parseJsonlFile(fileContents.toString());
@@ -61,4 +60,3 @@ const parseJsonlFile = (content: string) => {
 
 // // Example usage
 // jsonData.forEach((entry) => console.log(entry));
-

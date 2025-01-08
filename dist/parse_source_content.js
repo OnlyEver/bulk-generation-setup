@@ -7,13 +7,13 @@ exports.sanitizeBlocks = sanitizeBlocks;
 function parseData(content, titlesToRemove, blocTypesToRemove) {
     let dataAfterRemovingUnWantedBlocks = removeSectionsByTitle(content, titlesToRemove, blocTypesToRemove);
     let afterSanitized = sanitizeBlocks(dataAfterRemovingUnWantedBlocks);
-    return {
+    return JSON.stringify({
         type: content.type,
         title: content.title,
         content: afterSanitized,
         headings: content.headings,
         taxonomy: content.taxonomy,
-    };
+    });
 }
 function removeSectionsByTitle(data, titlesToRemove, blockTypeToRemove) {
     let dataAfterRemoving = [];

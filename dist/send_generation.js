@@ -51,12 +51,20 @@ function sendGeneration() {
             "Reference & Indexing",
             "Other",
         ];
+        const customId = (doc) => {
+            return JSON.stringify({
+                'id': doc._id.toString(),
+                'type': 'typology',
+                'bloom_level': 1,
+            });
+        };
         const batchData = docs.map((doc, index) => ({
-            custom_id: `request-${index + 1}`, // Unique identifier for each request.
+            custom_id: customId(doc), // Unique identifier for each request.
             method: "POST", // HTTP method.
             url: "/v1/chat/completions", // API endpoint.
             body: {
-                model: "gpt-4o-mini", // Specify the model.
+                model: "gpt-4o-mini",
+                // response_format: { type: 'json_object' }, // Specify the model.
                 messages: [
                     { role: "system", content: (0, typology_prompt_1.returnTypologyPrompt)() }, // System message.
                     {

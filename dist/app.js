@@ -27,13 +27,13 @@ app.get("/send-generation", (req, res) => __awaiter(void 0, void 0, void 0, func
 }));
 app.get("/check-status", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const data = await checkBatchStatus("1");
-    const data = yield (0, check_batch_status_1.checkBatchStatus)("batch_677d070c405881909d5c6373fea1ab91");
+    const data = yield (0, check_batch_status_1.checkBatchStatus)("batch_677e0d7e240881909bae053adf7126d2");
     // batch_677d070dfd008190ad9b8a48cf6717e4
     res.send(data);
 }));
 app.get("/get-results", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const data = await checkBatchStatus("1");
-    const data = yield (0, get_result_1.getResult)("batch_677d070c405881909d5c6373fea1ab91");
+    const data = yield (0, get_result_1.getResult)("file-VYk48giUdr2NLJ5cDGcCW2");
     // batch_677d070dfd008190ad9b8a48cf6717e4
     res.send(data);
 }));

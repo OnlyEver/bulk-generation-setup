@@ -3,11 +3,11 @@ import { Queue } from "bullmq";
 const generationQueue = new Queue("generation-queue", {
   connection: {
     host: "127.0.0.1",
-    port: "6379",
+    port: 6379,
   },
 });
 
-export async function addGenerationTask(data) {
+export async function addGenerationTask(data: any) {
   const response = await generationQueue.add(`generation-${data.id}`, data);
   console.log("Generation task added", response.id);
 }

@@ -1,4 +1,4 @@
-import { sendGeneration } from "../send_generation";
+import { sendGeneration } from "../generation-jobs/send_generation";
 
 const generationComplete = () =>
   new Promise<void>((res, rej) => setTimeout(() => res(), 2 * 1000));

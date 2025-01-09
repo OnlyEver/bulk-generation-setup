@@ -4,5 +4,6 @@ exports.config = void 0;
 require("dotenv/config");
 exports.config = {
     openAiKey: process.env.OPENAIKEY,
-    dbUri: process.env.DB_URI
+    dbUri: process.env.DB_URI,
+    dbName: process.env.DB_NAME,
 };

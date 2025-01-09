@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { config } from "./config";
+import { config } from "../../config";
 
 export async function cancelBatch(batchId: string) {
     const openai = new OpenAI({

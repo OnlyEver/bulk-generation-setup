@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getResult = getResult;
 const openai_1 = __importDefault(require("openai"));
-const config_1 = require("./config");
+const config_1 = require("../../config");
 function getResult(fileid) {
     return __awaiter(this, void 0, void 0, function* () {
         const openai = new openai_1.default({

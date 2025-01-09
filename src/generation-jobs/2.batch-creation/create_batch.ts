@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { config } from "./config";
+import { config } from "../../config";
 
 export async function prepareBatch(fileid: string) {
   const openai = new OpenAI({
@@ -11,6 +11,5 @@ export async function prepareBatch(fileid: string) {
     completion_window: "24h",
   });
 
-  console.log(batch);
-  return "Batch will be prepared here";
+  return batch;
 }

@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const send_generation_1 = require("./send_generation");
-const check_batch_status_1 = require("./check_batch_status");
-const get_result_1 = require("./get_result");
-const config_1 = require("./config");
+const send_generation_1 = require("./generation-jobs/send_generation");
+const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
+const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
 const mongodb_1 = require("mongodb");
+const config_1 = require("./config");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.get("/", (req, res) => {
@@ -29,18 +29,19 @@ app.get("/send-generation", (req, res) => __awaiter(void 0, void 0, void 0, func
 }));
 app.get("/check-status", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const data = await checkBatchStatus("1");
-    const data = yield (0, check_batch_status_1.checkBatchStatus)("batch_677d070c405881909d5c6373fea1ab91");
+    // const data = await checkBatchStatus("batch_677e2d19065081909e98849d40dd11ed");
+    const data = yield (0, check_batch_status_1.checkBatchStatus)("batch_677d070dfd008190ad9b8a48cf6717e4");
     // batch_677d070dfd008190ad9b8a48cf6717e4
     res.send(data);
 }));
 app.get("/get-results", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const data = await checkBatchStatus("1");
-    const data = yield (0, get_result_1.getResult)("batch_677d070c405881909d5c6373fea1ab91");
+    const data = yield (0, get_result_1.getResult)("file-VYk48giUdr2NLJ5cDGcCW2");
     // batch_677d070dfd008190ad9b8a48cf6717e4
     res.send(data);
 }));
 app.get("/connect", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const dbName = "bulk_generation";
+    const dbName = config_1.config.dbName;
     const dbUri = config_1.config.dbUri || "mongodb://localhost:27017";
     const client = new mongodb_1.MongoClient(dbUri);
     try {

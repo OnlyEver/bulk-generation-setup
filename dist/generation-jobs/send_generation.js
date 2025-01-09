@@ -16,23 +16,23 @@ exports.sendGeneration = sendGeneration;
 const openai_1 = __importDefault(require("openai"));
 const fs_1 = __importDefault(require("fs"));
 const promises_1 = __importDefault(require("fs/promises"));
-const create_batch_1 = require("./create_batch");
-const check_batch_status_1 = require("./check_batch_status");
-const typology_prompt_1 = require("./prompts/typology_prompt");
-const parse_source_content_1 = require("./parse_source_content");
-const config_1 = require("./config");
-const delay_helper_1 = require("./helper_function/delay_helper");
-const cancel_batch_1 = require("./cancel_batch");
-const connection_1 = require("./mongodb/connection");
-const get_result_1 = require("./get_result");
+const typology_prompt_1 = require("./1.batch-prepare/fetch-prompts/typology_prompt");
+const parse_source_content_1 = require("./1.batch-prepare/parse_source_content");
+const config_1 = require("../config");
+const delay_helper_1 = require("../helper_function/delay_helper");
+const connection_1 = require("../mongodb/connection");
+const create_batch_1 = require("./2.batch-creation/create_batch");
+const get_result_1 = require("./4.batch-result/get_result");
+const check_batch_status_1 = require("./3.batch-status/check_batch_status");
+const cancel_batch_1 = require("./3.batch-status/cancel_batch");
 function sendGeneration() {
     return __awaiter(this, void 0, void 0, function* () {
         let docs = yield connection_1.sourceCollection.find({}).toArray();
         const customId = (doc) => {
             return JSON.stringify({
-                'id': doc._id.toString(),
-                'type': 'typology',
-                'bloom_level': 1,
+                id: doc._id.toString(),
+                type: "typology",
+                bloom_level: 1,
             });
         };
         const batchData = docs.map((doc, index) => ({
@@ -41,7 +41,7 @@ function sendGeneration() {
             url: "/v1/chat/completions", // API endpoint.
             body: {
                 model: "gpt-4o-mini",
-                response_format: { type: 'json_object' }, // Specify the model.
+                response_format: { type: "json_object" }, // Specify the model.
                 messages: [
                     { role: "system", content: (0, typology_prompt_1.returnTypologyPrompt)() }, // System message.
                     {
@@ -71,8 +71,8 @@ function sendGeneration() {
             purpose: "batch",
         });
         yield (0, create_batch_1.prepareBatch)(file.id);
-        const batchStatus = yield poolBatchStatus('batch_677e2d19065081909e98849d40dd11ed');
-        if (batchStatus.status == 'completed') {
+        const batchStatus = yield poolBatchStatus("batch_677e2d19065081909e98849d40dd11ed");
+        if (batchStatus.status == "completed") {
             //get results
         }
         else {
@@ -89,31 +89,31 @@ function sendGeneration() {
 function poolBatchStatus(batchId) {
     return __awaiter(this, void 0, void 0, function* () {
         const batchStatus = yield (0, check_batch_status_1.checkBatchStatus)(batchId);
-        console.log('pooling');
-        if (batchStatus.status == 'failed') {
+        console.log("pooling");
+        if (batchStatus.status == "failed") {
             //cancel batch
             yield (0, cancel_batch_1.cancelBatch)(batchId);
             return {
                 id: batchStatus.id,
-                status: 'failed',
-                file: batchStatus.error_file_id
+                status: "failed",
+                file: batchStatus.error_file_id,
             };
         }
-        else if (batchStatus.status != 'completed') {
+        else if (batchStatus.status != "completed") {
             yield (0, delay_helper_1.delay)(10);
             return yield poolBatchStatus(batchId);
         }
-        else if (batchStatus.status == 'completed') {
+        else if (batchStatus.status == "completed") {
             return {
                 id: batchStatus.id,
-                status: 'completed',
-                file: batchStatus.output_file_id
+                status: "completed",
+                file: batchStatus.output_file_id,
             };
         }
         else {
             return {
-                id: 'sda',
-                status: 'failed',
+                id: "sda",
+                status: "failed",
             };
         }
     });

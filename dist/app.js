@@ -39,7 +39,8 @@ app.get("/check-status", (req, res) => __awaiter(void 0, void 0, void 0, functio
 app.get("/get-results", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // const data = await checkBatchStatus("1");
     // const data = await getResult("file-4jyehGaJ145NnZBS5zkw2w");
-    const data = yield (0, get_result_1.getResult)("file-AwS7kdAgAhczAKHSa5QobL"); //card gen batch
+    // const data = await getResult("file-AwS7kdAgAhczAKHSa5QobL"); //card gen batch
+    const data = yield (0, get_result_1.getResult)("file-NuBmjmVw85rntmVAdP15eL"); //card gen batch
     // const data = await getResult("file-AFf7HYu9brVBKGhBRgrv5h"); //card gen batch
     // batch_677d070dfd008190ad9b8a48cf6717e4
     res.send(data);

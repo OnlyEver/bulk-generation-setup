@@ -22,7 +22,7 @@ function getResult(fileid) {
         });
         const fileResponse = yield openai.files.content(fileid);
         const fileContents = yield fileResponse.text();
-        console.log(fileContents);
+        // console.log(fileContents);
         const parsedString = parseJsonlFile(fileContents.toString());
         return parsedString;
         // return JSON.parse(pa);

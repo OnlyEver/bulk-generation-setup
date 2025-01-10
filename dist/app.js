@@ -41,7 +41,7 @@ app.get("/check-status", (req, res, next) => __awaiter(void 0, void 0, void 0, f
     try {
         // const data = await checkBatchStatus("1");
         // const data = await checkBatchStatus("batch_677e2d19065081909e98849d40dd11ed");
-        const data = yield (0, check_batch_status_1.checkBatchStatus)("batch_677d070dfd008190ad9b8a48cf6717e4");
+        const data = yield (0, check_batch_status_1.checkBatchStatus)("batch_6780fabe3e388190a153dce03eeecc4c");
         // batch_677d070dfd008190ad9b8a48cf6717e4
         res.send(data);
     }

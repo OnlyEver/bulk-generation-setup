@@ -13,30 +13,29 @@ import { Batch } from "openai/resources";
  * @throws {Error} - Throws an error if file upload or batch creation fails.
  * 
  */
-export async function createBatch() : Promise<Batch> {
+export async function createBatch(filename: string): Promise<Batch> {
   try {
     const openai = new OpenAI({
       apiKey: config.openAiKey,
     });
-  
+
     const file = await openai.files.create({
-      file: fs.createReadStream("./batchinputonl"),
+      file: fs.createReadStream(filename),
       purpose: "batch",
     });
-  
+
     const batch = await openai.batches.create({
       input_file_id: file.id,
       endpoint: "/v1/chat/completions",
       completion_window: "24h",
     });
-  
+
     return batch;
   } catch (error) {
     console.error("Error during batch creation:", error);
 
     throw new Error(
-      `Batch creation failed: ${
-        error instanceof Error ? error.message : "Unknown error"
+      `Batch creation failed: ${error instanceof Error ? error.message : "Unknown error"
       }`
     );
   }

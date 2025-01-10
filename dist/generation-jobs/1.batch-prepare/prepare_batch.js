@@ -32,6 +32,7 @@ function prepareBatch() {
                     bloom_level: 1,
                 });
             };
+            console.log(docs);
             const batchData = docs.map((doc, index) => ({
                 custom_id: customId(doc), // Unique identifier for each request.
                 method: "POST",
@@ -57,8 +58,9 @@ function prepareBatch() {
                     ],
                 },
             }));
+            console.log(batchData);
             // Write the batch data to a local file
-            const filePath = "./batchinputonl";
+            const filePath = "./batchinput.jsonl";
             yield promises_1.default.writeFile(filePath, batchData.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
         }
         catch (error) {

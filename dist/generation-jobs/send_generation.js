@@ -80,6 +80,7 @@ function poolBatchStatus(batchId) {
             return {
                 id: "sda",
                 status: batch_status_1.BatchStatusEnum.FAILED,
+                file: batchStatus.error_file_id,
             };
         }
     });

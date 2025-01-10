@@ -2,28 +2,13 @@
 import { getResult } from "./4.batch-result/get_result";
 import { checkBatchStatus } from "./3.batch-status/check_batch_status";
 import { cancelBatch } from "./3.batch-status/cancel_batch";
-import { returnCardGenPrompt } from "./1.batch-prepare/fetch-prompts/card_gen_prompt";
-import { BSON, ObjectId, WithId } from "mongodb";
-import { parseTypologyOnSuccess } from "../utils/parse_typology";
-import { parseCardGenResponse } from "./5.batch-parse/card_gen_result";
-import { Card, insertCard, insertSourceTypology } from "../mongodb/insert";
-import { prepareBatch } from "./1.batch-prepare/prepare_batch";
-import { createBatch } from "./2.batch-creation/create_batch";
 import { BatchStatusEnum } from "../enums/batch_status";
 
 export async function sendGeneration() {
-  const openai = new OpenAI({
-    apiKey: config.openAiKey,
-  });
-
-  // console.log("Batch id: ", batch.id);
-  let docs = await sourceCollection.find({}).toArray();
-
-
   await prepareBatch();
   const batch = await createBatch('./batchinput.jsonl');
   const batchStatus = await poolBatchStatus(
-    batch.id
+    "batch_677e2d19065081909e98849d40dd11ed"
   );
   if (batchStatus.status == "completed") {
     const response = await getResult(batchStatus.file!);
@@ -35,10 +20,6 @@ export async function sendGeneration() {
       await handleBatchFailure(batchStatus.file!);
     } 
   }
-  const data = {
-    generation: "Generation will be handled here",
-  };
-  return data;
 }
 
 

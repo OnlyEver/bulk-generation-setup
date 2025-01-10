@@ -232,7 +232,7 @@ Once you are done generating the test cards, review the full list of concepts an
 
 Only stop generating test questions once you believe there is sufficient testing material for learners to fully understand the concepts and remember the facts. The same concept or fact can have multiple test cards, so continue creating test cards until you are confident that there are enough for learners to fully grasp the source material.
 `;
-export function returnCardGenPrompt(cardGenPrompt: any) {
+export function returnCardGenPrompt() {
     return promptString;
 }
 

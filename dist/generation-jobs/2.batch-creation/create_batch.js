@@ -25,14 +25,14 @@ const config_1 = require("../../config");
  * @throws {Error} - Throws an error if file upload or batch creation fails.
  *
  */
-function createBatch() {
+function createBatch(filename) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const openai = new openai_1.default({
                 apiKey: config_1.config.openAiKey,
             });
             const file = yield openai.files.create({
-                file: fs_1.default.createReadStream("./batchinputonl"),
+                file: fs_1.default.createReadStream(filename),
                 purpose: "batch",
             });
             const batch = yield openai.batches.create({

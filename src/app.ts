@@ -30,21 +30,21 @@ app.get("/send-generation", async (req: any, res: any, next: NextFunction) => {
 
 app.get("/check-status", async (req: Request, res: any, next: NextFunction) => {
   try {
-  // const data = await checkBatchStatus("1");
-  // const data = await checkBatchStatus("batch_677e2d19065081909e98849d40dd11ed");
-  const data = await checkBatchStatus("batch_677d070dfd008190ad9b8a48cf6717e4");
-  // batch_677d070dfd008190ad9b8a48cf6717e4
-  res.send(data);
+    // const data = await checkBatchStatus("1");
+    // const data = await checkBatchStatus("batch_677e2d19065081909e98849d40dd11ed");
+    const data = await checkBatchStatus("batch_677d070dfd008190ad9b8a48cf6717e4");
+    // batch_677d070dfd008190ad9b8a48cf6717e4
+    res.send(data);
   } catch (error) {
     next(error);
   }
 });
 app.get("/get-results", async (req: any, res: any, next: NextFunction) => {
   try {
-  // const data = await checkBatchStatus("1");
-  const data = await getResult("file-VYk48giUdr2NLJ5cDGcCW2");
-  // batch_677d070dfd008190ad9b8a48cf6717e4
-  res.send(data);
+    // const data = await checkBatchStatus("1");
+    const data = await getResult("file-VYk48giUdr2NLJ5cDGcCW2");
+    // batch_677d070dfd008190ad9b8a48cf6717e4
+    res.send(data);
   } catch (error) {
     next(error);
   }

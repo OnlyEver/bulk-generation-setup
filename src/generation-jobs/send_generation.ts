@@ -1,9 +1,7 @@
+
 import OpenAI from "openai";
-import fs from "fs";
 import fsPromise from "fs/promises";
 
-import { returnTypologyPrompt } from "./1.batch-prepare/fetch-prompts/typology_prompt";
-import { parseData } from "./1.batch-prepare/parse_source_content";
 import { config } from "../config";
 import { delay } from "../utils/delay_helper";
 
@@ -11,10 +9,7 @@ import { cardCollection, sourceCollection, typologyCollection } from "../mongodb
 
 import { getResult } from "./4.batch-result/get_result";
 import { checkBatchStatus } from "./3.batch-status/check_batch_status";
-import { cancelBatch } from "./3.batch-status/cancel_batch";
-import { returnCardGenPrompt } from "./1.batch-prepare/fetch-prompts/card_gen_prompt";
 import { BSON, ObjectId, WithId } from "mongodb";
-import { parseTypologyOnSuccess } from "../utils/parse_typology";
 import { parseCardGenResponse } from "./5.batch-parse/card_gen_result";
 import { Card, insertCard, insertSourceTypology } from "../mongodb/insert";
 import { prepareBatch } from "./1.batch-prepare/prepare_batch";
@@ -22,14 +17,11 @@ import { createBatch } from "./2.batch-creation/create_batch";
 import { BatchStatusEnum } from "../enums/batch_status";
 import { prepareBatchForCard } from "./1.batch-prepare/prepare_card_batch";
 
-
 type BatchStatus = {
   id: string;
-  status: string;
+  status: BatchStatusEnum;
   file?: string;
 };
-
-
 
 export async function sendGeneration() {
   const openai = new OpenAI({
@@ -45,12 +37,15 @@ export async function sendGeneration() {
   const batchStatus = await poolBatchStatus(
     batch.id
   );
-  if (batchStatus.status == "completed") {
+  if (batchStatus.status == BatchStatusEnum.COMPLETED) {
     const response = await getResult(batchStatus.file!);
     // const respone = await getResult('file-AwS7kdAgAhczAKHSa5QobL');
     await sendCardGeneration(response, docs);
   } else {
     //handle failure
+    if (batchStatus.file) {
+      await handleBatchFailure(batchStatus.file!);
+    } 
   }
   const data = {
     generation: "Generation will be handled here",
@@ -63,7 +58,7 @@ export async function sendGeneration() {
 async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
   const batchStatus = await checkBatchStatus(batchId);
   console.log("pooling");
-  console.log(batchId);
+  console.log('Batch Id: ',batchId);
 
   if (batchStatus.status == BatchStatusEnum.FAILED) {
     //cancel batch
@@ -86,10 +81,10 @@ async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
     return {
       id: "sda",
       status: BatchStatusEnum.FAILED,
+      file: batchStatus.error_file_id,
     };
   }
 }
-
 
 
 export async function sendCardGeneration(response: any[], docs: WithId<BSON.Document>[]) {
@@ -142,9 +137,40 @@ export async function sendCardGeneration(response: any[], docs: WithId<BSON.Docu
 
   } else {
     //handle failure
+    if (batchStatus.file) {
+      await handleBatchFailure(batchStatus.file!);
+    } 
   }
-
 };
+
+/**
+ * Handles a failed batch by retrieving and saving the error file content.
+ * Overrides the file if it already exists.
+ *
+ * @param errorFileId - The ID of the error file to retrieve.
+ */
+async function handleBatchFailure(errorFileId: string) {
+  try {
+    console.error("Batch failed. Retrieving error file...");
+
+    // Retrieve the error file content
+    const errorContent = await getResult(errorFileId);
+
+    // Save the error response to a local file
+    const errorFilePath = "./error_file_response.json";
+    await fsPromise.writeFile(
+      errorFilePath,
+      JSON.stringify(errorContent, null, 2),
+      "utf-8"
+    );
+
+    console.log(`Error file saved at: ${errorFilePath}`);
+  } catch (error) {
+    console.error("Failed to retrieve or save the error file:", error);
+    throw error;
+  }
+}
+
 
 
 

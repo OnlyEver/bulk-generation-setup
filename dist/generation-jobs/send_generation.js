@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendGeneration = sendGeneration;
 exports.sendCardGeneration = sendCardGeneration;
 const openai_1 = __importDefault(require("openai"));
+const promises_1 = __importDefault(require("fs/promises"));
 const config_1 = require("../config");
 const delay_helper_1 = require("../utils/delay_helper");
 const connection_1 = require("../mongodb/connection");
@@ -37,13 +38,16 @@ function sendGeneration() {
         yield (0, prepare_batch_1.prepareBatch)();
         const batch = yield (0, create_batch_1.createBatch)('./batchinput.jsonl');
         const batchStatus = yield poolBatchStatus(batch.id);
-        if (batchStatus.status == "completed") {
+        if (batchStatus.status == batch_status_1.BatchStatusEnum.COMPLETED) {
             const response = yield (0, get_result_1.getResult)(batchStatus.file);
             // const respone = await getResult('file-AwS7kdAgAhczAKHSa5QobL');
             yield sendCardGeneration(response, docs);
         }
         else {
             //handle failure
+            if (batchStatus.file) {
+                yield handleBatchFailure(batchStatus.file);
+            }
         }
         const data = {
             generation: "Generation will be handled here",
@@ -80,6 +84,7 @@ function poolBatchStatus(batchId) {
             return {
                 id: "sda",
                 status: batch_status_1.BatchStatusEnum.FAILED,
+                file: batchStatus.error_file_id,
             };
         }
     });
@@ -128,7 +133,33 @@ function sendCardGeneration(response, docs) {
         }
         else {
             //handle failure
+            if (batchStatus.file) {
+                yield handleBatchFailure(batchStatus.file);
+            }
         }
     });
 }
 ;
+/**
+ * Handles a failed batch by retrieving and saving the error file content.
+ * Overrides the file if it already exists.
+ *
+ * @param errorFileId - The ID of the error file to retrieve.
+ */
+function handleBatchFailure(errorFileId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            console.error("Batch failed. Retrieving error file...");
+            // Retrieve the error file content
+            const errorContent = yield (0, get_result_1.getResult)(errorFileId);
+            // Save the error response to a local file
+            const errorFilePath = "./error_file_response.json";
+            yield promises_1.default.writeFile(errorFilePath, JSON.stringify(errorContent, null, 2), "utf-8");
+            console.log(`Error file saved at: ${errorFilePath}`);
+        }
+        catch (error) {
+            console.error("Failed to retrieve or save the error file:", error);
+            throw error;
+        }
+    });
+}

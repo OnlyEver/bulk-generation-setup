@@ -26,7 +26,7 @@ function prepareBatchForCard(response, docs) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var sourceId = '';
-            const cardGenBatchData = yield Promise.all(response.map((batchResponse) => __awaiter(this, void 0, void 0, function* () {
+            const cardGenBatchData = yield Promise.all(response.map((batchResponse, index) => __awaiter(this, void 0, void 0, function* () {
                 const body = batchResponse['response']['body'];
                 const content = body.choices[0]['message']['content'];
                 const parsedContent = JSON.parse(content);
@@ -40,7 +40,7 @@ function prepareBatchForCard(response, docs) {
                 const sourceContent = docs.find((doc) => doc._id == sourceId);
                 return {
                     custom_id: JSON.stringify({
-                        id: sourceId,
+                        id: index,
                         type: 'card_gen',
                         bloom_level: 1,
                     }), // Unique identifier for each request.

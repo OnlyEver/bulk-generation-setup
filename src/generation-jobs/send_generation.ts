@@ -63,10 +63,11 @@ export async function sendGeneration() {
 async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
   const batchStatus = await checkBatchStatus(batchId);
   console.log("pooling");
+  console.log(batchId);
 
   if (batchStatus.status == BatchStatusEnum.FAILED) {
     //cancel batch
-    await cancelBatch(batchId);
+    // await cancelBatch(batchId);
     return {
       id: batchStatus.id,
       status: BatchStatusEnum.FAILED,

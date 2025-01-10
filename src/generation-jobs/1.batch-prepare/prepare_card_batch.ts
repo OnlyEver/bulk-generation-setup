@@ -16,7 +16,7 @@ export async function prepareBatchForCard(response: any[], docs: WithId<BSON.Doc
     try {
         var sourceId: any = '';
         const cardGenBatchData =
-            await Promise.all(response.map(async (batchResponse: any) => {
+            await Promise.all(response.map(async (batchResponse: any, index) => {
                 const body = batchResponse['response']['body'];
                 const content = body.choices[0]['message']['content'];
                 const parsedContent = JSON.parse(content);
@@ -30,7 +30,7 @@ export async function prepareBatchForCard(response: any[], docs: WithId<BSON.Doc
                 const sourceContent = docs.find((doc) => doc._id == sourceId);
                 return {
                     custom_id: JSON.stringify({
-                        id: sourceId,
+                        id: index,
                         type: 'card_gen',
                         bloom_level: 1,
                     }), // Unique identifier for each request.

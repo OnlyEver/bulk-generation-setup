@@ -20,7 +20,6 @@ const delay_helper_1 = require("../utils/delay_helper");
 const connection_1 = require("../mongodb/connection");
 const get_result_1 = require("./4.batch-result/get_result");
 const check_batch_status_1 = require("./3.batch-status/check_batch_status");
-const cancel_batch_1 = require("./3.batch-status/cancel_batch");
 const mongodb_1 = require("mongodb");
 const card_gen_result_1 = require("./5.batch-parse/card_gen_result");
 const insert_1 = require("../mongodb/insert");
@@ -56,9 +55,10 @@ function poolBatchStatus(batchId) {
     return __awaiter(this, void 0, void 0, function* () {
         const batchStatus = yield (0, check_batch_status_1.checkBatchStatus)(batchId);
         console.log("pooling");
+        console.log(batchId);
         if (batchStatus.status == batch_status_1.BatchStatusEnum.FAILED) {
             //cancel batch
-            yield (0, cancel_batch_1.cancelBatch)(batchId);
+            // await cancelBatch(batchId);
             return {
                 id: batchStatus.id,
                 status: batch_status_1.BatchStatusEnum.FAILED,

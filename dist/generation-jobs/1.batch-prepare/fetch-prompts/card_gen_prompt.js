@@ -1,4 +1,8 @@
-export const promptString: string = `As a dedicated assistant at a learning company, your role is to analyze educational content and create test cards that help learners understand and remember key concepts and facts. You will be provided with:
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.promptString = void 0;
+exports.returnCardGenPrompt = returnCardGenPrompt;
+exports.promptString = `As a dedicated assistant at a learning company, your role is to analyze educational content and create test cards that help learners understand and remember key concepts and facts. You will be provided with:
 
 1. Title of the source
 2. Main headings
@@ -232,8 +236,6 @@ Once you are done generating the test cards, review the full list of concepts an
 
 Only stop generating test questions once you believe there is sufficient testing material for learners to fully understand the concepts and remember the facts. The same concept or fact can have multiple test cards, so continue creating test cards until you are confident that there are enough for learners to fully grasp the source material.
 `;
-export function returnCardGenPrompt() {
-    return promptString;
+function returnCardGenPrompt() {
+    return exports.promptString;
 }
-
-

@@ -9,31 +9,12 @@ export async function getResult(fileid: string) {
   const fileContents = await fileResponse.text();
 
   console.log(fileContents);
-  const parsedString = parseJsonlFile(fileContents.toString());
+  const parsedString = _parseJsonlFile(fileContents.toString());
   return parsedString;
   // return JSON.parse(pa);
 }
 
-// const readJsonlFile = async (file:) => {
-//   try {
-//     // Read the entire JSONL file as a string
-//     const fileContent = await fs.readFile(filePath, "utf8");
-
-//     // Split the content into lines and parse each as JSON
-//     const data = fileContent
-//       .split("\n") // Split by newlines
-//       .filter((line) => line.trim() !== "") // Remove empty lines
-//       .map((line) => JSON.parse(line)); // Parse JSON strings into objects
-
-//     console.log("Parsed JSONL Data:", data);
-//     return data;
-//   } catch (error) {
-//     console.error("Error reading JSONL file:", error);
-//     throw error;
-//   }
-// };
-
-const parseJsonlFile = (content: string) => {
+const _parseJsonlFile = (content: string) => {
   try {
     // Read the JSONL file content
     // const fileContent = await fs.readFile(content, "utf8");
@@ -51,12 +32,3 @@ const parseJsonlFile = (content: string) => {
     throw error;
   }
 };
-
-// File path of the JSONL file to parse
-// const filePath = "./batchoutput.jsonl";
-
-// // Call the function to parse the JSONL file
-// const jsonData = await parseJsonlFile(filePath);
-
-// // Example usage
-// jsonData.forEach((entry) => console.log(entry));

@@ -59,7 +59,7 @@ function poolBatchStatus(batchId) {
     return __awaiter(this, void 0, void 0, function* () {
         const batchStatus = yield (0, check_batch_status_1.checkBatchStatus)(batchId);
         console.log("pooling");
-        console.log(batchId);
+        console.log('Batch Id: ', batchId);
         if (batchStatus.status == batch_status_1.BatchStatusEnum.FAILED) {
             //cancel batch
             // await cancelBatch(batchId);

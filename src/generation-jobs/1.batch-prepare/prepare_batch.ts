@@ -1,6 +1,6 @@
 import fsPromise from "fs/promises";
 
-import { sourceCollection } from "../../mongodb/connection";
+import { database } from "../../mongodb/connection";
 import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 
@@ -10,7 +10,10 @@ import { parseData } from "../1.batch-prepare/parse_source_content";
  */
 export async function prepareBatch() {
   try {
-    let docs = await sourceCollection.find({}).toArray();
+    const db = await database();
+    const generationDataCollection = db.collection('_generation_data');
+
+    let docs = await generationDataCollection.find({}).toArray();
     const customId = (doc: any) => {
       return JSON.stringify({
         id: doc._id.toString(),

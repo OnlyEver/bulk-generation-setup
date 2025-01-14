@@ -30,13 +30,15 @@ const batch_status_1 = require("../enums/batch_status");
 const prepare_card_batch_1 = require("./1.batch-prepare/prepare_card_batch");
 function sendGeneration() {
     return __awaiter(this, void 0, void 0, function* () {
+        const db = yield (0, connection_1.database)();
+        const sourceCollection = db.collection("_source");
         const openai = new openai_1.default({
             apiKey: config_1.config.openAiKey,
         });
         // console.log("Batch id: ", batch.id);
-        let docs = yield connection_1.sourceCollection.find({}).toArray();
+        let docs = yield sourceCollection.find({}).toArray();
         yield (0, prepare_batch_1.prepareBatch)();
-        const batch = yield (0, create_batch_1.createBatch)('./batchinput.jsonl');
+        const batch = yield (0, create_batch_1.createBatch)("./batchinput.jsonl");
         const batchStatus = yield poolBatchStatus(batch.id);
         if (batchStatus.status == batch_status_1.BatchStatusEnum.COMPLETED) {
             const response = yield (0, get_result_1.getResult)(batchStatus.file);
@@ -59,7 +61,7 @@ function poolBatchStatus(batchId) {
     return __awaiter(this, void 0, void 0, function* () {
         const batchStatus = yield (0, check_batch_status_1.checkBatchStatus)(batchId);
         console.log("pooling");
-        console.log(batchId);
+        console.log("Batch Id: ", batchId);
         if (batchStatus.status == batch_status_1.BatchStatusEnum.FAILED) {
             //cancel batch
             // await cancelBatch(batchId);
@@ -95,17 +97,17 @@ function sendCardGeneration(response, docs) {
             apiKey: config_1.config.openAiKey,
         });
         const sourceId = yield (0, prepare_card_batch_1.prepareBatchForCard)(response, docs);
-        var batch = yield (0, create_batch_1.createBatch)('./batchinputForCardGen.jsonl');
+        var batch = yield (0, create_batch_1.createBatch)("./batchinputForCardGen.jsonl");
         const batchStatus = yield poolBatchStatus(batch.id);
         if (batchStatus.status == "completed") {
             const generationContent = yield (0, get_result_1.getResult)(batchStatus.file);
             console.log(generationContent);
             generationContent.forEach((element) => __awaiter(this, void 0, void 0, function* () {
-                const body = element['response']['body'];
-                const content = body.choices[0]['message']['content'];
+                const body = element["response"]["body"];
+                const content = body.choices[0]["message"]["content"];
                 const parsedContent = JSON.parse(content);
-                console.log('Logging content');
-                console.log(parsedContent['test_cards']);
+                console.log("Logging content");
+                console.log(parsedContent["test_cards"]);
                 const source = docs.find((doc) => doc._id == sourceId);
                 var headings = [];
                 if (source) {
@@ -139,7 +141,6 @@ function sendCardGeneration(response, docs) {
         }
     });
 }
-;
 /**
  * Handles a failed batch by retrieving and saving the error file content.
  * Overrides the file if it already exists.

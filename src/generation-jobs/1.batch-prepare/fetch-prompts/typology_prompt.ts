@@ -1,3 +1,7 @@
+import { database } from "../../../mongodb/connection";
+import { typologyTextDocs } from "../../../prompts/typology/typology_text";
+import { ObjectId } from "mongodb";
+
 const typologyPromptString = `
 You are a dedicated assistant that categorizes and summarizes educational content. You will process educational content (in JSON format) that represents text from diverse sources such as PDFs, book chapters, videos, and websites. Follow these steps:
 
@@ -128,6 +132,55 @@ json
 
 `;
 
-export function returnTypologyPrompt() {
-    return typologyPromptString;
+
+async function getPromptData(promptIds: Array<string>) : Promise<string> {
+    const db = await database();
+    const promptCollection = db.collection('_prompts');
+
+    // Convert string IDs to ObjectId
+    const objectIds = promptIds.map((id) => new ObjectId(id));
+
+    let result = await promptCollection
+        .aggregate([
+            {
+                /// match the ids of prompt docs
+                $match: {
+                    _id: {
+                        $in: objectIds,
+                    },
+                },
+            },
+            {
+                /// create a new field allContent(in memory) and pushes the "prompt" field from _prompt doc
+                $group: {
+                    _id: null,
+                    allContent: { $push: "$prompt" },
+                },
+            },
+            {
+                /// concat each element in above created `allContent temp field`, and update that to "concatenatedContent"(temp field)
+                $project: {
+                    concatenatedContent: {
+                        $reduce: {
+                            input: "$allContent",
+                            initialValue: "",
+                            in: { $concat: ["$$value", "$$this"] },
+                        },
+                    },
+                },
+            },
+        ])
+        .toArray();
+
+
+    return result.length > 0 ? result[0].concatenatedContent : "";
+}
+
+export async function returnTypologyPrompt() {
+    const typologyObjectIds = Object.values(typologyTextDocs);
+    const typologyPrompts = await getPromptData(typologyObjectIds);
+    console.log('Typology prompt: ', typologyPrompts);
+
+    return typologyPrompts;
+    // return typologyPromptString;
 }

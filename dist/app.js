@@ -16,6 +16,8 @@ const express_1 = __importDefault(require("express"));
 const send_generation_1 = require("./generation-jobs/send_generation");
 const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
 const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
+const connection_1 = require("./mongodb/connection");
+const typology_prompt_1 = require("./generation-jobs/1.batch-prepare/fetch-prompts/typology_prompt");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.get("/", (req, res) => {
@@ -60,6 +62,10 @@ app.get("/get-results", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         next(error);
     }
 }));
+app.get("/hello", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, typology_prompt_1.returnTypologyPrompt)();
+    res.json({ message: data });
+}));
 // app.get("/connect", async (req, res) => {
 //   const dbName = config.dbName;
 //   const dbUri: string = config.dbUri || "mongodb://localhost:27017"; 
@@ -91,6 +97,19 @@ app.get("/get-results", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 app.use((req, res) => {
     res.status(404).json({ error: true, message: "Route not found." });
 });
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Start the server
+const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Initialize the database
+        yield (0, connection_1.database)();
+        // Start the Express server
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    }
+    catch (error) {
+        console.error("Failed to start the server:", error);
+        process.exit(1); // Exit the process with a failure code
+    }
 });
+startServer();

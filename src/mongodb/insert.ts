@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { cardCollection, typologyCollection } from "./connection";
+import { database } from "./connection";
 
 export type Card = {
     id: ObjectId;
@@ -18,13 +18,15 @@ export async function insertSourceTypology(parsedTypology: Object, sourceId: str
         _source_id: sourceId,
         typology: parsedTypology,
     }
+    const db = await database();
+    const typologyCollection = db.collection("_typology");
+
     const result = await typologyCollection.insertOne(doc);
     console.log(result);
 
 }
 
 export async function insertCard(parsedCardData: Card, sourceId: string) {
-
     console.log('Inserting card data');
     const doc = {
         _source_id: sourceId,
@@ -35,8 +37,9 @@ export async function insertCard(parsedCardData: Card, sourceId: string) {
         bloom_level: parsedCardData.bloomlevel,
         heading: parsedCardData.heading,
     }
+
+    const db = await database();
+    const cardCollection = db.collection("_card");
     const result = await cardCollection.insertOne(doc);
     console.log(result);
-
-
 }

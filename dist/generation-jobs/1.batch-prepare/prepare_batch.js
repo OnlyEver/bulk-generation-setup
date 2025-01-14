@@ -24,7 +24,9 @@ const parse_source_content_1 = require("../1.batch-prepare/parse_source_content"
 function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let docs = yield connection_1.sourceCollection.find({}).toArray();
+            const db = yield (0, connection_1.database)();
+            const generationDataCollection = db.collection('_generation_data');
+            let docs = yield generationDataCollection.find({}).toArray();
             const customId = (doc) => {
                 return JSON.stringify({
                     id: doc._id.toString(),
@@ -32,6 +34,7 @@ function prepareBatch() {
                     bloom_level: 1,
                 });
             };
+            /// aasti ko json bata, which prompts to fetch evaluate, and get those prompts.
             console.log(docs);
             const batchData = docs.map((doc, index) => ({
                 custom_id: customId(doc), // Unique identifier for each request.

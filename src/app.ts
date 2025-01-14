@@ -2,6 +2,8 @@ import express, { Request, Response, NextFunction } from "express";
 import { sendGeneration } from "./generation-jobs/send_generation";
 import { checkBatchStatus } from "./generation-jobs/3.batch-status/check_batch_status";
 import { getResult } from "./generation-jobs/4.batch-result/get_result";
+import { database } from "./mongodb/connection";
+import { returnTypologyPrompt } from "./generation-jobs/1.batch-prepare/fetch-prompts/typology_prompt";
 
 const app = express();
 
@@ -88,6 +90,19 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ error: true, message: "Route not found." });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Start the server
+const startServer = async () => {
+  try {
+    // Initialize the database
+    await database();
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start the server:", error);
+    process.exit(1); // Exit the process with a failure code
+  }
+};
+
+startServer();

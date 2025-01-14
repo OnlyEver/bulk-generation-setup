@@ -13,9 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createBatch = createBatch;
-const openai_1 = __importDefault(require("openai"));
 const fs_1 = __importDefault(require("fs"));
-const config_1 = require("../../config");
+const openai_helper_1 = require("../../openai/openai_helper");
 /**
  * Creates a batch using the provided input file for OpenAI's batch API.
  * Uploads the input file and creates a batch.
@@ -28,14 +27,11 @@ const config_1 = require("../../config");
 function createBatch(filename) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const openai = new openai_1.default({
-                apiKey: config_1.config.openAiKey,
-            });
-            const file = yield openai.files.create({
+            const file = yield (0, openai_helper_1.openAI)().files.create({
                 file: fs_1.default.createReadStream(filename),
                 purpose: "batch",
             });
-            const batch = yield openai.batches.create({
+            const batch = yield (0, openai_helper_1.openAI)().batches.create({
                 input_file_id: file.id,
                 endpoint: "/v1/chat/completions",
                 completion_window: "24h",

@@ -14,7 +14,7 @@ exports.insertCard = insertCard;
 const connection_1 = require("./connection");
 function insertSourceTypology(parsedTypology, sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const typologyCollection = (0, connection_1.database)().collection("typology");
+        const typologyCollection = connection_1.database.collection("typology");
         console.log("Inserting typology");
         console.log(parsedTypology);
         const doc = {
@@ -28,7 +28,7 @@ function insertSourceTypology(parsedTypology, sourceId) {
 function insertCard(parsedCardData, sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Inserting card data");
-        const cardCollection = (0, connection_1.database)().collection("_card");
+        const cardCollection = connection_1.database.collection("_card");
         const doc = {
             _source_id: sourceId,
             content: parsedCardData.content,

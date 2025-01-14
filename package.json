@@ -1,6 +1,6 @@
 {
-  "name": "bulk_generation_test",
-  "version": "1.0.0",
+  "name": "bulk-generation",
+  "version": "0.0.4",
   "main": "dist/app.js",
   "scripts": {
     "start": "npm run build && node dist/app.js",

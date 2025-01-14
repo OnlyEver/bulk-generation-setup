@@ -8,19 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkBatchStatus = checkBatchStatus;
-const openai_1 = __importDefault(require("openai"));
-const config_1 = require("../../config");
+const openai_helper_1 = require("../../openai/openai_helper");
 function checkBatchStatus(batchId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const openai = new openai_1.default({
-            apiKey: config_1.config.openAiKey,
-        });
-        const batch = yield openai.batches.retrieve(batchId);
+        const batch = yield (0, openai_helper_1.openAI)().batches.retrieve(batchId);
         return batch;
     });
 }

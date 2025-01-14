@@ -30,10 +30,7 @@ const batch_status_1 = require("../enums/batch_status");
 const prepare_card_batch_1 = require("./1.batch-prepare/prepare_card_batch");
 function sendGeneration() {
     return __awaiter(this, void 0, void 0, function* () {
-        const openai = new openai_1.default({
-            apiKey: config_1.config.openAiKey,
-        });
-        const sourceCollection = (0, connection_1.database)().collection("_source");
+        const sourceCollection = connection_1.database.collection("_source");
         // console.log("Batch id: ", batch.id);
         let docs = yield sourceCollection.find({}).toArray();
         yield (0, prepare_batch_1.prepareBatch)();

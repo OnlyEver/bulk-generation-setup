@@ -2,8 +2,6 @@ import express, { Request, Response, NextFunction } from "express";
 import { sendGeneration } from "./generation-jobs/send_generation";
 import { checkBatchStatus } from "./generation-jobs/3.batch-status/check_batch_status";
 import { getResult } from "./generation-jobs/4.batch-result/get_result";
-import { database } from "./mongodb/connection";
-import { returnTypologyPrompt } from "./generation-jobs/1.batch-prepare/fetch-prompts/typology_prompt";
 
 const app = express();
 
@@ -52,57 +50,13 @@ app.get("/get-results", async (req: any, res: any, next: NextFunction) => {
   }
 });
 
-// app.get("/connect", async (req, res) => {
-//   const dbName = config.dbName;
-//   const dbUri: string = config.dbUri || "mongodb://localhost:27017"; 
-//   const client = new MongoClient(dbUri);
-
-//   try {
-//     await client.connect();
-//     console.log("Connected to the database!");
-//     const database = client.db(dbName);
-
-//     // Perform a test operation to confirm connection
-//     const collections = await database.listCollections().toArray();
-
-//     let docs = await database.collection("_source").find({}).toArray();
-
-//     res.status(200).json({
-//       message: "Connected to the database successfully.",
-//       databaseName: dbName,
-//       collectionData: docs, // List collection names
-//     });
-//   } catch (error: unknown) {
-//     console.error("Database connection failed:", error);
-
-//     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-//     res.status(500).json({
-//       message: "Failed to connect to the database.",
-//       error: errorMessage,
-//     });
-//   } finally {
-//     await client.close();
-//   }
-// });
 
 // 404 handler for unmatched routes
 app.use((req: Request, res: Response) => {
   res.status(404).json({ error: true, message: "Route not found." });
 });
 
-// Start the server
-const startServer = async () => {
-  try {
-    // Initialize the database
-    await database();
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start the server:", error);
-    process.exit(1); // Exit the process with a failure code
-  }
-};
-
-startServer();

@@ -18,7 +18,7 @@ export async function insertSourceTypology(parsedTypology: Object, sourceId: str
         _source_id: sourceId,
         typology: parsedTypology,
     }
-    const db = await database();
+    const db =  database();
     const typologyCollection = db.collection("_typology");
 
     const result = await typologyCollection.insertOne(doc);
@@ -38,7 +38,7 @@ export async function insertCard(parsedCardData: Card, sourceId: string) {
         heading: parsedCardData.heading,
     }
 
-    const db = await database();
+    const db =  database();
     const cardCollection = db.collection("_card");
     const result = await cardCollection.insertOne(doc);
     console.log(result);

@@ -20,7 +20,7 @@ function insertSourceTypology(parsedTypology, sourceId) {
             _source_id: sourceId,
             typology: parsedTypology,
         };
-        const db = yield (0, connection_1.database)();
+        const db = (0, connection_1.database)();
         const typologyCollection = db.collection("_typology");
         const result = yield typologyCollection.insertOne(doc);
         console.log(result);
@@ -38,7 +38,7 @@ function insertCard(parsedCardData, sourceId) {
             bloom_level: parsedCardData.bloomlevel,
             heading: parsedCardData.heading,
         };
-        const db = yield (0, connection_1.database)();
+        const db = (0, connection_1.database)();
         const cardCollection = db.collection("_card");
         const result = yield cardCollection.insertOne(doc);
         console.log(result);

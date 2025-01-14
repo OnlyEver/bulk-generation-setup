@@ -16,8 +16,6 @@ const express_1 = __importDefault(require("express"));
 const send_generation_1 = require("./generation-jobs/send_generation");
 const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
 const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
-const connection_1 = require("./mongodb/connection");
-const typology_prompt_1 = require("./generation-jobs/1.batch-prepare/fetch-prompts/typology_prompt");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.get("/", (req, res) => {
@@ -62,54 +60,10 @@ app.get("/get-results", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         next(error);
     }
 }));
-app.get("/hello", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield (0, typology_prompt_1.returnTypologyPrompt)();
-    res.json({ message: data });
-}));
-// app.get("/connect", async (req, res) => {
-//   const dbName = config.dbName;
-//   const dbUri: string = config.dbUri || "mongodb://localhost:27017"; 
-//   const client = new MongoClient(dbUri);
-//   try {
-//     await client.connect();
-//     console.log("Connected to the database!");
-//     const database = client.db(dbName);
-//     // Perform a test operation to confirm connection
-//     const collections = await database.listCollections().toArray();
-//     let docs = await database.collection("_source").find({}).toArray();
-//     res.status(200).json({
-//       message: "Connected to the database successfully.",
-//       databaseName: dbName,
-//       collectionData: docs, // List collection names
-//     });
-//   } catch (error: unknown) {
-//     console.error("Database connection failed:", error);
-//     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-//     res.status(500).json({
-//       message: "Failed to connect to the database.",
-//       error: errorMessage,
-//     });
-//   } finally {
-//     await client.close();
-//   }
-// });
 // 404 handler for unmatched routes
 app.use((req, res) => {
     res.status(404).json({ error: true, message: "Route not found." });
 });
-// Start the server
-const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // Initialize the database
-        yield (0, connection_1.database)();
-        // Start the Express server
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    }
-    catch (error) {
-        console.error("Failed to start the server:", error);
-        process.exit(1); // Exit the process with a failure code
-    }
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
-startServer();

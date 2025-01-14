@@ -10,9 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.returnTypologyPrompt = returnTypologyPrompt;
-const connection_1 = require("../../../mongodb/connection");
 const typology_text_1 = require("../../../prompts/typology/typology_text");
-const mongodb_1 = require("mongodb");
+const get_prompt_data_1 = require("./get_prompt_data");
 const typologyPromptString = `
 You are a dedicated assistant that categorizes and summarizes educational content. You will process educational content (in JSON format) that represents text from diverse sources such as PDFs, book chapters, videos, and websites. Follow these steps:
 
@@ -142,50 +141,10 @@ json
 
 
 `;
-function getPromptData(promptIds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const db = yield (0, connection_1.database)();
-        const promptCollection = db.collection('_prompts');
-        // Convert string IDs to ObjectId
-        const objectIds = promptIds.map((id) => new mongodb_1.ObjectId(id));
-        let result = yield promptCollection
-            .aggregate([
-            {
-                /// match the ids of prompt docs
-                $match: {
-                    _id: {
-                        $in: objectIds,
-                    },
-                },
-            },
-            {
-                /// create a new field allContent(in memory) and pushes the "prompt" field from _prompt doc
-                $group: {
-                    _id: null,
-                    allContent: { $push: "$prompt" },
-                },
-            },
-            {
-                /// concat each element in above created `allContent temp field`, and update that to "concatenatedContent"(temp field)
-                $project: {
-                    concatenatedContent: {
-                        $reduce: {
-                            input: "$allContent",
-                            initialValue: "",
-                            in: { $concat: ["$$value", "$$this"] },
-                        },
-                    },
-                },
-            },
-        ])
-            .toArray();
-        return result.length > 0 ? result[0].concatenatedContent : "";
-    });
-}
 function returnTypologyPrompt() {
     return __awaiter(this, void 0, void 0, function* () {
         const typologyObjectIds = Object.values(typology_text_1.typologyTextDocs);
-        const typologyPrompts = yield getPromptData(typologyObjectIds);
+        const typologyPrompts = yield (0, get_prompt_data_1.getPromptData)(typologyObjectIds);
         console.log('Typology prompt: ', typologyPrompts);
         return typologyPrompts;
         // return typologyPromptString;

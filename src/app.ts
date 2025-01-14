@@ -3,11 +3,19 @@ import { getResult } from "./generation-jobs/4.batch-result/get_result";
 import { createBatch } from "./generation-jobs/2.batch-creation/create_batch";
 import { prepareBatch } from "./generation-jobs/1.batch-prepare/prepare_batch";
 import { database } from "./mongodb/connection";
+import OpenAI from "openai";
+import { setOpenAIKey } from "./openai/openai_helper";
 
 // Connect to mongodb
 
 export const dbInstance = (connectionUri: string) => {
   return database;
+};
+
+
+// init openai
+export const openai = (openaiKey: string) => {
+  setOpenAIKey(openaiKey);
 };
 
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources

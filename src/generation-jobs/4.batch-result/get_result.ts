@@ -1,11 +1,7 @@
-import OpenAI from "openai";
-import { config } from "../../config";
-import fs from "fs/promises";
+import { openAI } from "../../openai/openai_helper";
 export async function getResult(fileid: string) {
-  const openai = new OpenAI({
-    apiKey: config.openAiKey,
-  });
-  const fileResponse = await openai.files.content(fileid);
+
+  const fileResponse = await openAI().files.content(fileid);
   const fileContents = await fileResponse.text();
 
   console.log(fileContents);

@@ -1,12 +1,12 @@
 import OpenAI from "openai";
 import { config } from "../../config";
+import { openAI } from "../../openai/openai_helper";
 
 export async function cancelBatch(batchId: string) {
-    const openai = new OpenAI({
-        apiKey: config.openAiKey,
-    });
-    const batch = await openai.batches.cancel(batchId);
+
+    const batch = await openAI().batches.cancel(batchId);
 
 
     return batch;
 }
+

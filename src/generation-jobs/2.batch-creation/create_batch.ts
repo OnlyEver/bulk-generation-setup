@@ -1,7 +1,7 @@
-import OpenAI from "openai";
 import fs from "fs";
 import { config } from "../../config";
 import { Batch } from "openai/resources";
+import { openAI } from "../../openai/openai_helper";
 
 
 /**
@@ -15,16 +15,14 @@ import { Batch } from "openai/resources";
  */
 export async function createBatch(filename: string): Promise<Batch> {
   try {
-    const openai = new OpenAI({
-      apiKey: config.openAiKey,
-    });
 
-    const file = await openai.files.create({
+
+    const file = await openAI().files.create({
       file: fs.createReadStream(filename),
       purpose: "batch",
     });
 
-    const batch = await openai.batches.create({
+    const batch = await openAI().batches.create({
       input_file_id: file.id,
       endpoint: "/v1/chat/completions",
       completion_window: "24h",

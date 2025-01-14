@@ -1,11 +1,10 @@
-
 import OpenAI from "openai";
 import fsPromise from "fs/promises";
 
 import { config } from "../config";
 import { delay } from "../utils/delay_helper";
 
-import { cardCollection, sourceCollection, typologyCollection } from "../mongodb/connection";
+import { database } from "../mongodb/connection";
 
 import { getResult } from "./4.batch-result/get_result";
 import { checkBatchStatus } from "./3.batch-status/check_batch_status";
@@ -24,6 +23,7 @@ type BatchStatus = {
 };
 
 export async function sendGeneration() {
+  const sourceCollection = database().collection("_source");
   const openai = new OpenAI({
     apiKey: config.openAiKey,
   });
@@ -31,12 +31,9 @@ export async function sendGeneration() {
   // console.log("Batch id: ", batch.id);
   let docs = await sourceCollection.find({}).toArray();
 
-
   await prepareBatch();
-  const batch = await createBatch('./batchinput.jsonl');
-  const batchStatus = await poolBatchStatus(
-    batch.id
-  );
+  const batch = await createBatch("./batchinput.jsonl");
+  const batchStatus = await poolBatchStatus(batch.id);
   if (batchStatus.status == BatchStatusEnum.COMPLETED) {
     const response = await getResult(batchStatus.file!);
     // const respone = await getResult('file-AwS7kdAgAhczAKHSa5QobL');
@@ -45,7 +42,7 @@ export async function sendGeneration() {
     //handle failure
     if (batchStatus.file) {
       await handleBatchFailure(batchStatus.file!);
-    } 
+    }
   }
   const data = {
     generation: "Generation will be handled here",
@@ -53,12 +50,10 @@ export async function sendGeneration() {
   return data;
 }
 
-
-
 async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
   const batchStatus = await checkBatchStatus(batchId);
   console.log("pooling");
-  console.log('Batch Id: ',batchId);
+  console.log("Batch Id: ", batchId);
 
   if (batchStatus.status == BatchStatusEnum.FAILED) {
     //cancel batch
@@ -86,28 +81,28 @@ async function poolBatchStatus(batchId: string): Promise<BatchStatus> {
   }
 }
 
-
-export async function sendCardGeneration(response: any[], docs: WithId<BSON.Document>[]) {
+export async function sendCardGeneration(
+  response: any[],
+  docs: WithId<BSON.Document>[]
+) {
   const openai = new OpenAI({
     apiKey: config.openAiKey,
   });
 
   const sourceId = await prepareBatchForCard(response, docs);
-  var batch = await createBatch('./batchinputForCardGen.jsonl');
+  var batch = await createBatch("./batchinputForCardGen.jsonl");
 
-  const batchStatus = await poolBatchStatus(
-    batch.id
-  );
+  const batchStatus = await poolBatchStatus(batch.id);
   if (batchStatus.status == "completed") {
     const generationContent = await getResult(batchStatus.file!);
     console.log(generationContent);
     generationContent.forEach(async (element) => {
-      const body = element['response']['body'];
-      const content = body.choices[0]['message']['content'];
+      const body = element["response"]["body"];
+      const content = body.choices[0]["message"]["content"];
       const parsedContent = JSON.parse(content);
 
-      console.log('Logging content');
-      console.log(parsedContent['test_cards']);
+      console.log("Logging content");
+      console.log(parsedContent["test_cards"]);
 
       const source = docs.find((doc) => doc._id == sourceId);
       var headings = [];
@@ -119,29 +114,31 @@ export async function sendCardGeneration(response: any[], docs: WithId<BSON.Docu
       console.log(source);
       const parsedC = parseCardGenResponse(parsedContent, false, headings);
       if (parsedC.cards_data != null) {
-        const cards: Card[] = Array.from(parsedC.cards_data!.entries()).map(([key, value]) => ({
-          id: new ObjectId(key), // Convert the key to ObjectId
-          heading: value.heading,
-          content: value.content,
-          concepts: value.concepts,
-          facts: value.facts,
-          bloomlevel: value.bloomLevel,
-          displayTitle: value.displayTitle,
-        }));
+        const cards: Card[] = Array.from(parsedC.cards_data!.entries()).map(
+          ([key, value]) => ({
+            id: new ObjectId(key), // Convert the key to ObjectId
+            heading: value.heading,
+            content: value.content,
+            concepts: value.concepts,
+            facts: value.facts,
+            bloomlevel: value.bloomLevel,
+            displayTitle: value.displayTitle,
+          })
+        );
         await Promise.all(
           cards.map(async (card: Card) => {
             await insertCard(card, sourceId);
-          }));
+          })
+        );
       }
     });
-
   } else {
     //handle failure
     if (batchStatus.file) {
       await handleBatchFailure(batchStatus.file!);
-    } 
+    }
   }
-};
+}
 
 /**
  * Handles a failed batch by retrieving and saving the error file content.
@@ -170,7 +167,3 @@ async function handleBatchFailure(errorFileId: string) {
     throw error;
   }
 }
-
-
-
-

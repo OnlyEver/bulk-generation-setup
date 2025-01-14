@@ -5,7 +5,7 @@ import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_
 import { parseData } from "../1.batch-prepare/parse_source_content";
 
 /**
- * Prepares a batch file for processing by generating a set of data requests 
+ * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
 export async function prepareBatch() {
@@ -17,11 +17,12 @@ export async function prepareBatch() {
         type: "typology",
         bloom_level: 1,
       });
-    }
+    };
+    /// aasti ko json bata, which prompts to fetch evaluate, and get those prompts.
 
     console.log(docs);
 
-    const batchData = docs.map((doc, index) => ({
+    const batchData = docs.map((doc: any, index: number) => ({
       custom_id: customId(doc), // Unique identifier for each request.
       method: "POST",
       url: "/v1/chat/completions", // API endpoint.
@@ -62,8 +63,8 @@ export async function prepareBatch() {
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     throw new Error(`Failed to prepare batch file: ${errorMessage}`);
   }
-
 }

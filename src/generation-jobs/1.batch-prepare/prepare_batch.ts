@@ -10,7 +10,7 @@ import { parseData } from "../1.batch-prepare/parse_source_content";
  */
 export async function prepareBatch() {
   try {
-    const sourceCollection = database().collection("_source");
+    const sourceCollection = database.collection("_source");
     let docs = await sourceCollection.find({}).toArray();
     const customId = (doc: any) => {
       return JSON.stringify({

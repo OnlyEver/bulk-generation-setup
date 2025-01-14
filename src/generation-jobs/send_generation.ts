@@ -23,8 +23,7 @@ type BatchStatus = {
 };
 
 export async function sendGeneration() {
-
-  const sourceCollection = database().collection("_source");
+  const sourceCollection = database.collection("_source");
 
   // console.log("Batch id: ", batch.id);
   let docs = await sourceCollection.find({}).toArray();

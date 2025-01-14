@@ -1,4 +1,3 @@
-import { sendGeneration } from "./generation-jobs/send_generation";
 import { checkBatchStatus } from "./generation-jobs/3.batch-status/check_batch_status";
 import { getResult } from "./generation-jobs/4.batch-result/get_result";
 import { createBatch } from "./generation-jobs/2.batch-creation/create_batch";
@@ -7,7 +6,7 @@ import { database } from "./mongodb/connection";
 
 // Connect to mongodb
 
-export const dbInstance = () => {
+export const dbInstance = (connectionUri: string) => {
   return database;
 };
 

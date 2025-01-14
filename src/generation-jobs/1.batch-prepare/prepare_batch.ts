@@ -1,15 +1,16 @@
 import fsPromise from "fs/promises";
 
-import { sourceCollection } from "../../mongodb/connection";
+import { database } from "../../mongodb/connection";
 import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 
 /**
- * Prepares a batch file for processing by generating a set of data requests 
+ * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
 export async function prepareBatch() {
   try {
+    const sourceCollection = database().collection("_source");
     let docs = await sourceCollection.find({}).toArray();
     const customId = (doc: any) => {
       return JSON.stringify({
@@ -17,7 +18,7 @@ export async function prepareBatch() {
         type: "typology",
         bloom_level: 1,
       });
-    }
+    };
 
     console.log(docs);
 
@@ -62,8 +63,8 @@ export async function prepareBatch() {
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     throw new Error(`Failed to prepare batch file: ${errorMessage}`);
   }
-
 }

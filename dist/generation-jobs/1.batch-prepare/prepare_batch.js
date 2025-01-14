@@ -24,7 +24,8 @@ const parse_source_content_1 = require("../1.batch-prepare/parse_source_content"
 function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let docs = yield connection_1.sourceCollection.find({}).toArray();
+            const sourceCollection = (0, connection_1.database)().collection("_source");
+            let docs = yield sourceCollection.find({}).toArray();
             const customId = (doc) => {
                 return JSON.stringify({
                     id: doc._id.toString(),

@@ -14,19 +14,21 @@ exports.insertCard = insertCard;
 const connection_1 = require("./connection");
 function insertSourceTypology(parsedTypology, sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('Inserting typology');
+        const typologyCollection = (0, connection_1.database)().collection("typology");
+        console.log("Inserting typology");
         console.log(parsedTypology);
         const doc = {
             _source_id: sourceId,
             typology: parsedTypology,
         };
-        const result = yield connection_1.typologyCollection.insertOne(doc);
+        const result = yield typologyCollection.insertOne(doc);
         console.log(result);
     });
 }
 function insertCard(parsedCardData, sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('Inserting card data');
+        console.log("Inserting card data");
+        const cardCollection = (0, connection_1.database)().collection("_card");
         const doc = {
             _source_id: sourceId,
             content: parsedCardData.content,
@@ -36,7 +38,7 @@ function insertCard(parsedCardData, sourceId) {
             bloom_level: parsedCardData.bloomlevel,
             heading: parsedCardData.heading,
         };
-        const result = yield connection_1.cardCollection.insertOne(doc);
+        const result = yield cardCollection.insertOne(doc);
         console.log(result);
     });
 }

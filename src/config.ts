@@ -1,7 +1,7 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export const config = {
-    openAiKey: process.env.OPENAIKEY,
-    dbUri: process.env.DB_URI,
-    dbName: process.env.DB_NAME,
-}
+  openAiKey: process.env.OPENAIKEY,
+  dbUri: process.env.DB_URI ?? "",
+  dbName: process.env.DB_NAME,
+};

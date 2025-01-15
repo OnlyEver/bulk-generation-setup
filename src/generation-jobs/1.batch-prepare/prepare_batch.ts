@@ -18,9 +18,9 @@ export async function prepareBatch(): Promise<string> {
     const batchData = await Promise.all(
       sources.map(async (doc: any) => {
         if (doc.type == 'typology') {
-          await prepareBatchForBreadth(doc);
+          return await prepareBatchForBreadth(doc);
         } else {
-          await prepareBatchForDepth(doc);
+          return await prepareBatchForDepth(doc);
         }
       })
     );
@@ -49,7 +49,7 @@ const getPrompt = async (type: string, bloomLevel?: number): Promise<string> => 
     case "typology":
       return await returnTypologyPrompt();
     case "card":
-      return returnCardGenPrompt(bloomLevel ?? 1);
+      return await returnCardGenPrompt(bloomLevel ?? 1);
     default:
       return await returnTypologyPrompt();
   }

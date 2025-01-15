@@ -13,53 +13,16 @@ import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
 export async function prepareBatch(): Promise<string> {
   try {
     const generationDataCollection = database.collection('_generation_data');
-
     let docs = await generationDataCollection.find({}).toArray();
-
     let sources = await fetchSourceDocuments(docs, database);
-
-    const customId = (doc: any) => {
-      return JSON.stringify({
-        // id: doc._id.toString(),
-        id: doc.source._id.toString(),
-        // type: "typology",
-        type: doc.type,
-        bloom_level: 1,
-      });
-    };
-    /// aasti ko json bata, which prompts to fetch evaluate, and get those prompts.
-
-
     const batchData = await Promise.all(
-      sources.map(async (doc: any) => ({
-        custom_id: customId(doc), // Unique identifier for each request.
-        method: "POST",
-        url: "/v1/chat/completions", // API endpoint.
-        body: {
-          model: "gpt-4o-mini",
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: await getPrompt(doc.type) },
-            {
-              role: "user",
-              content: parseData(
-                doc.source.content,
-                [
-                  "See also",
-                  "References",
-                  "Further reading",
-                  "External links",
-                  "Notes and references",
-                  "Bibliography",
-                  "Notes",
-                  "Cited sources",
-                ],
-                ["table", "empty_line"]
-              ),
-            },
-          ],
-        },
-      }))
+      sources.map(async (doc: any) => {
+        if (doc.type == 'typology') {
+          await prepareBatchForBreadth(doc);
+        } else {
+          await prepareBatchForDepth(doc);
+        }
+      })
     );
 
 
@@ -92,8 +55,69 @@ const getPrompt = async (type: string): Promise<string> => {
   }
 }
 
-const prepareBatchForBreadth = async () => { }
-const prepareBatchForDepth = async () => { }
+const getCustomIdForBreadth = (doc: any) => ({
+  return: JSON.stringify({
+    id: doc.source._id.toString(),
+    type: doc.type,
+    bloom_level: 1,
+  })
+})
+const getCustomIdForDepth = (doc: any) => ({
+  //return custom id for depth
+
+
+  // return: JSON.stringify({
+  //   id: doc.source._id.toString(),
+  //   type: doc.type,
+  //   bloom_level: 1,
+  // })
+})
+
+const getBatchDataForBreadth = (content: string) => {
+
+}
+const getBatchDataForDepth = (content: string) => {
+
+}
+
+const prepareBatchForBreadth = async (doc: any,) => {
+  const prompts = await getPrompt(doc.type);
+  return {
+    custom_id: getCustomIdForBreadth(doc), // Unique identifier for each request.
+    method: "POST",
+    url: "/v1/chat/completions", // API endpoint.
+    body: {
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: prompts },
+        {
+          role: "user",
+          content: parseData(
+            doc.source.content,
+            [
+              "See also",
+              "References",
+              "Further reading",
+              "External links",
+              "Notes and references",
+              "Bibliography",
+              "Notes",
+              "Cited sources",
+            ],
+            ["table", "empty_line"]
+          ),
+        },
+      ],
+    },
+  }
+
+
+}
+const prepareBatchForDepth = async (doc: any) => {
+  //return map data for depth
+  return {}
+}
 
 const fetchSourceDocuments = async (docs: any[], db: Db) => {
   const sourceCollection = db.collection('_source');

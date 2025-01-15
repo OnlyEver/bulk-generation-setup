@@ -8,4 +8,4 @@ import { Batch } from "openai/resources";
  * @throws {Error} - Throws an error if file upload or batch creation fails.
  *
  */
-export declare function createBatch(filename: string): Promise<Batch>;
+export declare function createBatch(fileList: string[]): Promise<Batch[]>;

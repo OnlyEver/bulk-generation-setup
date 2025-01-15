@@ -10,31 +10,75 @@ import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-export async function prepareBatch(): Promise<string> {
+export async function prepareBatch(): Promise<string[]> {
   try {
+    var inputFileList: string[] = [];
     const generationDataCollection = database.collection('_generation_data');
     let docs = await generationDataCollection.find({}).toArray();
     let sources = await fetchSourceDocuments(docs, database);
-    const batchData = await Promise.all(
-      sources.map(async (doc: any) => {
-        if (doc.type == 'typology') {
-          await prepareBatchForBreadth(doc);
+    const result = [];
+
+    for (let i = 0; i < sources.length; i += 300) {
+      // Slice the array into chunks of maxCount elements
+      result.push(sources.slice(i, i + 300));
+    }
+    console.log(result);
+
+    result.forEach(async (
+      element, index
+    ) => {
+      var batchData: any[] = [];
+      for (const elem of element) {
+        if (elem.type == 'typology') {
+          const data = await prepareBatchForBreadth(elem);
+          batchData.push(data);
         } else {
-          await prepareBatchForDepth(doc);
+
+          // batchData.push(await prepareBatchForDepth(doc));
         }
-      })
-    );
+      }
+      // element.forEach(async (doc: any) => {
+      //   if (doc.type == 'typology') {
+      //     const data = await prepareBatchForBreadth(doc);
+      //     batchData.push(data);
+      //   } else {
+
+      //     // batchData.push(await prepareBatchForDepth(doc));
+      //   }
+      // });
+      const filePath = `./batchinput${index}.jsonl`;
+      await fsPromise.writeFile(
+        filePath,
+        batchData.map((entry) => JSON.stringify(entry)).join("\n"),
+        "utf-8"
+      );
+
+      inputFileList.push(filePath);
+    })
+
+    console.log(inputFileList);
+    return inputFileList;
+
+    // const batchData = await Promise.all(
+    //   sources.map(async (doc: any) => {
+    //     if (doc.type == 'typology') {
+    //       return await prepareBatchForBreadth(doc);
+    //     } else {
+    //       return await prepareBatchForDepth(doc);
+    //     }
+    //   })
+    // );
 
 
     // Write the batch data to a local file
-    const filePath = "./batchinput.jsonl";
-    await fsPromise.writeFile(
-      filePath,
-      batchData.map((entry) => JSON.stringify(entry)).join("\n"),
-      "utf-8"
-    );
+    // const filePath = "./batchinput.jsonl";
+    // await fsPromise.writeFile(
+    //   filePath,
+    //   batchData.map((entry) => JSON.stringify(entry)).join("\n"),
+    //   "utf-8"
+    // );
 
-    return filePath;
+    // return filePath;
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
@@ -111,9 +155,10 @@ const prepareBatchForBreadth = async (doc: any,) => {
       ],
     },
   }
-
-
 }
+
+
+
 const prepareBatchForDepth = async (doc: any) => {
   //return map data for depth
   return {}

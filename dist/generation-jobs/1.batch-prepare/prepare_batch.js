@@ -26,50 +26,58 @@ const card_gen_prompt_1 = require("./fetch-prompts/card_gen_prompt");
 function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            var inputFileList = [];
             const generationDataCollection = connection_1.database.collection('_generation_data');
             let docs = yield generationDataCollection.find({}).toArray();
             let sources = yield fetchSourceDocuments(docs, connection_1.database);
-            const customId = (doc) => {
-                return JSON.stringify({
-                    // id: doc._id.toString(),
-                    id: doc.source._id.toString(),
-                    // type: "typology",
-                    type: doc.type,
-                    bloom_level: 1,
-                });
-            };
-            /// aasti ko json bata, which prompts to fetch evaluate, and get those prompts.
-            const batchData = yield Promise.all(sources.map((doc) => __awaiter(this, void 0, void 0, function* () {
-                return ({
-                    custom_id: customId(doc), // Unique identifier for each request.
-                    method: "POST",
-                    url: "/v1/chat/completions", // API endpoint.
-                    body: {
-                        model: "gpt-4o-mini",
-                        response_format: { type: "json_object" },
-                        messages: [
-                            { role: "system", content: yield getPrompt(doc.type) },
-                            {
-                                role: "user",
-                                content: (0, parse_source_content_1.parseData)(doc.source.content, [
-                                    "See also",
-                                    "References",
-                                    "Further reading",
-                                    "External links",
-                                    "Notes and references",
-                                    "Bibliography",
-                                    "Notes",
-                                    "Cited sources",
-                                ], ["table", "empty_line"]),
-                            },
-                        ],
-                    },
-                });
-            })));
+            const result = [];
+            for (let i = 0; i < sources.length; i += 300) {
+                // Slice the array into chunks of maxCount elements
+                result.push(sources.slice(i, i + 300));
+            }
+            console.log(result);
+            result.forEach((element, index) => __awaiter(this, void 0, void 0, function* () {
+                var batchData = [];
+                for (const elem of element) {
+                    if (elem.type == 'typology') {
+                        const data = yield prepareBatchForBreadth(elem);
+                        batchData.push(data);
+                    }
+                    else {
+                        // batchData.push(await prepareBatchForDepth(doc));
+                    }
+                }
+                // element.forEach(async (doc: any) => {
+                //   if (doc.type == 'typology') {
+                //     const data = await prepareBatchForBreadth(doc);
+                //     batchData.push(data);
+                //   } else {
+                //     // batchData.push(await prepareBatchForDepth(doc));
+                //   }
+                // });
+                const filePath = `./batchinput${index}.jsonl`;
+                yield promises_1.default.writeFile(filePath, batchData.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
+                inputFileList.push(filePath);
+            }));
+            console.log(inputFileList);
+            return inputFileList;
+            // const batchData = await Promise.all(
+            //   sources.map(async (doc: any) => {
+            //     if (doc.type == 'typology') {
+            //       return await prepareBatchForBreadth(doc);
+            //     } else {
+            //       return await prepareBatchForDepth(doc);
+            //     }
+            //   })
+            // );
             // Write the batch data to a local file
-            const filePath = "./batchinput.jsonl";
-            yield promises_1.default.writeFile(filePath, batchData.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
-            return filePath;
+            // const filePath = "./batchinput.jsonl";
+            // await fsPromise.writeFile(
+            //   filePath,
+            //   batchData.map((entry) => JSON.stringify(entry)).join("\n"),
+            //   "utf-8"
+            // );
+            // return filePath;
         }
         catch (error) {
             console.error("Error occurred while preparing the batch file:", error);
@@ -88,8 +96,57 @@ const getPrompt = (type) => __awaiter(void 0, void 0, void 0, function* () {
             return yield (0, typology_prompt_1.returnTypologyPrompt)();
     }
 });
-const prepareBatchForBreadth = () => __awaiter(void 0, void 0, void 0, function* () { });
-const prepareBatchForDepth = () => __awaiter(void 0, void 0, void 0, function* () { });
+const getCustomIdForBreadth = (doc) => ({
+    return: JSON.stringify({
+        id: doc.source._id.toString(),
+        type: doc.type,
+        bloom_level: 1,
+    })
+});
+const getCustomIdForDepth = (doc) => ({
+//return custom id for depth
+// return: JSON.stringify({
+//   id: doc.source._id.toString(),
+//   type: doc.type,
+//   bloom_level: 1,
+// })
+});
+const getBatchDataForBreadth = (content) => {
+};
+const getBatchDataForDepth = (content) => {
+};
+const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
+    const prompts = yield getPrompt(doc.type);
+    return {
+        custom_id: getCustomIdForBreadth(doc), // Unique identifier for each request.
+        method: "POST",
+        url: "/v1/chat/completions", // API endpoint.
+        body: {
+            model: "gpt-4o-mini",
+            response_format: { type: "json_object" },
+            messages: [
+                { role: "system", content: prompts },
+                {
+                    role: "user",
+                    content: (0, parse_source_content_1.parseData)(doc.source.content, [
+                        "See also",
+                        "References",
+                        "Further reading",
+                        "External links",
+                        "Notes and references",
+                        "Bibliography",
+                        "Notes",
+                        "Cited sources",
+                    ], ["table", "empty_line"]),
+                },
+            ],
+        },
+    };
+});
+const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
+    //return map data for depth
+    return {};
+});
 const fetchSourceDocuments = (docs, db) => __awaiter(void 0, void 0, void 0, function* () {
     const sourceCollection = db.collection('_source');
     const sourceDocs = yield Promise.all(docs.map((doc) => __awaiter(void 0, void 0, void 0, function* () {

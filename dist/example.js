@@ -16,9 +16,24 @@ const config_1 = require("./config");
     console.log('example');
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : '');
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : '');
-    const filePath = yield (0, app_1.prepareGenerationBatch)();
-    console.log(filePath);
-    // const batch = await createBatchRequest(filePath);
-    // console.log(batch);
+    const filePaths = yield (0, app_1.prepareGenerationBatch)();
+    console.log(filePaths);
+    const batch = yield (0, app_1.createBatchRequest)(filePaths);
+    const batchDataCollection = (0, app_1.getDbInstance)().collection('_batch_data');
+    // const batchData = {
+    //     id: batch.id,
+    //     input_file_id: batch.input_file_id,
+    //     output_file_id: batch.output_file_id,
+    //     error_file_id: batch.error_file_id,
+    //     status: batch.status,
+    //     ctime: Date.UTC,
+    // }
+    yield batchDataCollection.insertMany(batch);
+    //update generation data source with the status
+    console.log(batch);
+    // batch.id,
+    // batch.input_file_id,
+    // batch.status,
+    // ctime,
     //store batch to mongo
 }))();

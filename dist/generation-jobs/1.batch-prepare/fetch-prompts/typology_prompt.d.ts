@@ -1,1 +1,1 @@
-export declare function returnTypologyPrompt(): string;
+export declare function returnTypologyPrompt(): Promise<string>;

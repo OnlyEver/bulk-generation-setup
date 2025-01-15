@@ -31,6 +31,9 @@ const prepare_card_batch_1 = require("./1.batch-prepare/prepare_card_batch");
 function sendGeneration() {
     return __awaiter(this, void 0, void 0, function* () {
         const sourceCollection = connection_1.database.collection("_source");
+        const openai = new openai_1.default({
+            apiKey: config_1.config.openAiKey,
+        });
         // console.log("Batch id: ", batch.id);
         let docs = yield sourceCollection.find({}).toArray();
         yield (0, prepare_batch_1.prepareBatch)();

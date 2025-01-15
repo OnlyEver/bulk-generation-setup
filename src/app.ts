@@ -2,16 +2,22 @@ import { checkBatchStatus } from "./generation-jobs/3.batch-status/check_batch_s
 import { getResult } from "./generation-jobs/4.batch-result/get_result";
 import { createBatch } from "./generation-jobs/2.batch-creation/create_batch";
 import { prepareBatch } from "./generation-jobs/1.batch-prepare/prepare_batch";
-import { setUp } from "./mongodb/connection";
+import { setUp, database } from "./mongodb/connection";
 import OpenAI from "openai";
 import { setOpenAIKey } from "./openai/openai_helper";
+import { Db, MongoClient } from "mongodb";
+
 
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 
+
 export const setUpMongoClient = (connectionUri: string, dbName: string) => {
   return setUp(connectionUri, dbName);
 };
+
+export const getDbInstance = (): Db => { return database };
+
 
 // init openai
 export const openai = (openaiKey: string) => {

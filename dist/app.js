@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareBatchForDepth = exports.prepareBatchForBreadth = exports.openai = exports.setUpMongoClient = void 0;
+exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareBatchForDepth = exports.prepareBatchForBreadth = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
 const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
 const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
 const create_batch_1 = require("./generation-jobs/2.batch-creation/create_batch");
@@ -22,6 +22,8 @@ const setUpMongoClient = (connectionUri, dbName) => {
     return (0, connection_1.setUp)(connectionUri, dbName);
 };
 exports.setUpMongoClient = setUpMongoClient;
+const getDbInstance = () => { return connection_1.database; };
+exports.getDbInstance = getDbInstance;
 // init openai
 const openai = (openaiKey) => {
     (0, openai_helper_1.setOpenAIKey)(openaiKey);

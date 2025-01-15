@@ -8,7 +8,6 @@ export function parseCardGenResponse(
   try {
     const cardData = [];
     const unparsedTestCards = generatedData["test_cards"];
-    console.log(unparsedTestCards);
     const type = generatedData.type;
     if (unparsedTestCards !== undefined && unparsedTestCards.length != 0) {
       for (let elem of unparsedTestCards) {

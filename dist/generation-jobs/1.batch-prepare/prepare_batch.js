@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchSourceDocuments = void 0;
 exports.prepareBatch = prepareBatch;
 const promises_1 = __importDefault(require("fs/promises"));
 const connection_1 = require("../../mongodb/connection");
@@ -29,7 +28,7 @@ function prepareBatch() {
         try {
             const generationDataCollection = connection_1.database.collection('_generation_data');
             let docs = yield generationDataCollection.find({}).toArray();
-            let sources = yield (0, exports.fetchSourceDocuments)(docs, connection_1.database);
+            let sources = yield fetchSourceDocuments(docs, connection_1.database);
             const customId = (doc) => {
                 return JSON.stringify({
                     // id: doc._id.toString(),
@@ -40,7 +39,6 @@ function prepareBatch() {
                 });
             };
             /// aasti ko json bata, which prompts to fetch evaluate, and get those prompts.
-            console.log(docs);
             const batchData = yield Promise.all(sources.map((doc) => __awaiter(this, void 0, void 0, function* () {
                 return ({
                     custom_id: customId(doc), // Unique identifier for each request.
@@ -68,10 +66,10 @@ function prepareBatch() {
                     },
                 });
             })));
-            console.log(batchData);
             // Write the batch data to a local file
             const filePath = "./batchinput.jsonl";
             yield promises_1.default.writeFile(filePath, batchData.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
+            return filePath;
         }
         catch (error) {
             console.error("Error occurred while preparing the batch file:", error);
@@ -90,6 +88,8 @@ const getPrompt = (type) => __awaiter(void 0, void 0, void 0, function* () {
             return yield (0, typology_prompt_1.returnTypologyPrompt)();
     }
 });
+const prepareBatchForBreadth = () => __awaiter(void 0, void 0, void 0, function* () { });
+const prepareBatchForDepth = () => __awaiter(void 0, void 0, void 0, function* () { });
 const fetchSourceDocuments = (docs, db) => __awaiter(void 0, void 0, void 0, function* () {
     const sourceCollection = db.collection('_source');
     const sourceDocs = yield Promise.all(docs.map((doc) => __awaiter(void 0, void 0, void 0, function* () {
@@ -102,4 +102,3 @@ const fetchSourceDocuments = (docs, db) => __awaiter(void 0, void 0, void 0, fun
     })));
     return sourceDocs;
 });
-exports.fetchSourceDocuments = fetchSourceDocuments;

@@ -4,7 +4,6 @@ export async function getResult(fileid: string) {
   const fileResponse = await openAI().files.content(fileid);
   const fileContents = await fileResponse.text();
 
-  console.log(fileContents);
   const parsedString = _parseJsonlFile(fileContents.toString());
   return parsedString;
   // return JSON.parse(pa);

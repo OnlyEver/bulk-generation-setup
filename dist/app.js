@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareBatchForDepth = exports.prepareBatchForBreadth = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
+exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareGenerationBatch = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
 const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
 const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
 const create_batch_1 = require("./generation-jobs/2.batch-creation/create_batch");
@@ -30,17 +30,16 @@ const openai = (openaiKey) => {
 };
 exports.openai = openai;
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources
-const prepareBatchForBreadth = () => __awaiter(void 0, void 0, void 0, function* () {
+const prepareGenerationBatch = () => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield (0, prepare_batch_1.prepareBatch)();
     return data;
 });
-exports.prepareBatchForBreadth = prepareBatchForBreadth;
+exports.prepareGenerationBatch = prepareGenerationBatch;
 // This function prepares the batch for the depth generation, basically card generation
-const prepareBatchForDepth = () => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield (0, prepare_batch_1.prepareBatch)();
-    return data;
-});
-exports.prepareBatchForDepth = prepareBatchForDepth;
+// export const prepareBatchForDepth = async () => {
+//   const data = await prepareBatch();
+//   return data;
+// };
 /// Creates an OPENAI batch request
 /// After creation of the batch, the data is stored into mongodb
 const createBatchRequest = (filePath) => __awaiter(void 0, void 0, void 0, function* () {

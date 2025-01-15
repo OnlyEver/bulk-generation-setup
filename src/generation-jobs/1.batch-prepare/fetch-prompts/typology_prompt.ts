@@ -136,7 +136,7 @@ json
 export async function returnTypologyPrompt() {
     const typologyObjectIds = Object.values(typologyTextDocs);
     const typologyPrompts = await getPromptData(typologyObjectIds);
-    console.log('Typology prompt: ', typologyPrompts);
+
 
     return typologyPrompts;
     // return typologyPromptString;

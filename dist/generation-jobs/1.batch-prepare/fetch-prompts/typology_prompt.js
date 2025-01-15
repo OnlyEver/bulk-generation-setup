@@ -145,7 +145,6 @@ function returnTypologyPrompt() {
     return __awaiter(this, void 0, void 0, function* () {
         const typologyObjectIds = Object.values(typology_text_1.typologyTextDocs);
         const typologyPrompts = yield (0, get_prompt_data_1.getPromptData)(typologyObjectIds);
-        console.log('Typology prompt: ', typologyPrompts);
         return typologyPrompts;
         // return typologyPromptString;
     });

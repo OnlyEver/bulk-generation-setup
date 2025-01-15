@@ -10,7 +10,7 @@ import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-export async function prepareBatch() {
+export async function prepareBatch(): Promise<string> {
   try {
     const generationDataCollection = database.collection('_generation_data');
 
@@ -29,7 +29,6 @@ export async function prepareBatch() {
     };
     /// aasti ko json bata, which prompts to fetch evaluate, and get those prompts.
 
-    console.log(docs);
 
     const batchData = await Promise.all(
       sources.map(async (doc: any) => ({
@@ -63,7 +62,6 @@ export async function prepareBatch() {
       }))
     );
 
-    console.log(batchData);
 
     // Write the batch data to a local file
     const filePath = "./batchinput.jsonl";
@@ -72,6 +70,8 @@ export async function prepareBatch() {
       batchData.map((entry) => JSON.stringify(entry)).join("\n"),
       "utf-8"
     );
+
+    return filePath;
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
@@ -92,7 +92,10 @@ const getPrompt = async (type: string): Promise<string> => {
   }
 }
 
-export const fetchSourceDocuments = async (docs: any[], db: Db) => {
+const prepareBatchForBreadth = async () => { }
+const prepareBatchForDepth = async () => { }
+
+const fetchSourceDocuments = async (docs: any[], db: Db) => {
   const sourceCollection = db.collection('_source');
 
   const sourceDocs = await Promise.all(

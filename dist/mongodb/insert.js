@@ -15,7 +15,6 @@ const connection_1 = require("./connection");
 function insertSourceTypology(parsedTypology, sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
         const typologyCollection = connection_1.database.collection("typology");
-        console.log("Inserting typology");
         console.log(parsedTypology);
         const doc = {
             _source_id: sourceId,

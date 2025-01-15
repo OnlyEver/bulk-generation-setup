@@ -16,7 +16,6 @@ export async function insertSourceTypology(
   sourceId: string
 ) {
   const typologyCollection = database.collection("typology");
-  console.log("Inserting typology");
   console.log(parsedTypology);
   const doc = {
     _source_id: sourceId,

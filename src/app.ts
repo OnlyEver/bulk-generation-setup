@@ -25,16 +25,16 @@ export const openai = (openaiKey: string) => {
 };
 
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources
-export const prepareBatchForBreadth = async () => {
+export const prepareGenerationBatch = async () => {
   const data = await prepareBatch();
   return data;
 };
 
 // This function prepares the batch for the depth generation, basically card generation
-export const prepareBatchForDepth = async () => {
-  const data = await prepareBatch();
-  return data;
-};
+// export const prepareBatchForDepth = async () => {
+//   const data = await prepareBatch();
+//   return data;
+// };
 
 /// Creates an OPENAI batch request
 /// After creation of the batch, the data is stored into mongodb

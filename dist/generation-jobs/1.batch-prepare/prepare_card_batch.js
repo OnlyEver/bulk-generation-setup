@@ -25,23 +25,23 @@ const card_gen_prompt_1 = require("./fetch-prompts/card_gen_prompt");
 function prepareBatchForCard(response, docs) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            var sourceId = '';
+            var sourceId = "";
             const cardGenBatchData = yield Promise.all(response.map((batchResponse, index) => __awaiter(this, void 0, void 0, function* () {
-                const body = batchResponse['response']['body'];
-                const content = body.choices[0]['message']['content'];
+                const body = batchResponse["response"]["body"];
+                const content = body.choices[0]["message"]["content"];
                 const parsedContent = JSON.parse(content);
                 // console.log(batchResponse);
                 // console.log(parsedContent);
                 const parsedTypology = (0, parse_typology_1.parseTypologyOnSuccess)(parsedContent);
                 // console.log(parsedTypology);
-                const customId = JSON.parse(batchResponse['custom_id']);
-                sourceId = customId['id'];
+                const customId = JSON.parse(batchResponse["custom_id"]);
+                sourceId = customId["id"];
                 yield (0, insert_1.insertSourceTypology)(parsedTypology, sourceId);
                 const sourceContent = docs.find((doc) => doc._id == sourceId);
                 return {
                     custom_id: JSON.stringify({
                         id: index,
-                        type: 'card_gen',
+                        type: "card_gen",
                         bloom_level: 1,
                     }), // Unique identifier for each request.
                     method: "POST", // HTTP method.
@@ -53,16 +53,17 @@ function prepareBatchForCard(response, docs) {
                             { role: "system", content: (0, card_gen_prompt_1.returnCardGenPrompt)() }, // System message.
                             {
                                 role: "user",
-                                content: JSON.stringify(parsedTypology) + (0, parse_source_content_1.parseData)(sourceContent.content, [
-                                    "See also",
-                                    "References",
-                                    "Further reading",
-                                    "External links",
-                                    "Notes and references",
-                                    "Bibliography",
-                                    "Notes",
-                                    "Cited sources",
-                                ], ["table", "empty_line"]),
+                                content: JSON.stringify(parsedTypology) +
+                                    (0, parse_source_content_1.parseData)(sourceContent.content, [
+                                        "See also",
+                                        "References",
+                                        "Further reading",
+                                        "External links",
+                                        "Notes and references",
+                                        "Bibliography",
+                                        "Notes",
+                                        "Cited sources",
+                                    ], ["table", "empty_line"]),
                             }, // User message (use doc content or default).
                         ],
                     },

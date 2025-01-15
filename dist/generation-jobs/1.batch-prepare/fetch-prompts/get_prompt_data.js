@@ -14,8 +14,7 @@ const connection_1 = require("../../../mongodb/connection");
 const mongodb_1 = require("mongodb");
 function getPromptData(promptIds) {
     return __awaiter(this, void 0, void 0, function* () {
-        const db = (0, connection_1.database)();
-        const promptCollection = db.collection('_prompts');
+        const promptCollection = connection_1.database.collection('_prompts');
         // Convert string IDs to ObjectId
         const objectIds = promptIds.map((id) => new mongodb_1.ObjectId(id));
         let result = yield promptCollection

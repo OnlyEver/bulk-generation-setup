@@ -12,12 +12,11 @@ import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
  */
 export async function prepareBatch() {
   try {
-    const db = database();
-    const generationDataCollection = db.collection('_generation_data');
+    const generationDataCollection = database.collection('_generation_data');
 
     let docs = await generationDataCollection.find({}).toArray();
 
-    let sources = await fetchSourceDocuments(docs, db);
+    let sources = await fetchSourceDocuments(docs, database);
 
     const customId = (doc: any) => {
       return JSON.stringify({

@@ -1,9 +1,8 @@
 import { database } from "../../../mongodb/connection";
 import { ObjectId } from "mongodb";
 
-export async function getPromptData(promptIds: Array<string>) : Promise<string> {
-    const db =  database();
-    const promptCollection = db.collection('_prompts');
+export async function getPromptData(promptIds: Array<string>): Promise<string> {
+    const promptCollection = database.collection('_prompts');
 
     // Convert string IDs to ObjectId
     const objectIds = promptIds.map((id) => new ObjectId(id));

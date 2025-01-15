@@ -19,6 +19,7 @@ const connection_1 = require("../../mongodb/connection");
 const typology_prompt_1 = require("../1.batch-prepare/fetch-prompts/typology_prompt");
 const parse_source_content_1 = require("../1.batch-prepare/parse_source_content");
 const mongodb_1 = require("mongodb");
+const card_gen_prompt_1 = require("./fetch-prompts/card_gen_prompt");
 /**
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
@@ -26,10 +27,9 @@ const mongodb_1 = require("mongodb");
 function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const db = (0, connection_1.database)();
-            const generationDataCollection = db.collection('_generation_data');
+            const generationDataCollection = connection_1.database.collection('_generation_data');
             let docs = yield generationDataCollection.find({}).toArray();
-            let sources = yield (0, exports.fetchSourceDocuments)(docs, db);
+            let sources = yield (0, exports.fetchSourceDocuments)(docs, connection_1.database);
             const customId = (doc) => {
                 return JSON.stringify({
                     // id: doc._id.toString(),
@@ -85,7 +85,7 @@ const getPrompt = (type) => __awaiter(void 0, void 0, void 0, function* () {
         case "typology":
             return yield (0, typology_prompt_1.returnTypologyPrompt)();
         case "card":
-            return yield (0, typology_prompt_1.returnTypologyPrompt)();
+            return (0, card_gen_prompt_1.returnCardGenPrompt)();
         default:
             return yield (0, typology_prompt_1.returnTypologyPrompt)();
     }
@@ -98,7 +98,7 @@ const fetchSourceDocuments = (docs, db) => __awaiter(void 0, void 0, void 0, fun
         const sourceObjectId = mongodb_1.ObjectId.createFromHexString(sourceId);
         // Fetch the document from '_source' collection
         const source = yield sourceCollection.findOne({ _id: sourceObjectId });
-        return Object.assign(Object.assign({}, doc), { source });
+        return Object.assign(Object.assign({}, doc), { source: source });
     })));
     return sourceDocs;
 });

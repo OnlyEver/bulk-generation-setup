@@ -6,7 +6,7 @@ function parseCardGenResponse(generatedData, isGapFill, headings) {
     // const status_code = generatedData.status_code;
     try {
         const cardData = [];
-        const unparsedTestCards = generatedData['test_cards'];
+        const unparsedTestCards = generatedData["test_cards"];
         console.log(unparsedTestCards);
         const type = generatedData.type;
         if (unparsedTestCards !== undefined && unparsedTestCards.length != 0) {
@@ -16,16 +16,16 @@ function parseCardGenResponse(generatedData, isGapFill, headings) {
                 //   elem.card_reference = '';
                 // }
                 if (elem.type == "flash") {
-                    cardData.push(parseFlashCard(elem));
+                    cardData.push(_parseFlashCard(elem));
                 }
                 else if (elem.type == "mcq") {
-                    cardData.push(parseMcqCard(elem));
+                    cardData.push(_parseMcqCard(elem));
                 }
                 else if (elem.type == "cloze") {
-                    cardData.push(parseClozeCard(elem));
+                    cardData.push(_parseClozeCard(elem));
                 }
                 else if (elem.type == "match") {
-                    cardData.push(parseMatchCard(elem));
+                    cardData.push(_parseMatchCard(elem));
                 }
             }
         }
@@ -60,11 +60,11 @@ function parseCardGenResponse(generatedData, isGapFill, headings) {
         //  }
     }
 }
-function parseFlashCard(data) {
-    let displayTitle = generateFlashCardDisplayTitle(data.card_content.front, data.card_content.back);
+function _parseFlashCard(data) {
+    let displayTitle = _generateFlashCardDisplayTitle(data.card_content.front, data.card_content.back);
     let flashCardData = {
         type: {
-            category: 'learning',
+            category: "learning",
             sub_type: data.type,
         },
         heading: data.card_reference,
@@ -79,12 +79,13 @@ function parseFlashCard(data) {
     };
     return flashCardData;
 }
-function generateFlashCardDisplayTitle(front, back) {
+function _generateFlashCardDisplayTitle(front, back) {
     return `${front} ---- ${back}`;
 }
-function parseMcqCard(data) {
+function _parseMcqCard(data) {
     let mcqAnswers = [];
-    if (data.card_content.choices !== undefined && data.card_content.choices.length != 0) {
+    if (data.card_content.choices !== undefined &&
+        data.card_content.choices.length != 0) {
         for (let choice of data.card_content.choices) {
             let answer = {
                 answer: choice.choice,
@@ -93,10 +94,10 @@ function parseMcqCard(data) {
             mcqAnswers.push(answer);
         }
     }
-    let displayTitle = generateMcqCardDisplayTitle(data.card_content.prompt, mcqAnswers);
+    let displayTitle = _generateMcqCardDisplayTitle(data.card_content.prompt, mcqAnswers);
     let mcqCard = {
         type: {
-            category: 'learning',
+            category: "learning",
             sub_type: data.type,
         },
         heading: data.card_reference,
@@ -111,7 +112,7 @@ function parseMcqCard(data) {
     };
     return mcqCard;
 }
-function generateMcqCardDisplayTitle(question, answers) {
+function _generateMcqCardDisplayTitle(question, answers) {
     let answersString = [];
     if (answers.length != 0) {
         for (let option of answers) {
@@ -127,11 +128,11 @@ function generateMcqCardDisplayTitle(question, answers) {
         return question;
     }
 }
-function parseClozeCard(data) {
-    let displayTitle = generateClozeCardDisplayTitle(data.card_content.prompt, data.card_content.options);
+function _parseClozeCard(data) {
+    let displayTitle = _generateClozeCardDisplayTitle(data.card_content.prompt, data.card_content.options);
     let clozeCardData = {
         type: {
-            category: 'learning',
+            category: "learning",
             sub_type: data.type,
         },
         heading: data.card_reference,
@@ -146,8 +147,8 @@ function parseClozeCard(data) {
     };
     return clozeCardData;
 }
-function generateClozeCardDisplayTitle(question, answers) {
-    let optionsString = '';
+function _generateClozeCardDisplayTitle(question, answers) {
+    let optionsString = "";
     if (answers.length !== 0) {
         optionsString = answers
             .map((item) => {
@@ -155,19 +156,19 @@ function generateClozeCardDisplayTitle(question, answers) {
                 return item.option;
             }
             else {
-                return '';
+                return "";
             }
         })
             .join(", ");
     }
     return `${question} ---- ${optionsString}`;
 }
-function parseMatchCard(cardData) {
+function _parseMatchCard(cardData) {
     let content = cardData.card_content;
-    let displayTitle = generateMatchCardDisplayTitle(content);
+    let displayTitle = _generateMatchCardDisplayTitle(content);
     let matchCard = {
         type: {
-            category: 'learning',
+            category: "learning",
             sub_type: cardData.type,
         },
         heading: cardData.card_reference,
@@ -180,11 +181,11 @@ function parseMatchCard(cardData) {
     };
     return matchCard;
 }
-function generateMatchCardDisplayTitle(answers) {
+function _generateMatchCardDisplayTitle(answers) {
     let titles = [];
     let counter = 65;
     for (let data of answers) {
-        let value = data.right_item.join(',');
+        let value = data.right_item.join(",");
         let leftData = data.left_item;
         let letter = String.fromCharCode(counter);
         titles.push(`${letter}. ${leftData} -- ${value}`);

@@ -17,7 +17,7 @@ const promises_1 = __importDefault(require("fs/promises"));
 const parse_source_content_1 = require("../1.batch-prepare/parse_source_content");
 const parse_typology_1 = require("../../utils/parse_typology");
 const insert_1 = require("../../mongodb/insert");
-const card_gen_prompt_1 = require("./fetch-prompts/card_gen_prompt");
+const fetch_card_gen_prompt_1 = require("./fetch-prompts/fetch_card_gen_prompt");
 /**
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
@@ -50,7 +50,7 @@ function prepareBatchForCard(response, docs) {
                         model: "gpt-4o-mini",
                         response_format: { type: "json_object" }, // Specify the model.
                         messages: [
-                            { role: "system", content: (0, card_gen_prompt_1.returnCardGenPrompt)() }, // System message.
+                            { role: "system", content: (0, fetch_card_gen_prompt_1.returnCardGenPrompt)(1) }, // System message.
                             {
                                 role: "user",
                                 content: JSON.stringify(parsedTypology) +

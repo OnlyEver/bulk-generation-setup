@@ -1,4 +1,19 @@
-export const promptString: string = `As a dedicated assistant at a learning company, your role is to analyze educational content and create test cards that help learners understand and remember key concepts and facts. You will be provided with:
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.promptString = void 0;
+exports.returnCardGenPrompt = returnCardGenPrompt;
+const card_gen_prompts_1 = require("../../../prompts/card_generation/card_gen_prompts");
+const get_prompt_data_1 = require("./get_prompt_data");
+exports.promptString = `As a dedicated assistant at a learning company, your role is to analyze educational content and create test cards that help learners understand and remember key concepts and facts. You will be provided with:
 
 1. Title of the source
 2. Main headings
@@ -232,8 +247,26 @@ Once you are done generating the test cards, review the full list of concepts an
 
 Only stop generating test questions once you believe there is sufficient testing material for learners to fully understand the concepts and remember the facts. The same concept or fact can have multiple test cards, so continue creating test cards until you are confident that there are enough for learners to fully grasp the source material.
 `;
-export function returnCardGenPrompt() {
-    return promptString;
+const getBloomObjectId = (level) => {
+    if (level < 1 || level > 6) {
+        console.error(`Invalid level: ${level}. Must be between 1 and 6.`);
+    }
+    const key = `generate_bloom_${level}`;
+    return card_gen_prompts_1.cardGenDocs[key];
+};
+function returnCardGenPrompt(bloomLevel) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const cardGenObjectIds = [
+            card_gen_prompts_1.cardGenDocs.role,
+            getBloomObjectId(bloomLevel),
+            card_gen_prompts_1.cardGenDocs.cloze,
+            card_gen_prompts_1.cardGenDocs.flash,
+            card_gen_prompts_1.cardGenDocs.match,
+            card_gen_prompts_1.cardGenDocs.mcq,
+            card_gen_prompts_1.cardGenDocs.coverage
+        ];
+        const typologyPrompts = yield (0, get_prompt_data_1.getPromptData)(cardGenObjectIds);
+        return typologyPrompts;
+        // return promptString;
+    });
 }
-
-

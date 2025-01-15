@@ -1,12 +1,12 @@
 import fsPromise from "fs/promises";
 
 import { database } from "../../mongodb/connection";
-import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
+import { returnTypologyPrompt } from "./fetch-prompts/fetch_typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 import { BSON, WithId } from "mongodb";
 import { parseTypologyOnSuccess } from "../../utils/parse_typology";
 import { insertSourceTypology } from "../../mongodb/insert";
-import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
+import { returnCardGenPrompt } from "./fetch-prompts/fetch_card_gen_prompt";
 
 /**
  * Prepares a batch file for processing by generating a set of data requests
@@ -43,7 +43,7 @@ export async function prepareBatchForCard(
             model: "gpt-4o-mini",
             response_format: { type: "json_object" }, // Specify the model.
             messages: [
-              { role: "system", content: returnCardGenPrompt() }, // System message.
+              { role: "system", content: returnCardGenPrompt(1) }, // System message.
               {
                 role: "user",
                 content:

@@ -245,6 +245,11 @@ const getBloomObjectId = (level: number): string => {
     return cardGenDocs[key];
 };
 
+/**
+ * Returns prompts for card generation based on the bloom level
+ * 
+ * @param bloomLevel - Must be from 1 to 6
+ */
 export async function returnCardGenPrompt(bloomLevel: number) {
     const cardGenObjectIds = [
         cardGenDocs.role,
@@ -256,9 +261,9 @@ export async function returnCardGenPrompt(bloomLevel: number) {
         cardGenDocs.coverage
     ];
 
-    const typologyPrompts = await getPromptData(cardGenObjectIds);
+    const cardGenPrompts = await getPromptData(cardGenObjectIds);
 
-    return typologyPrompts;
+    return cardGenPrompts;
     // return promptString;
 }
 

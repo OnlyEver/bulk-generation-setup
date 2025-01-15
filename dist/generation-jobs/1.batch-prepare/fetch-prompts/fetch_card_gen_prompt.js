@@ -254,6 +254,11 @@ const getBloomObjectId = (level) => {
     const key = `generate_bloom_${level}`;
     return card_gen_prompts_1.cardGenDocs[key];
 };
+/**
+ * Returns prompts for card generation based on the bloom level
+ *
+ * @param bloomLevel - Must be from 1 to 6
+ */
 function returnCardGenPrompt(bloomLevel) {
     return __awaiter(this, void 0, void 0, function* () {
         const cardGenObjectIds = [
@@ -265,8 +270,8 @@ function returnCardGenPrompt(bloomLevel) {
             card_gen_prompts_1.cardGenDocs.mcq,
             card_gen_prompts_1.cardGenDocs.coverage
         ];
-        const typologyPrompts = yield (0, get_prompt_data_1.getPromptData)(cardGenObjectIds);
-        return typologyPrompts;
+        const cardGenPrompts = yield (0, get_prompt_data_1.getPromptData)(cardGenObjectIds);
+        return cardGenPrompts;
         // return promptString;
     });
 }

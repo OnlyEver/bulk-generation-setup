@@ -31,10 +31,10 @@ function prepareBatch() {
             let sources = yield fetchSourceDocuments(docs);
             const batchData = yield Promise.all(sources.map((doc) => __awaiter(this, void 0, void 0, function* () {
                 if (doc.type == 'typology') {
-                    yield prepareBatchForBreadth(doc);
+                    return yield prepareBatchForBreadth(doc);
                 }
                 else {
-                    yield prepareBatchForDepth(doc);
+                    return yield prepareBatchForDepth(doc);
                 }
             })));
             // Write the batch data to a local file
@@ -54,7 +54,7 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
         case "typology":
             return yield (0, fetch_typology_prompt_1.returnTypologyPrompt)();
         case "card":
-            return (0, fetch_card_gen_prompt_1.returnCardGenPrompt)(bloomLevel !== null && bloomLevel !== void 0 ? bloomLevel : 1);
+            return yield (0, fetch_card_gen_prompt_1.returnCardGenPrompt)(bloomLevel !== null && bloomLevel !== void 0 ? bloomLevel : 1);
         default:
             return yield (0, fetch_typology_prompt_1.returnTypologyPrompt)();
     }

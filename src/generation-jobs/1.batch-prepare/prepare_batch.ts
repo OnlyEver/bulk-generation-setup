@@ -4,6 +4,7 @@ import { database } from "../../mongodb/connection";
 import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 import { Db, ObjectId } from "mongodb";
+import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
 
 /**
  * Prepares a batch file for processing by generating a set of data requests
@@ -40,7 +41,7 @@ export async function prepareBatch() {
           model: "gpt-4o-mini",
           response_format: { type: "json_object" },
           messages: [
-            { role: "system", content: await getPrompt(doc.type) }, 
+            { role: "system", content: await getPrompt(doc.type) },
             {
               role: "user",
               content: parseData(
@@ -86,7 +87,7 @@ const getPrompt = async (type: string): Promise<string> => {
     case "typology":
       return await returnTypologyPrompt();
     case "card":
-      return await returnTypologyPrompt();
+      return returnCardGenPrompt();
     default:
       return await returnTypologyPrompt();
   }
@@ -108,7 +109,7 @@ export const fetchSourceDocuments = async (docs: any[], db: Db) => {
 
       return {
         ...doc,
-        source,
+        source: source,
       };
     })
   );

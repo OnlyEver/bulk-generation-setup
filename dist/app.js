@@ -60,33 +60,6 @@ app.get("/get-results", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         next(error);
     }
 }));
-// app.get("/connect", async (req, res) => {
-//   const dbName = config.dbName;
-//   const dbUri: string = config.dbUri || "mongodb://localhost:27017"; 
-//   const client = new MongoClient(dbUri);
-//   try {
-//     await client.connect();
-//     console.log("Connected to the database!");
-//     const database = client.db(dbName);
-//     // Perform a test operation to confirm connection
-//     const collections = await database.listCollections().toArray();
-//     let docs = await database.collection("_source").find({}).toArray();
-//     res.status(200).json({
-//       message: "Connected to the database successfully.",
-//       databaseName: dbName,
-//       collectionData: docs, // List collection names
-//     });
-//   } catch (error: unknown) {
-//     console.error("Database connection failed:", error);
-//     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-//     res.status(500).json({
-//       message: "Failed to connect to the database.",
-//       error: errorMessage,
-//     });
-//   } finally {
-//     await client.close();
-//   }
-// });
 // 404 handler for unmatched routes
 app.use((req, res) => {
     res.status(404).json({ error: true, message: "Route not found." });

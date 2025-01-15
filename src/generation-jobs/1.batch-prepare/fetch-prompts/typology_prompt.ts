@@ -1,3 +1,6 @@
+import { typologyTextDocs } from "../../../prompts/typology/typology_text";
+import { getPromptData } from "./get_prompt_data";
+
 const typologyPromptString = `
 You are a dedicated assistant that categorizes and summarizes educational content. You will process educational content (in JSON format) that represents text from diverse sources such as PDFs, book chapters, videos, and websites. Follow these steps:
 
@@ -128,6 +131,13 @@ json
 
 `;
 
-export function returnTypologyPrompt() {
-    return typologyPromptString;
+
+
+export async function returnTypologyPrompt() {
+    const typologyObjectIds = Object.values(typologyTextDocs);
+    const typologyPrompts = await getPromptData(typologyObjectIds);
+    console.log('Typology prompt: ', typologyPrompts);
+
+    return typologyPrompts;
+    // return typologyPromptString;
 }

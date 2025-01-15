@@ -1,8 +1,10 @@
 import fsPromise from "fs/promises";
 
-import { sourceCollection } from "../../mongodb/connection";
+import { database } from "../../mongodb/connection";
 import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
+import { Db, ObjectId } from "mongodb";
+import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
 
 /**
  * Prepares a batch file for processing by generating a set of data requests
@@ -10,11 +12,19 @@ import { parseData } from "../1.batch-prepare/parse_source_content";
  */
 export async function prepareBatch() {
   try {
-    let docs = await sourceCollection.find({}).toArray();
+    const db = database();
+    const generationDataCollection = db.collection('_generation_data');
+
+    let docs = await generationDataCollection.find({}).toArray();
+
+    let sources = await fetchSourceDocuments(docs, db);
+
     const customId = (doc: any) => {
       return JSON.stringify({
-        id: doc._id.toString(),
-        type: "typology",
+        // id: doc._id.toString(),
+        id: doc.source._id.toString(),
+        // type: "typology",
+        type: doc.type,
         bloom_level: 1,
       });
     };
@@ -22,35 +32,38 @@ export async function prepareBatch() {
 
     console.log(docs);
 
-    const batchData = docs.map((doc: any, index: number) => ({
-      custom_id: customId(doc), // Unique identifier for each request.
-      method: "POST",
-      url: "/v1/chat/completions", // API endpoint.
-      body: {
-        model: "gpt-4o-mini",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: returnTypologyPrompt() },
-          {
-            role: "user",
-            content: parseData(
-              doc.content,
-              [
-                "See also",
-                "References",
-                "Further reading",
-                "External links",
-                "Notes and references",
-                "Bibliography",
-                "Notes",
-                "Cited sources",
-              ],
-              ["table", "empty_line"]
-            ),
-          }, // User message (use doc content or default).
-        ],
-      },
-    }));
+    const batchData = await Promise.all(
+      sources.map(async (doc: any) => ({
+        custom_id: customId(doc), // Unique identifier for each request.
+        method: "POST",
+        url: "/v1/chat/completions", // API endpoint.
+        body: {
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: await getPrompt(doc.type) },
+            {
+              role: "user",
+              content: parseData(
+                doc.source.content,
+                [
+                  "See also",
+                  "References",
+                  "Further reading",
+                  "External links",
+                  "Notes and references",
+                  "Bibliography",
+                  "Notes",
+                  "Cited sources",
+                ],
+                ["table", "empty_line"]
+              ),
+            },
+          ],
+        },
+      }))
+    );
+
     console.log(batchData);
 
     // Write the batch data to a local file
@@ -67,4 +80,39 @@ export async function prepareBatch() {
       error instanceof Error ? error.message : "Unknown error";
     throw new Error(`Failed to prepare batch file: ${errorMessage}`);
   }
+}
+
+const getPrompt = async (type: string): Promise<string> => {
+  switch (type) {
+    case "typology":
+      return await returnTypologyPrompt();
+    case "card":
+      return returnCardGenPrompt();
+    default:
+      return await returnTypologyPrompt();
+  }
+}
+
+export const fetchSourceDocuments = async (docs: any[], db: Db) => {
+  const sourceCollection = db.collection('_source');
+
+  const sourceDocs = await Promise.all(
+    docs.map(async (doc) => {
+      const sourceId = doc._source;
+
+
+      // Convert the string _source to ObjectId
+      const sourceObjectId = ObjectId.createFromHexString(sourceId);
+
+      // Fetch the document from '_source' collection
+      const source = await sourceCollection.findOne({ _id: sourceObjectId });
+
+      return {
+        ...doc,
+        source: source,
+      };
+    })
+  );
+
+  return sourceDocs;
 }

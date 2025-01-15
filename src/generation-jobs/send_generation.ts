@@ -23,7 +23,8 @@ type BatchStatus = {
 };
 
 export async function sendGeneration() {
-  const sourceCollection = database().collection("_source");
+  const db = database();
+  const sourceCollection = db.collection("_source");
   const openai = new OpenAI({
     apiKey: config.openAiKey,
   });

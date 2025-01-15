@@ -20,7 +20,9 @@ function insertSourceTypology(parsedTypology, sourceId) {
             _source_id: sourceId,
             typology: parsedTypology,
         };
-        const result = yield connection_1.typologyCollection.insertOne(doc);
+        const db = (0, connection_1.database)();
+        const typologyCollection = db.collection("_typology");
+        const result = yield typologyCollection.insertOne(doc);
         console.log(result);
     });
 }
@@ -36,7 +38,9 @@ function insertCard(parsedCardData, sourceId) {
             bloom_level: parsedCardData.bloomlevel,
             heading: parsedCardData.heading,
         };
-        const result = yield connection_1.cardCollection.insertOne(doc);
+        const db = (0, connection_1.database)();
+        const cardCollection = db.collection("_card");
+        const result = yield cardCollection.insertOne(doc);
         console.log(result);
     });
 }

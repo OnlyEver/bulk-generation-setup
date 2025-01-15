@@ -1,6 +1,6 @@
 import fsPromise from "fs/promises";
 
-import { sourceCollection } from "../../mongodb/connection";
+import { database } from "../../mongodb/connection";
 import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 import { BSON, WithId } from "mongodb";

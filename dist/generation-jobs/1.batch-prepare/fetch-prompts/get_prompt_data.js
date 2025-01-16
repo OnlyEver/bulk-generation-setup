@@ -12,6 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPromptData = getPromptData;
 const connection_1 = require("../../../mongodb/connection");
 const mongodb_1 = require("mongodb");
+/**
+ * Function for getting the `prompt` field from the `_prompts` collection
+ * by passing an array of object ids
+ *
+ * @param promptIds - An array of string (Object Ids of the prompt documents)
+ */
 function getPromptData(promptIds) {
     return __awaiter(this, void 0, void 0, function* () {
         const promptCollection = connection_1.database.collection('_prompts');

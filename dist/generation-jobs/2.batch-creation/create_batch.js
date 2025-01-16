@@ -28,7 +28,7 @@ function createBatch(fileList) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var batchList = [];
-            fileList.forEach((filename) => __awaiter(this, void 0, void 0, function* () {
+            yield Promise.all(fileList.map((filename) => __awaiter(this, void 0, void 0, function* () {
                 const file = yield (0, openai_helper_1.openAI)().files.create({
                     file: fs_1.default.createReadStream(filename),
                     purpose: "batch",
@@ -39,7 +39,7 @@ function createBatch(fileList) {
                     completion_window: "24h",
                 });
                 batchList.push(batch);
-            }));
+            })));
             return batchList;
         }
         catch (error) {

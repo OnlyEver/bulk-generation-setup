@@ -16,20 +16,22 @@ import { openAI } from "../../openai/openai_helper";
 export async function createBatch(fileList: string[]): Promise<Batch[]> {
   try {
     var batchList: Batch[] = [];
+    await Promise.all(
+      fileList.map(async (filename) => {
+        const file = await openAI().files.create({
+          file: fs.createReadStream(filename),
+          purpose: "batch",
+        });
 
-    fileList.forEach(async (filename) => {
-      const file = await openAI().files.create({
-        file: fs.createReadStream(filename),
-        purpose: "batch",
-      });
+        const batch = await openAI().batches.create({
+          input_file_id: file.id,
+          endpoint: "/v1/chat/completions",
+          completion_window: "24h",
+        });
+        batchList.push(batch);
+      })
+    );
 
-      const batch = await openAI().batches.create({
-        input_file_id: file.id,
-        endpoint: "/v1/chat/completions",
-        completion_window: "24h",
-      });
-      batchList.push(batch);
-    });
 
 
     return batchList;

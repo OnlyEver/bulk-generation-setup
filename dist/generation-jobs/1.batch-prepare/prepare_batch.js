@@ -36,48 +36,30 @@ function prepareBatch() {
                 result.push(sources.slice(i, i + 300));
             }
             console.log(result);
-            result.forEach((element, index) => __awaiter(this, void 0, void 0, function* () {
-                var batchData = [];
-                for (const elem of element) {
-                    if (elem.type == 'typology') {
-                        const data = yield prepareBatchForBreadth(elem);
-                        batchData.push(data);
+            yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
+                const batchDataList = [];
+                yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
+                    if (elem.type === 'typology') {
+                        const batchData = yield prepareBatchForBreadth(elem);
+                        console.log(batchData);
+                        batchDataList.push(batchData);
                     }
                     else {
-                        // batchData.push(await prepareBatchForDepth(doc));
+                        // const batchData = await prepareBatchForDepth(elem);
+                        // console.log(batchData);
+                        // batchDataList.push(batchData);
                     }
-                }
-                // element.forEach(async (doc: any) => {
-                //   if (doc.type == 'typology') {
-                //     const data = await prepareBatchForBreadth(doc);
-                //     batchData.push(data);
-                //   } else {
-                //     // batchData.push(await prepareBatchForDepth(doc));
-                //   }
-                // });
+                })));
                 const filePath = `./batchinput${index}.jsonl`;
-                yield promises_1.default.writeFile(filePath, batchData.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
+                yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
-            }));
+            })));
             console.log(inputFileList);
+            return {
+                sources,
+                inputFileList,
+            };
             return inputFileList;
-            // const batchData = await Promise.all(
-            //   sources.map(async (doc: any) => {
-            //     if (doc.type == 'typology') {
-            //       return await prepareBatchForBreadth(doc);
-            //     } else {
-            //       return await prepareBatchForDepth(doc);
-            //     }
-            //   })
-            // );
-            // Write the batch data to a local file
-            // const filePath = "./batchinput.jsonl";
-            // await fsPromise.writeFile(
-            //   filePath,
-            //   batchData.map((entry) => JSON.stringify(entry)).join("\n"),
-            //   "utf-8"
-            // );
-            // return filePath;
         }
         catch (error) {
             console.error("Error occurred while preparing the batch file:", error);

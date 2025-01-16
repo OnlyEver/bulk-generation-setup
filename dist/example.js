@@ -16,24 +16,18 @@ const config_1 = require("./config");
     console.log('example');
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : '');
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : '');
-    const filePaths = yield (0, app_1.prepareGenerationBatch)();
-    console.log(filePaths);
-    const batch = yield (0, app_1.createBatchRequest)(filePaths);
+    const prepareResponse = yield (0, app_1.prepareGenerationBatch)();
+    const sourcesOnBatch = prepareResponse.sources;
+    const batch = yield (0, app_1.createBatchRequest)(prepareResponse.inputFileList);
     const batchDataCollection = (0, app_1.getDbInstance)().collection('_batch_data');
-    // const batchData = {
-    //     id: batch.id,
-    //     input_file_id: batch.input_file_id,
-    //     output_file_id: batch.output_file_id,
-    //     error_file_id: batch.error_file_id,
-    //     status: batch.status,
-    //     ctime: Date.UTC,
-    // }
+    const generationDataCollection = (0, app_1.getDbInstance)().collection('_generation_data');
     yield batchDataCollection.insertMany(batch);
+    yield Promise.all(sourcesOnBatch.map((source) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        const status = (_a = batch[0].status) !== null && _a !== void 0 ? _a : 'initialized'; // Defaults to null if the array is empty
+        yield generationDataCollection.updateMany({ _source: source._source }, { $set: { status: status } });
+    })));
     //update generation data source with the status
     console.log(batch);
-    // batch.id,
-    // batch.input_file_id,
-    // batch.status,
-    // ctime,
     //store batch to mongo
 }))();

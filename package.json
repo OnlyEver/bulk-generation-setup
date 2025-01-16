@@ -1,12 +1,12 @@
 {
   "name": "only_ever_bulk_generator",
   "version": "0.0.4",
-  "main": "dist/example.js",
+  "main": "dist/app.js",
   "scripts": {
-    "start": "npm run build && nodemon dist/example.js",
+    "start": "npm run build && nodemon dist/app.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "example": "npm run build && nodemon dist/example.js"
+    "example": "npm run build && nodemon dist/app.js"
   },
   "keywords": [],
   "author": "",

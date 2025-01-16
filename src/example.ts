@@ -1,18 +1,35 @@
-import { setUpMongoClient, openai, prepareGenerationBatch, createBatchRequest, getDbInstance } from "./app";
+
+import { createBatchRequest, getDbInstance, openai, prepareGenerationBatch, setUpMongoClient } from './app';
+
+/// setting up mongo
 import { config } from "./config";
 
 (async () => {
-    console.log('example');
-    setUpMongoClient(config.dbUri, config.dbName ?? '');
+
+    //env variables
+    const dbUri = config.dbUri;
+    const dbName = config.dbName;
+    const openAiKey = config.openAiKey;
+
+    //setup mongodb connection
+    setUpMongoClient(dbUri, dbName ?? '');
+
+    //setup openAI
     openai(config.openAiKey ?? '');
+
+    //prepare batch
     const prepareResponse: any = await prepareGenerationBatch();
     const sourcesOnBatch = prepareResponse.sources;
+
+    //create batch
     const batch = await createBatchRequest(prepareResponse.inputFileList);
     const batchDataCollection = getDbInstance().collection('_batch_data');
     const generationDataCollection = getDbInstance().collection('_generation_data');
 
+    //store batch data in collection
     await batchDataCollection.insertMany(batch);
 
+    //update generation data collection source batch status
     await Promise.all(
         sourcesOnBatch.map(async (source: any) => {
             const status = batch[0].status ?? 'initialized'; // Defaults to null if the array is empty
@@ -20,10 +37,6 @@ import { config } from "./config";
             await generationDataCollection.updateMany({ _source: source._source }, { $set: { status: status } });
         })
     );
-
-    //update generation data source with the status
     console.log(batch);
-
-    //store batch to mongo
 })();
 

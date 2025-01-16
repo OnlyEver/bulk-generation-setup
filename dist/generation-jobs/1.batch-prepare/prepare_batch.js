@@ -48,7 +48,7 @@ function prepareBatch() {
                         batchDataList.push(batchData);
                     }
                 })));
-                const filePath = `./batchinput${index}.jsonl`;
+                const filePath = `/tmp/batchinput${index}.jsonl`;
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
             })));

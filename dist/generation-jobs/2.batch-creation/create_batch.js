@@ -24,19 +24,23 @@ const openai_helper_1 = require("../../openai/openai_helper");
  * @throws {Error} - Throws an error if file upload or batch creation fails.
  *
  */
-function createBatch(filename) {
+function createBatch(fileList) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const file = yield (0, openai_helper_1.openAI)().files.create({
-                file: fs_1.default.createReadStream(filename),
-                purpose: "batch",
-            });
-            const batch = yield (0, openai_helper_1.openAI)().batches.create({
-                input_file_id: file.id,
-                endpoint: "/v1/chat/completions",
-                completion_window: "24h",
-            });
-            return batch;
+            var batchList = [];
+            yield Promise.all(fileList.map((filename) => __awaiter(this, void 0, void 0, function* () {
+                const file = yield (0, openai_helper_1.openAI)().files.create({
+                    file: fs_1.default.createReadStream(filename),
+                    purpose: "batch",
+                });
+                const batch = yield (0, openai_helper_1.openAI)().batches.create({
+                    input_file_id: file.id,
+                    endpoint: "/v1/chat/completions",
+                    completion_window: "24h",
+                });
+                batchList.push(batch);
+            })));
+            return batchList;
         }
         catch (error) {
             console.error("Error during batch creation:", error);

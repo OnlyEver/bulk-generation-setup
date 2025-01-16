@@ -38,7 +38,7 @@ export const prepareGenerationBatch = async () => {
 
 /// Creates an OPENAI batch request
 /// After creation of the batch, the data is stored into mongodb
-export const createBatchRequest = async (filePath: string) => {
+export const createBatchRequest = async (filePath: string[]) => {
   const batchData = await createBatch(filePath);
   return batchData;
 };

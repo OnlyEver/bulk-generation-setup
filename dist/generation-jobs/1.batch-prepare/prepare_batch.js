@@ -26,21 +26,38 @@ const fetch_card_gen_prompt_1 = require("./fetch-prompts/fetch_card_gen_prompt")
 function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            var inputFileList = [];
             const generationDataCollection = connection_1.database.collection('_generation_data');
             let docs = yield generationDataCollection.find({}).toArray();
             let sources = yield fetchSourceDocuments(docs);
-            const batchData = yield Promise.all(sources.map((doc) => __awaiter(this, void 0, void 0, function* () {
-                if (doc.type == 'typology') {
-                    return yield prepareBatchForBreadth(doc);
-                }
-                else {
-                    return yield prepareBatchForDepth(doc);
-                }
+            const result = [];
+            for (let i = 0; i < sources.length; i += 300) {
+                // Slice the array into chunks of maxCount elements
+                result.push(sources.slice(i, i + 300));
+            }
+            console.log(result);
+            yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
+                const batchDataList = [];
+                yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
+                    if (elem.type === 'typology') {
+                        const batchData = yield prepareBatchForBreadth(elem);
+                        batchDataList.push(batchData);
+                    }
+                    else {
+                        const batchData = yield prepareBatchForDepth(elem);
+                        batchDataList.push(batchData);
+                    }
+                })));
+                const filePath = `./batchinput${index}.jsonl`;
+                yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
+                inputFileList.push(filePath);
             })));
-            // Write the batch data to a local file
-            const filePath = "./batchinput.jsonl";
-            yield promises_1.default.writeFile(filePath, batchData.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
-            return filePath;
+            console.log(inputFileList);
+            return {
+                sources,
+                inputFileList,
+            };
+            return inputFileList;
         }
         catch (error) {
             console.error("Error occurred while preparing the batch file:", error);
@@ -106,7 +123,7 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedTypology = yield fetchTypologyDocuments(doc.source.id);
+    const parsedTypology = yield fetchTypologyDocuments(doc._source);
     const cardGenPrompt = yield getPrompt(doc.type, doc.bloom_level);
     return {
         custom_id: getCustomIdForDepth(doc),
@@ -137,7 +154,7 @@ const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function
 });
 const fetchTypologyDocuments = (sourceId) => __awaiter(void 0, void 0, void 0, function* () {
     const typologyCollection = connection_1.database.collection('typology');
-    const data = yield typologyCollection.findOne({ _source_id: sourceId.toString() }, { projection: { typology: 1, _id: 0, _source_id: 0 } });
+    const data = yield typologyCollection.findOne({ _source_id: sourceId.toString() }, { projection: { typology: 1, } });
     return {
         data
     };

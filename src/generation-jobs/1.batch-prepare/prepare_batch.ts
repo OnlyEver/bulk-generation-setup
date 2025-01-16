@@ -10,31 +10,56 @@ import { returnCardGenPrompt } from "./fetch-prompts/fetch_card_gen_prompt";
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-export async function prepareBatch(): Promise<string> {
+export async function prepareBatch(): Promise<Object> {
   try {
+    var inputFileList: string[] = [];
     const generationDataCollection = database.collection('_generation_data');
     let docs = await generationDataCollection.find({}).toArray();
     let sources = await fetchSourceDocuments(docs);
-    const batchData = await Promise.all(
-      sources.map(async (doc: any) => {
-        if (doc.type == 'typology') {
-          return await prepareBatchForBreadth(doc);
-        } else {
-          return await prepareBatchForDepth(doc);
-        }
+    const result = [];
+
+    for (let i = 0; i < sources.length; i += 300) {
+      // Slice the array into chunks of maxCount elements
+      result.push(sources.slice(i, i + 300));
+    }
+    console.log(result);
+    await Promise.all(
+      result.map(async (element, index) => {
+        const batchDataList: any[] = [];
+        await Promise.all(
+          element.map(async (elem) => {
+            if (elem.type === 'typology') {
+              const batchData = await prepareBatchForBreadth(elem);
+              batchDataList.push(batchData);
+            } else {
+              const batchData = await prepareBatchForDepth(elem);
+              batchDataList.push(batchData);
+            }
+          })
+        );
+
+
+        const filePath = `./batchinput${index}.jsonl`;
+        await fsPromise.writeFile(
+          filePath,
+          batchDataList.map((entry) => JSON.stringify(entry)).join("\n"),
+          "utf-8"
+        );
+
+        inputFileList.push(filePath);
       })
     );
 
 
-    // Write the batch data to a local file
-    const filePath = "./batchinput.jsonl";
-    await fsPromise.writeFile(
-      filePath,
-      batchData.map((entry) => JSON.stringify(entry)).join("\n"),
-      "utf-8"
-    );
 
-    return filePath;
+    console.log(inputFileList);
+    return {
+      sources,
+      inputFileList,
+    }
+    return inputFileList;
+
+
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
@@ -108,11 +133,12 @@ const prepareBatchForBreadth = async (doc: any,) => {
       ],
     },
   }
-
-
 }
+
+
+
 const prepareBatchForDepth = async (doc: any) => {
-  const parsedTypology = await fetchTypologyDocuments(doc.source.id);
+  const parsedTypology = await fetchTypologyDocuments(doc._source);
   const cardGenPrompt = await getPrompt(doc.type, doc.bloom_level);
 
   return {
@@ -153,7 +179,7 @@ const fetchTypologyDocuments = async (sourceId: string) => {
 
   const data = await typologyCollection.findOne(
     { _source_id: sourceId.toString() },
-    { projection: { typology: 1, _id: 0, _source_id: 0 } }
+    { projection: { typology: 1, } }
   );
 
   return {

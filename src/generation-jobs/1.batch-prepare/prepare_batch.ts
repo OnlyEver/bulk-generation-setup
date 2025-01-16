@@ -1,10 +1,10 @@
 import fsPromise from "fs/promises";
 
 import { database } from "../../mongodb/connection";
-import { returnTypologyPrompt } from "../1.batch-prepare/fetch-prompts/typology_prompt";
+import { returnTypologyPrompt } from "./fetch-prompts/fetch_typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 import { Db, ObjectId } from "mongodb";
-import { returnCardGenPrompt } from "./fetch-prompts/card_gen_prompt";
+import { returnCardGenPrompt } from "./fetch-prompts/fetch_card_gen_prompt";
 
 /**
  * Prepares a batch file for processing by generating a set of data requests
@@ -15,7 +15,7 @@ export async function prepareBatch(): Promise<Object> {
     var inputFileList: string[] = [];
     const generationDataCollection = database.collection('_generation_data');
     let docs = await generationDataCollection.find({}).toArray();
-    let sources = await fetchSourceDocuments(docs, database);
+    let sources = await fetchSourceDocuments(docs);
     const result = [];
 
     for (let i = 0; i < sources.length; i += 300) {
@@ -30,12 +30,10 @@ export async function prepareBatch(): Promise<Object> {
           element.map(async (elem) => {
             if (elem.type === 'typology') {
               const batchData = await prepareBatchForBreadth(elem);
-              console.log(batchData);
               batchDataList.push(batchData);
             } else {
-              // const batchData = await prepareBatchForDepth(elem);
-              // console.log(batchData);
-              // batchDataList.push(batchData);
+              const batchData = await prepareBatchForDepth(elem);
+              batchDataList.push(batchData);
             }
           })
         );
@@ -71,12 +69,12 @@ export async function prepareBatch(): Promise<Object> {
   }
 }
 
-const getPrompt = async (type: string): Promise<string> => {
+const getPrompt = async (type: string, bloomLevel?: number): Promise<string> => {
   switch (type) {
     case "typology":
       return await returnTypologyPrompt();
     case "card":
-      return returnCardGenPrompt();
+      return await returnCardGenPrompt(bloomLevel ?? 1);
     default:
       return await returnTypologyPrompt();
   }
@@ -90,14 +88,11 @@ const getCustomIdForBreadth = (doc: any) => ({
   })
 })
 const getCustomIdForDepth = (doc: any) => ({
-  //return custom id for depth
-
-
-  // return: JSON.stringify({
-  //   id: doc.source._id.toString(),
-  //   type: doc.type,
-  //   bloom_level: 1,
-  // })
+  return: JSON.stringify({
+    id: doc.index,
+    type: doc.type,
+    bloom_level: doc.bloom_level,
+  })
 })
 
 const getBatchDataForBreadth = (content: string) => {
@@ -143,12 +138,57 @@ const prepareBatchForBreadth = async (doc: any,) => {
 
 
 const prepareBatchForDepth = async (doc: any) => {
-  //return map data for depth
-  return {}
+  const parsedTypology = await fetchTypologyDocuments(doc._source);
+  const cardGenPrompt = await getPrompt(doc.type, doc.bloom_level);
+
+  return {
+    custom_id: getCustomIdForDepth(doc),
+    method: "POST", // HTTP method.
+    url: "/v1/chat/completions", // API endpoint.
+    body: {
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" }, // Specify the model.
+      messages: [
+        { role: "system", content: cardGenPrompt }, // System message.
+        {
+          role: "user",
+          content:
+            JSON.stringify(parsedTypology) +
+            parseData(
+              doc.source.content,
+              [
+                "See also",
+                "References",
+                "Further reading",
+                "External links",
+                "Notes and references",
+                "Bibliography",
+                "Notes",
+                "Cited sources",
+              ],
+              ["table", "empty_line"]
+            ),
+        }, // User message (use doc content or default).
+      ],
+    },
+  };
 }
 
-const fetchSourceDocuments = async (docs: any[], db: Db) => {
-  const sourceCollection = db.collection('_source');
+const fetchTypologyDocuments = async (sourceId: string) => {
+  const typologyCollection = database.collection('typology');
+
+  const data = await typologyCollection.findOne(
+    { _source_id: sourceId.toString() },
+    { projection: { typology: 1, } }
+  );
+
+  return {
+    data
+  }
+}
+
+const fetchSourceDocuments = async (docs: any[]) => {
+  const sourceCollection = database.collection('_source');
 
   const sourceDocs = await Promise.all(
     docs.map(async (doc) => {

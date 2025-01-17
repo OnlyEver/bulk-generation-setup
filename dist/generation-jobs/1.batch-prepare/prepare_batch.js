@@ -76,20 +76,20 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
             return yield (0, fetch_typology_prompt_1.returnTypologyPrompt)();
     }
 });
-const getCustomIdForBreadth = (doc) => ({
-    return: JSON.stringify({
+const getCustomIdForBreadth = (doc) => {
+    return JSON.stringify({
         id: doc.source._id.toString(),
         type: doc.type,
         bloom_level: 1,
-    })
-});
-const getCustomIdForDepth = (doc) => ({
-    return: JSON.stringify({
+    });
+};
+const getCustomIdForDepth = (doc) => {
+    return JSON.stringify({
         id: doc.index,
         type: doc.type,
         bloom_level: doc.bloom_level,
-    })
-});
+    });
+};
 const getBatchDataForBreadth = (content) => {
 };
 const getBatchDataForDepth = (content) => {

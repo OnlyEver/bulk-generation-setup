@@ -15,7 +15,7 @@ import { config } from "./config";
     setUpMongoClient(dbUri, dbName ?? '');
 
     //setup openAI
-    openai(config.openAiKey ?? '');
+    openai(openAiKey ?? '');
 
     //prepare batch
     const prepareResponse: any = await prepareGenerationBatch();

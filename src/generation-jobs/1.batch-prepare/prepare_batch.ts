@@ -80,20 +80,20 @@ const getPrompt = async (type: string, bloomLevel?: number): Promise<string> => 
   }
 }
 
-const getCustomIdForBreadth = (doc: any) => ({
-  return: JSON.stringify({
+const getCustomIdForBreadth = (doc: any) => {
+  return JSON.stringify({
     id: doc.source._id.toString(),
     type: doc.type,
     bloom_level: 1,
   })
-})
-const getCustomIdForDepth = (doc: any) => ({
-  return: JSON.stringify({
+}
+const getCustomIdForDepth = (doc: any) => {
+  return JSON.stringify({
     id: doc.index,
     type: doc.type,
     bloom_level: doc.bloom_level,
   })
-})
+}
 
 const getBatchDataForBreadth = (content: string) => {
 

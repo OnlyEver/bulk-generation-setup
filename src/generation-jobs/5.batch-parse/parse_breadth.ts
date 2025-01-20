@@ -12,11 +12,11 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
     const requestId = rawResponse.request_id;
     const content = rawResponse.response.body.choices[0].message.content;
     const parsedContent = JSON.parse(content);
+    const usage = rawResponse.response.response.usage;
 
     return {
       requestIdentifier: requestId,
       generated_data: {
-        status_code: 200,
         field: parseFields(parsedContent.field),
         concepts: parsedContent.facts.map(
           (fact: { fact_text: string; reference: string }) => ({
@@ -35,6 +35,14 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
           reason: parsedContent.generate_cards.reason,
         },
         summary_cards: parsedContent.summary_cards,
+      },
+      metadata: {
+        req_type: requestId.request_type,
+        req_time: new Date(),
+        req_tokens: usage?.prompt_tokens,
+        res_tokens: usage?.completion_tokens,
+        model: "gpt-4o-mini",
+        status: "completed",
       },
     };
   } catch (error) {

@@ -12,26 +12,23 @@ type ParsedResponse = {
 };
 
 type TypologyResponse = {
-  status_code: number,
-  // metaData: string,
   field: Array<{
-    [key: string]: string | boolean, 
-    reconcile: boolean,
-  }>,
+    [key: string]: string | boolean;
+    reconcile: boolean;
+  }>;
   concepts: Array<{
-    concept_text: string, 
-    reference: string 
-  }>,
+    concept_text: string;
+    reference: string;
+  }>;
   facts: Array<{
-    fact_text: string,
-    reference: string
-  }>,
+    fact_text: string;
+    reference: string;
+  }>;
   generate_cards: {
-    state: boolean,
-    reason: string 
-  },
-  summary_cards: string[] 
+    state: boolean;
+    reason: string;
+  };
+  summary_cards: string[];
 };
-
 
 type CardGenResponse = {};

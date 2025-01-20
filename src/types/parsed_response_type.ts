@@ -11,5 +11,27 @@ type ParsedResponse = {
   generated_data: TypologyResponse | CardGenResponse[];
 };
 
-type TypologyResponse = {};
+type TypologyResponse = {
+  status_code: number,
+  // metaData: string,
+  field: Array<{
+    [key: string]: string | boolean, 
+    reconcile: boolean,
+  }>,
+  concepts: Array<{
+    concept_text: string, 
+    reference: string 
+  }>,
+  facts: Array<{
+    fact_text: string,
+    reference: string
+  }>,
+  generate_cards: {
+    state: boolean,
+    reason: string 
+  },
+  summary_cards: string[] 
+};
+
+
 type CardGenResponse = {};

@@ -27,7 +27,7 @@ function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var inputFileList = [];
-            const generationDataCollection = connection_1.database.collection('_generation_data');
+            const generationDataCollection = connection_1.database.collection("_generation_data");
             let docs = yield generationDataCollection.find({}).toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
@@ -39,7 +39,7 @@ function prepareBatch() {
             yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
                 const batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
-                    if (elem.type === 'typology') {
+                    if (elem.type === "typology") {
                         const batchData = yield prepareBatchForBreadth(elem);
                         batchDataList.push(batchData);
                     }
@@ -76,24 +76,20 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
             return yield (0, fetch_typology_prompt_1.returnTypologyPrompt)();
     }
 });
-const getCustomIdForBreadth = (doc) => {
-    return JSON.stringify({
+const getCustomIdForBreadth = (doc) => ({
+    return: JSON.stringify({
         id: doc.source._id.toString(),
         type: doc.type,
         bloom_level: 1,
-    });
-};
-const getCustomIdForDepth = (doc) => {
-    return JSON.stringify({
+    }),
+});
+const getCustomIdForDepth = (doc) => ({
+    return: JSON.stringify({
         id: doc.index,
         type: doc.type,
         bloom_level: doc.bloom_level,
-    });
-};
-const getBatchDataForBreadth = (content) => {
-};
-const getBatchDataForDepth = (content) => {
-};
+    }),
+});
 const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
     const prompts = yield getPrompt(doc.type);
     return {
@@ -123,7 +119,8 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedTypology = yield fetchTypologyDocuments(doc._source);
+    // const parsedTypology = await _fetchTypologyDocuments(doc._source);
+    const parsedTypology = doc._source.source_taxonomy;
     const cardGenPrompt = yield getPrompt(doc.type, doc.bloom_level);
     return {
         custom_id: getCustomIdForDepth(doc),
@@ -152,15 +149,8 @@ const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function
         },
     };
 });
-const fetchTypologyDocuments = (sourceId) => __awaiter(void 0, void 0, void 0, function* () {
-    const typologyCollection = connection_1.database.collection('typology');
-    const data = yield typologyCollection.findOne({ _source_id: sourceId.toString() }, { projection: { typology: 1, } });
-    return {
-        data
-    };
-});
 const fetchSourceDocuments = (docs) => __awaiter(void 0, void 0, void 0, function* () {
-    const sourceCollection = connection_1.database.collection('_source');
+    const sourceCollection = connection_1.database.collection("_source");
     const sourceDocs = yield Promise.all(docs.map((doc) => __awaiter(void 0, void 0, void 0, function* () {
         const sourceId = doc._source;
         // Convert the string _source to ObjectId

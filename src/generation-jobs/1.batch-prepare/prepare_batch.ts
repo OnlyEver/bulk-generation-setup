@@ -78,8 +78,8 @@ const getPrompt = async (
   }
 };
 
-const getCustomIdForBreadth = (doc: any) => {
-  return JSON.stringify({
+const getCustomIdForBreadth = (doc: any) => ({
+  return: JSON.stringify({
     id: doc.source._id.toString(),
     type: doc.type,
     bloom_level: 1,
@@ -162,7 +162,6 @@ const prepareBatchForDepth = async (doc: any) => {
       ],
     },
   };
-}
 };
 
 const fetchSourceDocuments = async (docs: any[]) => {

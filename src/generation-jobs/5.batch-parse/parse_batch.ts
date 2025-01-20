@@ -1,16 +1,9 @@
 import { parseBreadth } from "./parse_breadth";
 
-export async function parseResponse(generatedResponses: any[]) {
+export async function parseResponse(generatedResponses: any[]): Promise<ParsedResponse[]> {
   try {
-    // const parsedResponses = await Promise.all(
-    //   generatedResponse.map(async (response) => {
-    //     const body = response["response"]["body"];
-    //     const content = body.choices[0]["message"]["content"];
-    //     const parsedContent = JSON.parse(content);
-    //     return parsedContent;
-    //   })
-    // );
-    // return parsedResponses;
+    const parsedData: ParsedResponse[] = [];
+
     for (const elem of generatedResponses) {
       const customId = extractCustomId(elem.custom_id);
       const rawResponse: RawResponse = {
@@ -24,9 +17,10 @@ export async function parseResponse(generatedResponses: any[]) {
       } else if (customId.request_type.type === "breadth") {
         // handle typology parsing
         const parsedBreadth = parseBreadth(rawResponse);
-        return parsedBreadth;
+        parsedData.push(parsedBreadth);
       }
     }
+    return parsedData;
   } catch (e: any) {
     throw Error(e.message);
   }

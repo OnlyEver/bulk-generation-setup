@@ -14,15 +14,7 @@ const parse_breadth_1 = require("./parse_breadth");
 function parseResponse(generatedResponses) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // const parsedResponses = await Promise.all(
-            //   generatedResponse.map(async (response) => {
-            //     const body = response["response"]["body"];
-            //     const content = body.choices[0]["message"]["content"];
-            //     const parsedContent = JSON.parse(content);
-            //     return parsedContent;
-            //   })
-            // );
-            // return parsedResponses;
+            const parsedData = [];
             for (const elem of generatedResponses) {
                 const customId = extractCustomId(elem.custom_id);
                 const rawResponse = {
@@ -36,9 +28,10 @@ function parseResponse(generatedResponses) {
                 else if (customId.request_type.type === "breadth") {
                     // handle typology parsing
                     const parsedBreadth = (0, parse_breadth_1.parseBreadth)(rawResponse);
-                    return parsedBreadth;
+                    parsedData.push(parsedBreadth);
                 }
             }
+            return parsedData;
         }
         catch (e) {
             throw Error(e.message);

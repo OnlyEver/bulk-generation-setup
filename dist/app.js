@@ -16,8 +16,9 @@ const create_batch_1 = require("./generation-jobs/2.batch-creation/create_batch"
 const prepare_batch_1 = require("./generation-jobs/1.batch-prepare/prepare_batch");
 const connection_1 = require("./mongodb/connection");
 const openai_helper_1 = require("./openai/openai_helper");
-// Connect to mongodb
-/// initializing the mongo client and open ai is absolutely necessary before proceeding anything
+// import { createBatchRequest, getDbInstance, openai, prepareGenerationBatch, setUpMongoClient } from './app';
+/// setting up mongo
+const config_1 = require("./config");
 const setUpMongoClient = (connectionUri, dbName) => {
     return (0, connection_1.setUp)(connectionUri, dbName);
 };
@@ -49,7 +50,7 @@ const createBatchRequest = (filePath) => __awaiter(void 0, void 0, void 0, funct
 exports.createBatchRequest = createBatchRequest;
 /// Gets batch status
 const getBatchStatus = (batchId) => __awaiter(void 0, void 0, void 0, function* () {
-    const status = yield (0, check_batch_status_1.checkBatchStatus)(batchId);
+    const status = yield (0, check_batch_status_1.checkBatchStatus)('batch_678de16203988190ac999510231b6228');
     return status;
 });
 exports.getBatchStatus = getBatchStatus;
@@ -59,3 +60,22 @@ const getFileContent = (fileId) => __awaiter(void 0, void 0, void 0, function* (
     return data;
 });
 exports.getFileContent = getFileContent;
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    //env variables
+    const dbUri = config_1.config.dbUri;
+    const dbName = config_1.config.dbName;
+    const openAiKey = config_1.config.openAiKey;
+    //setup mongodb connection
+    (0, exports.setUpMongoClient)(dbUri, dbName !== null && dbName !== void 0 ? dbName : '');
+    // //setup openAI
+    (0, exports.openai)((_a = config_1.config.openAiKey) !== null && _a !== void 0 ? _a : '');
+    // //prepare batch
+    // const prepareResponse: any = await prepareGenerationBatch();
+    // const sourcesOnBatch = prepareResponse.sources;
+    //create batch
+    // const batch = await createBatchRequest(prepareResponse.inputFileList);
+    // const batchDataCollection = getDbInstance().collection('_batch_data');
+    // await batchDataCollection.insertMany(batch);
+    yield (0, exports.getBatchStatus)('');
+}))();

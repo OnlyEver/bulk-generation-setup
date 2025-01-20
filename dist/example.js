@@ -38,3 +38,4 @@ const config_1 = require("./config");
     })));
     console.log(batch);
 }))();
+//# sourceMappingURL=example.js.map

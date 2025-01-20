@@ -18,3 +18,4 @@ exports.cardGenDocs = {
     mcq: "6765275f59c0563f42607ada",
     coverage: "6765277a59c0563f42607adc",
 };
+//# sourceMappingURL=card_gen_prompts.js.map

@@ -15,8 +15,8 @@ function getResult(fileid) {
     return __awaiter(this, void 0, void 0, function* () {
         const fileResponse = yield (0, openai_helper_1.openAI)().files.content(fileid);
         const fileContents = yield fileResponse.text();
-        const parsedString = _parseJsonlFile(fileContents.toString());
-        return parsedString;
+        const parseJSONLs = _parseJsonlFile(fileContents.toString());
+        return parseJSONLs;
         // return JSON.parse(pa);
     });
 }
@@ -37,3 +37,4 @@ const _parseJsonlFile = (content) => {
         throw error;
     }
 };
+//# sourceMappingURL=get_result.js.map

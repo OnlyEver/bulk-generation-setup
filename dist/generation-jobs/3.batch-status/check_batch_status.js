@@ -17,3 +17,4 @@ function checkBatchStatus(batchId) {
         return batch;
     });
 }
+//# sourceMappingURL=check_batch_status.js.map

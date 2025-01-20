@@ -17,3 +17,4 @@ function cancelBatch(batchId) {
         return batch;
     });
 }
+//# sourceMappingURL=cancel_batch.js.map

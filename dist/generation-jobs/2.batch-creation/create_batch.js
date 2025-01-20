@@ -48,3 +48,4 @@ function createBatch(fileList) {
         }
     });
 }
+//# sourceMappingURL=create_batch.js.map

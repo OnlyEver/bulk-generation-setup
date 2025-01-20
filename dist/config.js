@@ -8,3 +8,4 @@ exports.config = {
     dbUri: (_a = process.env.DB_URI) !== null && _a !== void 0 ? _a : "",
     dbName: process.env.DB_NAME,
 };
+//# sourceMappingURL=config.js.map

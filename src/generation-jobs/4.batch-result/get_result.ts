@@ -1,11 +1,10 @@
 import { openAI } from "../../openai/openai_helper";
-export async function getResult(fileid: string) {
-
+export async function getResult(fileid: string): Promise<any[]> {
   const fileResponse = await openAI().files.content(fileid);
   const fileContents = await fileResponse.text();
 
-  const parsedString = _parseJsonlFile(fileContents.toString());
-  return parsedString;
+  const parseJSONLs = _parseJsonlFile(fileContents.toString());
+  return parseJSONLs;
   // return JSON.parse(pa);
 }
 

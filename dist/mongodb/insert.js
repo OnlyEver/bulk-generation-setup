@@ -41,3 +41,4 @@ function insertCard(parsedCardData, sourceId) {
         console.log(result);
     });
 }
+//# sourceMappingURL=insert.js.map

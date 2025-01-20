@@ -12,3 +12,4 @@ var BatchStatusEnum;
     BatchStatusEnum["VALIDATING"] = "validating";
     BatchStatusEnum["EXPIRED"] = "expired";
 })(BatchStatusEnum || (exports.BatchStatusEnum = BatchStatusEnum = {}));
+//# sourceMappingURL=batch_status.js.map

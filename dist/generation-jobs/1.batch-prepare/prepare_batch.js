@@ -27,7 +27,7 @@ function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var inputFileList = [];
-            const generationDataCollection = connection_1.database.collection('_generation_data');
+            const generationDataCollection = connection_1.database.collection("_generation_data");
             let docs = yield generationDataCollection.find({}).toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
@@ -39,7 +39,7 @@ function prepareBatch() {
             yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
                 const batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
-                    if (elem.type === 'typology') {
+                    if (elem.request_type.type === "breadth") {
                         const batchData = yield prepareBatchForBreadth(elem);
                         batchDataList.push(batchData);
                     }
@@ -48,7 +48,7 @@ function prepareBatch() {
                         batchDataList.push(batchData);
                     }
                 })));
-                const filePath = `/tmp/batchinput${index}.jsonl`;
+                const filePath = `./batchinput${index}.jsonl`;
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
             })));
@@ -68,9 +68,9 @@ function prepareBatch() {
 }
 const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, function* () {
     switch (type) {
-        case "typology":
+        case "breadth":
             return yield (0, fetch_typology_prompt_1.returnTypologyPrompt)();
-        case "card":
+        case "depth":
             return yield (0, fetch_card_gen_prompt_1.returnCardGenPrompt)(bloomLevel !== null && bloomLevel !== void 0 ? bloomLevel : 1);
         default:
             return yield (0, fetch_typology_prompt_1.returnTypologyPrompt)();
@@ -78,24 +78,34 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
 });
 const getCustomIdForBreadth = (doc) => {
     return JSON.stringify({
-        id: doc.source._id.toString(),
-        type: doc.type,
-        bloom_level: 1,
+        source: doc.source._id.toString(),
+        request_type: {
+            type: doc.request_type.type,
+            n: 1,
+        },
     });
 };
+// {
+//   "source": ObjectIDString,
+//   "request_type": {
+//   "type": "depth",
+//   "n": 1
+//   "bloom_level": 1 // specific for card generation
+//   }
+// }
 const getCustomIdForDepth = (doc) => {
     return JSON.stringify({
         id: doc.index,
-        type: doc.type,
-        bloom_level: doc.bloom_level,
+        source: doc.source._id.toString(),
+        request_type: {
+            type: doc.request_type.type,
+            n: 1,
+            bloom_level: doc.request_type.bloom_level,
+        },
     });
 };
-const getBatchDataForBreadth = (content) => {
-};
-const getBatchDataForDepth = (content) => {
-};
 const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const prompts = yield getPrompt(doc.type);
+    const prompts = yield getPrompt(doc.request_type.type);
     return {
         custom_id: getCustomIdForBreadth(doc), // Unique identifier for each request.
         method: "POST",
@@ -123,8 +133,9 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedTypology = yield fetchTypologyDocuments(doc._source);
-    const cardGenPrompt = yield getPrompt(doc.type, doc.bloom_level);
+    // const parsedTypology = await _fetchTypologyDocuments(doc._source);
+    const parsedTypology = doc._source.source_taxonomy;
+    const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
     return {
         custom_id: getCustomIdForDepth(doc),
         method: "POST", // HTTP method.
@@ -152,15 +163,8 @@ const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function
         },
     };
 });
-const fetchTypologyDocuments = (sourceId) => __awaiter(void 0, void 0, void 0, function* () {
-    const typologyCollection = connection_1.database.collection('typology');
-    const data = yield typologyCollection.findOne({ _source_id: sourceId.toString() }, { projection: { typology: 1, } });
-    return {
-        data
-    };
-});
 const fetchSourceDocuments = (docs) => __awaiter(void 0, void 0, void 0, function* () {
-    const sourceCollection = connection_1.database.collection('_source');
+    const sourceCollection = connection_1.database.collection("_source");
     const sourceDocs = yield Promise.all(docs.map((doc) => __awaiter(void 0, void 0, void 0, function* () {
         const sourceId = doc._source;
         // Convert the string _source to ObjectId
@@ -171,3 +175,4 @@ const fetchSourceDocuments = (docs) => __awaiter(void 0, void 0, void 0, functio
     })));
     return sourceDocs;
 });
+//# sourceMappingURL=prepare_batch.js.map

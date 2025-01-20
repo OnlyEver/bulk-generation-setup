@@ -10,3 +10,4 @@ exports.setUp = setUp;
 // export const sourceCollection = database.collection("_source");
 // export const typologyCollection = database.collection("_typology");
 // export const cardCollection = database.collection("_card");
+//# sourceMappingURL=connection.js.map

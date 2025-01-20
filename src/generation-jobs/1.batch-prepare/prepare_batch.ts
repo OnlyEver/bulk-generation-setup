@@ -78,40 +78,32 @@ const getPrompt = async (
   }
 };
 
-const getCustomIdForBreadth = (doc: any) => {
-  return JSON.stringify({
-    source: doc.source._id.toString(),
+const getCustomIdForBreadth = (doc: any): RequestId => {
+  return {
+    source_id: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
-      n: 1,
-    },
-  });
+      n: doc.n | 1,
+    }
+  }
 };
-// {
-//   "source": ObjectIDString,
-//   "request_type": {
-//   "type": "depth",
-//   "n": 1
-//   "bloom_level": 1 // specific for card generation
-//   }
-// }
-const getCustomIdForDepth = (doc: any) => {
-  return JSON.stringify({
-    id: doc.index,
-    source: doc.source._id.toString(),
+
+const getCustomIdForDepth = (doc: any): RequestId => {
+  return {
+    source_id: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
-      n: 1,
+      n: doc.n | 1,
       bloom_level: doc.request_type.bloom_level,
     },
-  })
+  }
 
 };
 
 const prepareBatchForBreadth = async (doc: any) => {
   const prompts = await getPrompt(doc.request_type.type);
   return {
-    custom_id: getCustomIdForBreadth(doc), // Unique identifier for each request.
+    custom_id: JSON.stringify(getCustomIdForBreadth(doc)), // Unique identifier for each request.
     method: "POST",
     url: "/v1/chat/completions", // API endpoint.
     body: {
@@ -147,7 +139,7 @@ const prepareBatchForDepth = async (doc: any) => {
   const cardGenPrompt = await getPrompt(doc.request_type.type, doc.request_type.bloom_level);
 
   return {
-    custom_id: getCustomIdForDepth(doc),
+    custom_id: JSON.stringify(getCustomIdForDepth(doc)),
     method: "POST", // HTTP method.
     url: "/v1/chat/completions", // API endpoint.
     body: {

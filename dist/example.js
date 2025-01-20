@@ -13,6 +13,7 @@ const app_1 = require("./app");
 /// setting up mongo
 const config_1 = require("./config");
 (() => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     //env variables
     const dbUri = config_1.config.dbUri;
     const dbName = config_1.config.dbName;
@@ -20,7 +21,7 @@ const config_1 = require("./config");
     //setup mongodb connection
     (0, app_1.setUpMongoClient)(dbUri, dbName !== null && dbName !== void 0 ? dbName : '');
     //setup openAI
-    (0, app_1.openai)(openAiKey !== null && openAiKey !== void 0 ? openAiKey : '');
+    (0, app_1.openai)((_a = config_1.config.openAiKey) !== null && _a !== void 0 ? _a : '');
     //prepare batch
     const prepareResponse = yield (0, app_1.prepareGenerationBatch)();
     const sourcesOnBatch = prepareResponse.sources;

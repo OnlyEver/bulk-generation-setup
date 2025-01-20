@@ -12,9 +12,9 @@ export async function parseResponse(generatedResponses: any[]) {
     for (const elem of generatedResponses) {
       const customId = extractCustomId(elem.custom_id);
       if (customId.request_type.type === "depth") {
-        // handle typology parsing
+        // handle card  parsing
       } else if (customId.request_type.type === "breadth") {
-        // handle breadth parsing
+        // handle typology parsing
       }
     }
   } catch (e: any) {
@@ -33,12 +33,3 @@ function extractCustomId(customId: string): RequestId {
     },
   };
 }
-
-type RequestId = {
-  source_id: string;
-  request_type: {
-    type: string;
-    bloom_level?: number;
-    n: number;
-  };
-};

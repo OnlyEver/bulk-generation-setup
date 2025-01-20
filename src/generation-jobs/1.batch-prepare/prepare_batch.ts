@@ -13,7 +13,7 @@ import { returnCardGenPrompt } from "./fetch-prompts/fetch_card_gen_prompt";
 export async function prepareBatch(): Promise<Object> {
   try {
     var inputFileList: string[] = [];
-    const generationDataCollection = database.collection('_generation_data');
+    const generationDataCollection = database.collection("_generation_data");
     let docs = await generationDataCollection.find({}).toArray();
     let sources = await fetchSourceDocuments(docs);
     const result = [];
@@ -28,7 +28,7 @@ export async function prepareBatch(): Promise<Object> {
         const batchDataList: any[] = [];
         await Promise.all(
           element.map(async (elem) => {
-            if (elem.type === 'typology') {
+            if (elem.type === "typology") {
               const batchData = await prepareBatchForBreadth(elem);
               batchDataList.push(batchData);
             } else {
@@ -37,7 +37,6 @@ export async function prepareBatch(): Promise<Object> {
             }
           })
         );
-
 
         const filePath = `/tmp/batchinput${index}.jsonl`;
         await fsPromise.writeFile(
@@ -50,16 +49,12 @@ export async function prepareBatch(): Promise<Object> {
       })
     );
 
-
-
     console.log(inputFileList);
     return {
       sources,
       inputFileList,
-    }
+    };
     return inputFileList;
-
-
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
@@ -69,7 +64,10 @@ export async function prepareBatch(): Promise<Object> {
   }
 }
 
-const getPrompt = async (type: string, bloomLevel?: number): Promise<string> => {
+const getPrompt = async (
+  type: string,
+  bloomLevel?: number
+): Promise<string> => {
   switch (type) {
     case "typology":
       return await returnTypologyPrompt();
@@ -78,31 +76,24 @@ const getPrompt = async (type: string, bloomLevel?: number): Promise<string> => 
     default:
       return await returnTypologyPrompt();
   }
-}
+};
 
 const getCustomIdForBreadth = (doc: any) => ({
   return: JSON.stringify({
     id: doc.source._id.toString(),
     type: doc.type,
     bloom_level: 1,
-  })
-})
+  }),
+});
 const getCustomIdForDepth = (doc: any) => ({
   return: JSON.stringify({
     id: doc.index,
     type: doc.type,
     bloom_level: doc.bloom_level,
-  })
-})
+  }),
+});
 
-const getBatchDataForBreadth = (content: string) => {
-
-}
-const getBatchDataForDepth = (content: string) => {
-
-}
-
-const prepareBatchForBreadth = async (doc: any,) => {
+const prepareBatchForBreadth = async (doc: any) => {
   const prompts = await getPrompt(doc.type);
   return {
     custom_id: getCustomIdForBreadth(doc), // Unique identifier for each request.
@@ -132,13 +123,12 @@ const prepareBatchForBreadth = async (doc: any,) => {
         },
       ],
     },
-  }
-}
-
-
+  };
+};
 
 const prepareBatchForDepth = async (doc: any) => {
-  const parsedTypology = await fetchTypologyDocuments(doc._source);
+  // const parsedTypology = await _fetchTypologyDocuments(doc._source);
+  const parsedTypology = doc._source.source_taxonomy;
   const cardGenPrompt = await getPrompt(doc.type, doc.bloom_level);
 
   return {
@@ -172,28 +162,14 @@ const prepareBatchForDepth = async (doc: any) => {
       ],
     },
   };
-}
-
-const fetchTypologyDocuments = async (sourceId: string) => {
-  const typologyCollection = database.collection('typology');
-
-  const data = await typologyCollection.findOne(
-    { _source_id: sourceId.toString() },
-    { projection: { typology: 1, } }
-  );
-
-  return {
-    data
-  }
-}
+};
 
 const fetchSourceDocuments = async (docs: any[]) => {
-  const sourceCollection = database.collection('_source');
+  const sourceCollection = database.collection("_source");
 
   const sourceDocs = await Promise.all(
     docs.map(async (doc) => {
       const sourceId = doc._source;
-
 
       // Convert the string _source to ObjectId
       const sourceObjectId = ObjectId.createFromHexString(sourceId);
@@ -209,4 +185,4 @@ const fetchSourceDocuments = async (docs: any[]) => {
   );
 
   return sourceDocs;
-}
+};

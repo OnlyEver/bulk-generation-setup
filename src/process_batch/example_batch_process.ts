@@ -11,6 +11,8 @@ import { config } from "../config";
 import { setUpMongoClient, openai, getDbInstance } from "../app";
 
 import AWS from "aws-sdk";
+import { parseDepth } from "../generation-jobs/5.batch-parse/parse_depth";
+import { ObjectId } from "mongodb";
 
 const lambda = new AWS.Lambda();
 
@@ -53,10 +55,24 @@ export const handler = async () => {
   };
 };
 (async () => {
-  console.log("batch process");
+  // console.log("batch process");
   setUpMongoClient(config.dbUri, config.dbName ?? "");
-  openai(config.openAiKey ?? "");
-  await handler();
+  const db = getDbInstance();
+  const sourceCollection = db.collection("_source");
+  const taxonomyData = await sourceCollection.findOne(
+    {
+      _id: new ObjectId("6753b20a56e5e922b58273d6"),
+    },
+    {
+      projection: { source_taxonomy: 1 },
+    }
+  );
+  // openai(config.openAiKey ?? "");
+  // await handler();
+  const parsedCards = parseDepth({
+    sourceTaxonomy: taxonomyData?.source_taxonomy ?? {},
+  });
+  return parsedCards;
 
   // get batch status from mongo;
 })();

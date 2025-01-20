@@ -1,5 +1,5 @@
 type ParsedResponse = {
-  request_id: RequestId;
+  requestIdentifier: RequestId;
   metadata?: {
     req_type: RequestType;
     req_time: Date;

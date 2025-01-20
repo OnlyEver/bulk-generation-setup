@@ -2,6 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseBreadth = parseBreadth;
 const parse_typology_1 = require("../../utils/parse_typology");
+/**
+ *
+ * For parsing the breadth or typology
+ *
+ * @param {RawResponse} rawResponse from batch response
+ * @returns {ParsedResponse}
+ */
 function parseBreadth(rawResponse) {
     try {
         const requestId = rawResponse.request_id;

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseResponse = parseResponse;
+const parse_breadth_1 = require("./parse_breadth");
 function parseResponse(generatedResponses) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -24,11 +25,18 @@ function parseResponse(generatedResponses) {
             // return parsedResponses;
             for (const elem of generatedResponses) {
                 const customId = extractCustomId(elem.custom_id);
+                const rawResponse = {
+                    batch_id: elem.id,
+                    request_id: elem.response.request_id,
+                    response: elem.response
+                };
                 if (customId.request_type.type === "depth") {
                     // handle card  parsing
                 }
                 else if (customId.request_type.type === "breadth") {
                     // handle typology parsing
+                    const parsedBreadth = (0, parse_breadth_1.parseBreadth)(rawResponse);
+                    return parsedBreadth;
                 }
             }
         }

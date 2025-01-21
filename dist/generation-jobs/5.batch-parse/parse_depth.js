@@ -12,6 +12,11 @@ function parseDepth(params) {
         const usage = response.usage;
         const generatedData = JSON.parse(response.choices[0].message.content);
         const cardData = new parse_card_response_1.ParseCardResponse().parse(generatedData, params.sourceTaxonomy);
+        const cardResponse = {
+            cards_data: (_a = cardData.cards_data) !== null && _a !== void 0 ? _a : [],
+            missing_facts: [],
+            missing_concepts: [],
+        };
         return {
             requestIdentifier: requestId,
             metadata: {
@@ -22,7 +27,7 @@ function parseDepth(params) {
                 model: "gpt-4o-mini",
                 status: "completed",
             },
-            generated_data: (_a = cardData.cards_data) !== null && _a !== void 0 ? _a : [],
+            generated_data: cardResponse,
         };
     }
     catch (e) {

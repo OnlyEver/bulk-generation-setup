@@ -14,10 +14,10 @@ function parseBreadth(rawResponse) {
         const requestId = rawResponse.request_id;
         const content = rawResponse.response.body.choices[0].message.content;
         const parsedContent = JSON.parse(content);
+        const usage = rawResponse.response.response.usage;
         return {
             requestIdentifier: requestId,
             generated_data: {
-                status_code: 200,
                 field: (0, parse_typology_1.parseFields)(parsedContent.field),
                 concepts: parsedContent.facts.map((fact) => ({
                     fact_text: fact.fact_text,
@@ -32,6 +32,14 @@ function parseBreadth(rawResponse) {
                     reason: parsedContent.generate_cards.reason,
                 },
                 summary_cards: parsedContent.summary_cards,
+            },
+            metadata: {
+                req_type: requestId.request_type,
+                req_time: new Date(),
+                req_tokens: usage === null || usage === void 0 ? void 0 : usage.prompt_tokens,
+                res_tokens: usage === null || usage === void 0 ? void 0 : usage.completion_tokens,
+                model: "gpt-4o-mini",
+                status: "completed",
             },
         };
     }

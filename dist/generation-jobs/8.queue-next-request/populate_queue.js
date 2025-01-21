@@ -18,7 +18,7 @@ const list_last_where_1 = require("../../utils/list_last_where");
  * and breadth (typology) of the source
  *
  * @async
- * @param sourceId of the source
+ * @param sourceId `_id` of the source
  */
 function populateQueue(sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,7 +26,7 @@ function populateQueue(sourceId) {
         const sourceCollection = connection_1.database.collection('_source');
         const generationRequests = connection_1.database.collection('_generation_requests');
         const cardCollection = connection_1.database.collection('_card');
-        let documents = [];
+        let documents = []; // Array of documents to be inserted in the generation_requests collection
         try {
             const source = yield sourceCollection.findOne({
                 _id: mongodb_1.ObjectId.createFromHexString(sourceId)
@@ -43,48 +43,23 @@ function populateQueue(sourceId) {
                     const calculatedViewTime = Math.floor(viewTime / 300);
                     // If the breadth request or source taxonomy exists
                     if (lastBreadthRequest || sourceTaxonomy) {
-                        // if (lastBreadthRequest.req_type.n_reqs <= calculatedViewTime) {
-                        if (false) {
-                            yield _insertBreadthRequest(((_b = (_a = lastBreadthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n_reqs) !== null && _b !== void 0 ? _b : 0) + 1);
+                        if (lastBreadthRequest.req_type.n_reqs <= calculatedViewTime) {
+                            _insertBreadthRequest(((_b = (_a = lastBreadthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n_reqs) !== null && _b !== void 0 ? _b : 0) + 1);
                         }
                         else {
-                            /// For card generation or depth 
+                            /// For card generation or depth request 
                             const concepts = sourceTaxonomy.concepts;
                             const facts = sourceTaxonomy.facts;
                             const conceptTextArray = concepts.map((concept) => concept.concept_text);
                             const factTextArray = facts.map((fact) => fact.fact_text);
-                            let bloomLevelCards = yield cardCollection.aggregate([
-                                {
-                                    $match: {
-                                        "_id": { $in: aiCards }
-                                    }
-                                },
-                                {
-                                    $group: {
-                                        _id: "$generated_info.blooms_level",
-                                        cards: {
-                                            $push: {
-                                                _id: "$_id",
-                                                generated_info: "$generated_info"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    $sort: {
-                                        _id: 1
-                                    }
-                                },
-                                {
-                                    $project: {
-                                        _id: 0,
-                                        level: "$_id",
-                                        cards: 1
-                                    }
-                                }
+                            const bloomLevelCards = yield cardCollection.aggregate([
+                                { $match: { "_id": { $in: aiCards } } },
+                                { $group: { _id: '$generated_info.blooms_level', cards: { $push: { _id: '$_id', generated_info: '$generated_info' } } } },
+                                { $sort: { _id: 1 } },
+                                { $project: { _id: 0, level: '$_id', cards: 1 } },
                             ]).toArray();
-                            let levelConcepts = [];
-                            let levelFacts = [];
+                            let levelConcepts = []; /// An array of concept_text according to the bloom level
+                            let levelFacts = []; /// An array of fact_text according to the bloom level
                             if (sourceTaxonomy.generate_cards.state) {
                                 let maxRequestsForBloom = 5;
                                 for (let bloom = 1; bloom <= 5; bloom++) {
@@ -145,7 +120,7 @@ function populateQueue(sourceId) {
                                         }
                                     }
                                     else {
-                                        yield generationRequests.insertOne({
+                                        documents.push({
                                             "_source": sourceId,
                                             "ctime": new Date(),
                                             "status": "created",
@@ -162,37 +137,37 @@ function populateQueue(sourceId) {
                                     }
                                     maxRequestsForBloom--;
                                 }
-                                // const genReqs = await generationRequests.insertMany(documents);
-                                console.log("Inserted generation requests: ", documents.length);
                             }
                         }
                     }
                     else {
-                        yield _insertBreadthRequest(1);
+                        _insertBreadthRequest(1);
                     }
+                    const genReqs = yield generationRequests.insertMany(documents);
+                    console.log("Inserted generation requests: ", genReqs.insertedCount);
                 }
             }
             console.log("Documents: ", documents);
         }
         catch (error) {
+            console.log("Error while populating queue: ", error);
             throw Error;
         }
         function _insertBreadthRequest(n_reqs) {
-            return __awaiter(this, void 0, void 0, function* () {
-                yield generationRequests.insertOne({
-                    "_source": sourceId,
-                    "ctime": new Date(),
-                    "status": "created",
-                    "request_type": {
-                        "type": "breadth",
-                        "n_reqs": n_reqs
-                    }
-                });
+            documents.push({
+                "_source": sourceId,
+                "ctime": new Date(),
+                "status": "created",
+                "request_type": {
+                    "type": "breadth",
+                    "n_reqs": n_reqs
+                }
             });
         }
     });
 }
-function hanndleDepthQueue() {
-    return __awaiter(this, void 0, void 0, function* () { });
+function handleDepthRequest() {
+    return __awaiter(this, void 0, void 0, function* () {
+    });
 }
 //# sourceMappingURL=populate_queue.js.map

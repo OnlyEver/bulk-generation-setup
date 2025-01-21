@@ -9,20 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareGenerationBatch = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
+exports.bulkWriteToDb = exports.parseGeneratedData = exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareGenerationBatch = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
 const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
 const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
 const create_batch_1 = require("./generation-jobs/2.batch-creation/create_batch");
 const prepare_batch_1 = require("./generation-jobs/1.batch-prepare/prepare_batch");
 const connection_1 = require("./mongodb/connection");
 const openai_helper_1 = require("./openai/openai_helper");
+const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
+const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
+const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 const setUpMongoClient = (connectionUri, dbName) => {
     return (0, connection_1.setUp)(connectionUri, dbName);
 };
 exports.setUpMongoClient = setUpMongoClient;
-const getDbInstance = () => { return connection_1.database; };
+const getDbInstance = () => {
+    return connection_1.database;
+};
 exports.getDbInstance = getDbInstance;
 // init openai
 const openai = (openaiKey) => {
@@ -59,4 +64,20 @@ const getFileContent = (fileId) => __awaiter(void 0, void 0, void 0, function* (
     return data;
 });
 exports.getFileContent = getFileContent;
+const parseGeneratedData = (jsonLinesFromFile) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, parse_batch_1.parseBatchResponse)(jsonLinesFromFile);
+    return data;
+});
+exports.parseGeneratedData = parseGeneratedData;
+const bulkWriteToDb = (parsedResponses) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, write_to_do_1.handleBulkWrite)(parsedResponses.parsed_response);
+    const cleanUp = yield (0, clean_up_batch_data_1.cleanUpBatchData)({
+        batch_id: parsedResponses.batch_id,
+        requestIdentifiers: parsedResponses.parsed_response.map((e) => e.requestIdentifier),
+    });
+    return {
+        status: "Success",
+    };
+});
+exports.bulkWriteToDb = bulkWriteToDb;
 //# sourceMappingURL=app.js.map

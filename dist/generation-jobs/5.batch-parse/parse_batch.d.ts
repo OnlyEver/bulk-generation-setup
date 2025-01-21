@@ -1,1 +1,4 @@
-export declare function parseResponse(generatedResponses: any[]): Promise<ParsedResponse[]>;
+export declare function parseBatchResponse(generatedResponses: any[]): Promise<{
+    batch_id: string;
+    parsed_response: ParsedResponse[];
+}>;

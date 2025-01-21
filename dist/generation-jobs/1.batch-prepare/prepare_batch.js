@@ -27,7 +27,7 @@ function prepareBatch() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var inputFileList = [];
-            const generationDataCollection = connection_1.database.collection("_generation_data");
+            const generationDataCollection = connection_1.database.collection("_generation_requests");
             let docs = yield generationDataCollection.find({}).toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
@@ -48,7 +48,7 @@ function prepareBatch() {
                         batchDataList.push(batchData);
                     }
                 })));
-                const filePath = `/tmp/batchinput${index}.jsonl`;
+                const filePath = `batchinput${index}.jsonl`;
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
             })));
@@ -82,7 +82,7 @@ const getCustomIdForBreadth = (doc) => {
         request_type: {
             type: doc.request_type.type,
             n: doc.n | 1,
-        }
+        },
     };
 };
 const getCustomIdForDepth = (doc) => {
@@ -124,7 +124,6 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    // const parsedTypology = await _fetchTypologyDocuments(doc._source);
     const parsedTypology = doc._source.source_taxonomy;
     const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
     return {

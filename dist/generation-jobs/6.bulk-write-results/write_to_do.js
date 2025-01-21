@@ -9,22 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkBatchStatus = checkBatchStatus;
-const openai_helper_1 = require("../../openai/openai_helper");
+exports.handleBulkWrite = handleBulkWrite;
 const app_1 = require("../../app");
-function checkBatchStatus(batchId) {
+const parsed_response_to_db_operations_1 = require("./prepare-ops/parsed_response_to_db_operations");
+function handleBulkWrite(parsedResponse) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // const bacthList = await openAI().batches.list();
-            const batch = yield (0, openai_helper_1.openAI)().batches.retrieve(batchId);
             const database = (0, app_1.getDbInstance)();
-            const collection = database.collection("_batch_data");
-            yield collection.updateOne({ id: batchId }, { $set: batch }, { upsert: true });
-            return batch;
+            const cardCollection = database.collection("_cards");
+            const sourceCollection = database.collection("_source");
+            const dbOps = yield (0, parsed_response_to_db_operations_1.convertParsedArrayToDbOperations)(parsedResponse);
+            const cardsOps = dbOps._cards;
+            const sourceOps = dbOps._source;
+            if (cardsOps.length > 0) {
+                yield cardCollection.bulkWrite(cardsOps);
+            }
+            if (sourceOps.length > 0) {
+                yield sourceCollection.bulkWrite(sourceOps);
+            }
         }
         catch (e) {
-            throw Error(e.message);
+            console.error("Error occurred while converting the parsed array to db operations:", e);
+            throw e;
         }
     });
 }
-//# sourceMappingURL=check_batch_status.js.map
+//# sourceMappingURL=write_to_do.js.map

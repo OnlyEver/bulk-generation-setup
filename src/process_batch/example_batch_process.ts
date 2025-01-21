@@ -13,6 +13,7 @@ import { setUpMongoClient, openai, getDbInstance } from "../app";
 import AWS from "aws-sdk";
 import { parseDepth } from "../generation-jobs/5.batch-parse/parse_depth";
 import { ObjectId } from "mongodb";
+import { populateQueue } from "../generation-jobs/8.queue-next-request/populate_queue";
 
 const lambda = new AWS.Lambda();
 
@@ -59,20 +60,21 @@ export const handler = async () => {
   setUpMongoClient(config.dbUri, config.dbName ?? "");
   const db = getDbInstance();
   const sourceCollection = db.collection("_source");
-  const taxonomyData = await sourceCollection.findOne(
-    {
-      _id: new ObjectId("6753b20a56e5e922b58273d6"),
-    },
-    {
-      projection: { source_taxonomy: 1 },
-    }
-  );
-  // openai(config.openAiKey ?? "");
-  // await handler();
-  const parsedCards = parseDepth({
-    sourceTaxonomy: taxonomyData?.source_taxonomy ?? {},
-  });
-  return parsedCards;
+  // const taxonomyData = await sourceCollection.findOne(
+  //   {
+  //     _id: new ObjectId("6753b20a56e5e922b58273d6"),
+  //   },
+  //   {
+  //     projection: { source_taxonomy: 1 },
+  //   }
+  // );
+  // // openai(config.openAiKey ?? "");
+  // // await handler();
+  // const parsedCards = parseDepth({
+  //   sourceTaxonomy: taxonomyData?.source_taxonomy ?? {},
+  // });
+  // return parsedCards;
 
   // get batch status from mongo;
+  await populateQueue('6753b17a7d070c44ecf24f9e');
 })();

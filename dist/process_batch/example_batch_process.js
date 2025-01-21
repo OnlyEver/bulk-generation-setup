@@ -23,8 +23,7 @@ exports.handler = void 0;
 const config_1 = require("../config");
 const app_1 = require("../app");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
-const parse_depth_1 = require("../generation-jobs/5.batch-parse/parse_depth");
-const mongodb_1 = require("mongodb");
+const populate_queue_1 = require("../generation-jobs/8.queue-next-request/populate_queue");
 const lambda = new aws_sdk_1.default.Lambda();
 const CHILD_LAMBDA_NAME = "child-handler";
 const handler = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -59,22 +58,26 @@ const handler = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.handler = handler;
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
     const db = (0, app_1.getDbInstance)();
     const sourceCollection = db.collection("_source");
-    const taxonomyData = yield sourceCollection.findOne({
-        _id: new mongodb_1.ObjectId("6753b20a56e5e922b58273d6"),
-    }, {
-        projection: { source_taxonomy: 1 },
-    });
-    // openai(config.openAiKey ?? "");
-    // await handler();
-    const parsedCards = (0, parse_depth_1.parseDepth)({
-        sourceTaxonomy: (_b = taxonomyData === null || taxonomyData === void 0 ? void 0 : taxonomyData.source_taxonomy) !== null && _b !== void 0 ? _b : {},
-    });
-    return parsedCards;
+    // const taxonomyData = await sourceCollection.findOne(
+    //   {
+    //     _id: new ObjectId("6753b20a56e5e922b58273d6"),
+    //   },
+    //   {
+    //     projection: { source_taxonomy: 1 },
+    //   }
+    // );
+    // // openai(config.openAiKey ?? "");
+    // // await handler();
+    // const parsedCards = parseDepth({
+    //   sourceTaxonomy: taxonomyData?.source_taxonomy ?? {},
+    // });
+    // return parsedCards;
     // get batch status from mongo;
+    yield (0, populate_queue_1.populateQueue)('6753b17a7d070c44ecf24f9e');
 }))();
 //# sourceMappingURL=example_batch_process.js.map

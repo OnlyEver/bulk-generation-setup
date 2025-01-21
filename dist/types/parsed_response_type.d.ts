@@ -11,7 +11,6 @@ type ParsedResponse = {
     generated_data: TypologyResponse | CardGenResponse[];
 };
 type TypologyResponse = {
-    status_code: number;
     field: Array<{
         [key: string]: string | boolean;
         reconcile: boolean;

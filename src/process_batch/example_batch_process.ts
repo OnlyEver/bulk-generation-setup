@@ -78,5 +78,10 @@ export const handler = async () => {
     const parsedData = await parseGeneratedData(fileContent);
 
     const bulkWriteResult = await bulkWriteToDb(parsedData);
+  } else if (batchStatus.status === "failed") {
+    console.log("Batch failed");
+    const errorFileContent = await getFileContent(
+      batchStatus.error_file_id ?? ""
+    );
   }
 })();

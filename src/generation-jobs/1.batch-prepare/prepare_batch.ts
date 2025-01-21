@@ -13,7 +13,9 @@ import { returnCardGenPrompt } from "./fetch-prompts/fetch_card_gen_prompt";
 export async function prepareBatch(): Promise<Object> {
   try {
     var inputFileList: string[] = [];
-    const generationDataCollection = database.collection("_generation_data");
+    const generationDataCollection = database.collection(
+      "_generation_requests"
+    );
     let docs = await generationDataCollection.find({}).toArray();
     let sources = await fetchSourceDocuments(docs);
     const result = [];
@@ -38,7 +40,7 @@ export async function prepareBatch(): Promise<Object> {
           })
         );
 
-        const filePath = `/tmp/batchinput${index}.jsonl`;
+        const filePath = `batchinput${index}.jsonl`;
         await fsPromise.writeFile(
           filePath,
           batchDataList.map((entry) => JSON.stringify(entry)).join("\n"),
@@ -84,8 +86,8 @@ const getCustomIdForBreadth = (doc: any): RequestId => {
     request_type: {
       type: doc.request_type.type,
       n: doc.n | 1,
-    }
-  }
+    },
+  };
 };
 
 const getCustomIdForDepth = (doc: any): RequestId => {
@@ -96,8 +98,7 @@ const getCustomIdForDepth = (doc: any): RequestId => {
       n: doc.n | 1,
       bloom_level: doc.request_type.bloom_level,
     },
-  }
-
+  };
 };
 
 const prepareBatchForBreadth = async (doc: any) => {
@@ -134,9 +135,11 @@ const prepareBatchForBreadth = async (doc: any) => {
 };
 
 const prepareBatchForDepth = async (doc: any) => {
-  // const parsedTypology = await _fetchTypologyDocuments(doc._source);
   const parsedTypology = doc._source.source_taxonomy;
-  const cardGenPrompt = await getPrompt(doc.request_type.type, doc.request_type.bloom_level);
+  const cardGenPrompt = await getPrompt(
+    doc.request_type.type,
+    doc.request_type.bloom_level
+  );
 
   return {
     custom_id: JSON.stringify(getCustomIdForDepth(doc)),

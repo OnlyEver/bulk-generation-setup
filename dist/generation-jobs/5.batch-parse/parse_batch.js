@@ -9,20 +9,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseResponse = parseResponse;
+exports.parseBatchResponse = parseBatchResponse;
 const mongodb_1 = require("mongodb");
 const app_1 = require("../../app");
 const parse_depth_1 = require("./parse_depth");
 const parse_breadth_1 = require("./parse_breadth");
-function parseResponse(generatedResponses) {
+function parseBatchResponse(generatedResponses) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         try {
             const parsedData = [];
             const db = (0, app_1.getDbInstance)();
             const sourceCollection = db.collection("_source");
+            var batchId = "";
             for (const elem of generatedResponses) {
                 const customId = extractCustomId(elem.custom_id);
+                batchId = elem.id;
                 const rawResponse = {
                     batch_id: elem.id,
                     request_id: elem.response.request_id,
@@ -50,7 +52,10 @@ function parseResponse(generatedResponses) {
                     parsedData.push(parsedBreadth);
                 }
             }
-            return parsedData;
+            return {
+                batch_id: batchId,
+                parsed_response: parsedData,
+            };
         }
         catch (e) {
             throw Error(e.message);

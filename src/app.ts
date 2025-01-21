@@ -6,18 +6,20 @@ import { setUp, database } from "./mongodb/connection";
 import OpenAI from "openai";
 import { setOpenAIKey } from "./openai/openai_helper";
 import { Db, MongoClient } from "mongodb";
-
+import { parseBatchResponse } from "./generation-jobs/5.batch-parse/parse_batch";
+import { handleBulkWrite } from "./generation-jobs/6.bulk-write-results/write_to_do";
+import { cleanUpBatchData } from "./generation-jobs/7.clean-batch-data/clean_up_batch_data";
 
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
-
 
 export const setUpMongoClient = (connectionUri: string, dbName: string) => {
   return setUp(connectionUri, dbName);
 };
 
-export const getDbInstance = (): Db => { return database };
-
+export const getDbInstance = (): Db => {
+  return database;
+};
 
 // init openai
 export const openai = (openaiKey: string) => {
@@ -56,4 +58,28 @@ export const getFileContent = async (fileId: string) => {
   return data;
 };
 
+export const parseGeneratedData = async (
+  jsonLinesFromFile: any[]
+): Promise<{
+  batch_id: string;
+  parsed_response: ParsedResponse[];
+}> => {
+  const data = await parseBatchResponse(jsonLinesFromFile);
+  return data;
+};
 
+export const bulkWriteToDb = async (parsedResponses: {
+  batch_id: string;
+  parsed_response: ParsedResponse[];
+}) => {
+  const data = await handleBulkWrite(parsedResponses.parsed_response);
+  const cleanUp = await cleanUpBatchData({
+    batch_id: parsedResponses.batch_id,
+    requestIdentifiers: parsedResponses.parsed_response.map(
+      (e: ParsedResponse) => e.requestIdentifier
+    ),
+  });
+  return {
+    status: "Success",
+  };
+};

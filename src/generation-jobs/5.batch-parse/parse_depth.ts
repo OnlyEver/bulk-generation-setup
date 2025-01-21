@@ -20,6 +20,12 @@ export function parseDepth(params: parseDepth): ParsedResponse {
       params.sourceTaxonomy
     );
 
+    const cardResponse: CardGenResponse = {
+      cards_data: cardData.cards_data ?? [],
+      missing_facts: [],
+      missing_concepts: [],
+    };
+
     return {
       requestIdentifier: requestId,
       metadata: {
@@ -30,7 +36,7 @@ export function parseDepth(params: parseDepth): ParsedResponse {
         model: "gpt-4o-mini",
         status: "completed",
       },
-      generated_data: cardData.cards_data ?? [],
+      generated_data: cardResponse,
     };
   } catch (e: any) {
     throw Error(e.message);

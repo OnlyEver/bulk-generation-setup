@@ -8,10 +8,9 @@ type ParsedResponse = {
         model: string;
         status: string;
     };
-    generated_data: TypologyResponse | CardGenResponse[];
+    generated_data: TypologyResponse | CardGenResponse;
 };
 type TypologyResponse = {
-    status_code: number;
     field: Array<{
         [key: string]: string | boolean;
         reconcile: boolean;
@@ -30,4 +29,14 @@ type TypologyResponse = {
     };
     summary_cards: string[];
 };
-type CardGenResponse = {};
+type CardGenResponse = {
+    cards_data: any[];
+    missing_facts: Array<{
+        concept_text: string;
+        reference: string;
+    }>;
+    missing_concepts: Array<{
+        fact_text: string;
+        reference: string;
+    }>;
+};

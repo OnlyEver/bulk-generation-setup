@@ -8,7 +8,15 @@
 // 4. Child Lambdas process the batches.
 
 import { config } from "../config";
-import { setUpMongoClient, openai, getDbInstance } from "../app";
+import {
+  setUpMongoClient,
+  openai,
+  getDbInstance,
+  getBatchStatus,
+  getFileContent,
+  parseGeneratedData,
+  bulkWriteToDb,
+} from "../app";
 
 import AWS from "aws-sdk";
 import { parseDepth } from "../generation-jobs/5.batch-parse/parse_depth";
@@ -57,22 +65,18 @@ export const handler = async () => {
 (async () => {
   // console.log("batch process");
   setUpMongoClient(config.dbUri, config.dbName ?? "");
-  const db = getDbInstance();
-  const sourceCollection = db.collection("_source");
-  const taxonomyData = await sourceCollection.findOne(
-    {
-      _id: new ObjectId("6753b20a56e5e922b58273d6"),
-    },
-    {
-      projection: { source_taxonomy: 1 },
-    }
-  );
-  // openai(config.openAiKey ?? "");
-  // await handler();
-  const parsedCards = parseDepth({
-    sourceTaxonomy: taxonomyData?.source_taxonomy ?? {},
-  });
-  return parsedCards;
+  openai(config.openAiKey ?? "");
 
-  // get batch status from mongo;
+  const batchStatus = await getBatchStatus(
+    "batch_678f656b08d88190ae11a7f7573517a1"
+  );
+  console.log(batchStatus.status);
+
+  if (batchStatus.status === "completed") {
+    const fileContent = await getFileContent(batchStatus.output_file_id ?? "");
+
+    const parsedData = await parseGeneratedData(fileContent);
+
+    const bulkWriteResult = await bulkWriteToDb(parsedData);
+  }
 })();

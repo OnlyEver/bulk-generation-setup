@@ -23,8 +23,6 @@ exports.handler = void 0;
 const config_1 = require("../config");
 const app_1 = require("../app");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
-const parse_depth_1 = require("../generation-jobs/5.batch-parse/parse_depth");
-const mongodb_1 = require("mongodb");
 const lambda = new aws_sdk_1.default.Lambda();
 const CHILD_LAMBDA_NAME = "child-handler";
 const handler = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -59,22 +57,16 @@ const handler = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.handler = handler;
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
-    const db = (0, app_1.getDbInstance)();
-    const sourceCollection = db.collection("_source");
-    const taxonomyData = yield sourceCollection.findOne({
-        _id: new mongodb_1.ObjectId("6753b20a56e5e922b58273d6"),
-    }, {
-        projection: { source_taxonomy: 1 },
-    });
-    // openai(config.openAiKey ?? "");
-    // await handler();
-    const parsedCards = (0, parse_depth_1.parseDepth)({
-        sourceTaxonomy: (_b = taxonomyData === null || taxonomyData === void 0 ? void 0 : taxonomyData.source_taxonomy) !== null && _b !== void 0 ? _b : {},
-    });
-    return parsedCards;
-    // get batch status from mongo;
+    (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
+    const batchStatus = yield (0, app_1.getBatchStatus)("batch_678f656b08d88190ae11a7f7573517a1");
+    console.log(batchStatus.status);
+    if (batchStatus.status === "completed") {
+        const fileContent = yield (0, app_1.getFileContent)((_c = batchStatus.output_file_id) !== null && _c !== void 0 ? _c : "");
+        const parsedData = yield (0, app_1.parseGeneratedData)(fileContent);
+        const bulkWriteResult = yield (0, app_1.bulkWriteToDb)(parsedData.parsed_response);
+    }
 }))();
 //# sourceMappingURL=example_batch_process.js.map

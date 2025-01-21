@@ -9,3 +9,8 @@ export declare const getBatchStatus: (batchId: string) => Promise<OpenAI.Batches
     _request_id?: string | null;
 }>;
 export declare const getFileContent: (fileId: string) => Promise<any[]>;
+export declare const parseGeneratedData: (jsonLinesFromFile: any[]) => Promise<{
+    batch_id: string;
+    parsed_response: ParsedResponse[];
+}>;
+export declare const bulkWriteToDb: (parsedResponses: ParsedResponse[]) => Promise<void>;

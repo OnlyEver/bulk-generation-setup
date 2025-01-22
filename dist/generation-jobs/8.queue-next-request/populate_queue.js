@@ -18,18 +18,18 @@ const list_last_where_1 = require("../../utils/list_last_where");
  * and breadth (typology) of the source
  *
  * @async
- * @param sourceId `_id` of the source
+ * @param sourceId - The `_id` of the source
  */
 function populateQueue(sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b;
         const sourceCollection = connection_1.database.collection('_source');
         const generationRequests = connection_1.database.collection('_generation_requests');
         const cardCollection = connection_1.database.collection('_card');
         let documents = []; // Array of documents to be inserted in the generation_requests collection
         try {
             const source = yield sourceCollection.findOne({
-                _id: mongodb_1.ObjectId.createFromHexString(sourceId)
+                _id: new mongodb_1.ObjectId(sourceId)
             }, {
                 projection: { generation_info: 1, view_time: 1, source_taxonomy: 1, _ai_cards: 1 },
             });
@@ -47,100 +47,12 @@ function populateQueue(sourceId) {
                             _insertBreadthRequest(((_b = (_a = lastBreadthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n_reqs) !== null && _b !== void 0 ? _b : 0) + 1);
                         }
                         else {
-                            /// For card generation or depth request 
-                            const concepts = sourceTaxonomy.concepts;
-                            const facts = sourceTaxonomy.facts;
-                            const conceptTextArray = concepts.map((concept) => concept.concept_text);
-                            const factTextArray = facts.map((fact) => fact.fact_text);
-                            const bloomLevelCards = yield cardCollection.aggregate([
-                                { $match: { "_id": { $in: aiCards } } },
-                                { $group: { _id: '$generated_info.blooms_level', cards: { $push: { _id: '$_id', generated_info: '$generated_info' } } } },
-                                { $sort: { _id: 1 } },
-                                { $project: { _id: 0, level: '$_id', cards: 1 } },
-                            ]).toArray();
-                            let levelConcepts = []; /// An array of concept_text according to the bloom level
-                            let levelFacts = []; /// An array of fact_text according to the bloom level
-                            if (sourceTaxonomy.generate_cards.state) {
-                                let maxRequestsForBloom = 5;
-                                for (let bloom = 1; bloom <= 5; bloom++) {
-                                    console.log("Bloom level: ", bloom);
-                                    let missingConcepts = [];
-                                    let missingFacts = [];
-                                    const lastDepthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => { var _a, _b; return ((_a = item.req_type) === null || _a === void 0 ? void 0 : _a.type) === 'depth' && ((_b = item.req_type) === null || _b === void 0 ? void 0 : _b.bloom_level) === bloom; });
-                                    if (lastDepthRequest) {
-                                        if (((_d = (_c = lastDepthRequest.req_type) === null || _c === void 0 ? void 0 : _c.n_reqs) !== null && _d !== void 0 ? _d : 0) <= maxRequestsForBloom) {
-                                            let levelCards = [];
-                                            levelCards = ((_e = bloomLevelCards.find((item) => item.level === bloom)) === null || _e === void 0 ? void 0 : _e.cards) || [];
-                                            if (levelCards.length > 0) {
-                                                for (let card of levelCards) {
-                                                    if (card.generated_info.concepts) {
-                                                        for (let concept of card.generated_info.concepts) {
-                                                            if (concept.concept_text) {
-                                                                levelConcepts.push(concept.concept_text);
-                                                            }
-                                                        }
-                                                    }
-                                                    if (card.generated_info.facts) {
-                                                        for (let fact of card.generated_info.facts) {
-                                                            if (fact.fact_text) {
-                                                                levelFacts.push(fact.fact_text);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                if (levelConcepts.length > 0) {
-                                                    const c = conceptTextArray.filter((concept) => !levelConcepts.includes(concept));
-                                                    missingConcepts = [];
-                                                    missingConcepts.push(...c);
-                                                }
-                                                if (levelFacts.length > 0) {
-                                                    const f = factTextArray.filter((fact) => !levelFacts.includes(fact));
-                                                    missingFacts = [];
-                                                    missingFacts.push(...f);
-                                                }
-                                                if (missingConcepts.length > 0 || missingFacts.length > 0) {
-                                                    const missingConceptsData = missingConcepts.map((concept) => { return concepts.find((e) => e.concept_text === concept); });
-                                                    const missingFactsData = missingFacts.map((fact) => { return facts.find((e) => e.fact_text === fact); });
-                                                    documents.push({
-                                                        "_source": sourceId,
-                                                        "ctime": new Date(),
-                                                        "status": "created",
-                                                        "request_type": {
-                                                            "type": "depth",
-                                                            "bloom_level": bloom,
-                                                            "n_reqs": ((_f = lastDepthRequest === null || lastDepthRequest === void 0 ? void 0 : lastDepthRequest.n_reqs) !== null && _f !== void 0 ? _f : 0) + 1
-                                                        },
-                                                        "params": {
-                                                            "missing_concepts": missingConceptsData,
-                                                            "missing_facts": missingFactsData,
-                                                        },
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        documents.push({
-                                            "_source": sourceId,
-                                            "ctime": new Date(),
-                                            "status": "created",
-                                            "request_type": {
-                                                "type": "depth",
-                                                "bloom_level": bloom,
-                                                "n_reqs": 1
-                                            },
-                                            "params": {
-                                                "missing_concepts": concepts,
-                                                "missing_facts": facts,
-                                            },
-                                        });
-                                    }
-                                    maxRequestsForBloom--;
-                                }
-                            }
+                            const depthDocuments = yield handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection);
+                            documents.push(...depthDocuments);
                         }
                     }
                     else {
+                        /// Insert the initial breadth request with n_reqs = 1
                         _insertBreadthRequest(1);
                     }
                     const genReqs = yield generationRequests.insertMany(documents);
@@ -166,8 +78,118 @@ function populateQueue(sourceId) {
         }
     });
 }
-function handleDepthRequest() {
+/**
+ * Handles the depth request generation by determining missing concepts and facts for each bloom level.
+ *
+ * @async
+ * @param sourceId - The `_id` of the source.
+ * @param sourceTaxonomy - The taxonomy data of the source.
+ * @param generationInfo - Information about previous generation requests.
+ * @param aiCards - Array of AI card ObjectIds for the source.
+ * @param cardCollection - The collection containing card data.
+ * @returns {Promise<any[]>} - A promise resolving to an array of generation request documents.
+ */
+function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection) {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c, _d;
+        try {
+            let documents = [];
+            const concepts = sourceTaxonomy.concepts;
+            const facts = sourceTaxonomy.facts;
+            const conceptTextArray = concepts.map((concept) => concept.concept_text);
+            const factTextArray = facts.map((fact) => fact.fact_text);
+            const bloomLevelCards = yield cardCollection.aggregate([
+                { $match: { "_id": { $in: aiCards } } },
+                { $group: { _id: "$generated_info.blooms_level", cards: { $push: "$$ROOT" } } },
+                { $sort: { _id: 1 } },
+                { $project: { _id: 0, level: "$_id", cards: 1 } }
+            ]).toArray();
+            if (sourceTaxonomy.generate_cards.state) {
+                let maxRequestsForBloom = 5;
+                let levelConcepts = []; /// An array of concept_text according to the bloom level
+                let levelFacts = []; /// An array of fact_text according to the bloom level
+                for (let bloom = 1; bloom <= 5; bloom++) {
+                    console.log("Bloom level: ", bloom);
+                    let missingConcepts = [];
+                    let missingFacts = [];
+                    const lastDepthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => { var _a, _b; return ((_a = item.req_type) === null || _a === void 0 ? void 0 : _a.type) === 'depth' && ((_b = item.req_type) === null || _b === void 0 ? void 0 : _b.bloom_level) === bloom; });
+                    if (lastDepthRequest) {
+                        if (((_b = (_a = lastDepthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n_reqs) !== null && _b !== void 0 ? _b : 0) <= maxRequestsForBloom) {
+                            let levelCards = [];
+                            levelCards = ((_c = bloomLevelCards.find((item) => item.level === bloom)) === null || _c === void 0 ? void 0 : _c.cards) || [];
+                            if (levelCards.length > 0) {
+                                for (let card of levelCards) {
+                                    if (card.generated_info.concepts) {
+                                        for (let concept of card.generated_info.concepts) {
+                                            if (concept.concept_text) {
+                                                levelConcepts.push(concept.concept_text);
+                                            }
+                                        }
+                                    }
+                                    if (card.generated_info.facts) {
+                                        for (let fact of card.generated_info.facts) {
+                                            if (fact.fact_text) {
+                                                levelFacts.push(fact.fact_text);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (levelConcepts.length > 0) {
+                                    const c = conceptTextArray.filter((concept) => !levelConcepts.includes(concept));
+                                    missingConcepts = [];
+                                    missingConcepts.push(...c);
+                                }
+                                if (levelFacts.length > 0) {
+                                    const f = factTextArray.filter((fact) => !levelFacts.includes(fact));
+                                    missingFacts = [];
+                                    missingFacts.push(...f);
+                                }
+                                if (missingConcepts.length > 0 || missingFacts.length > 0) {
+                                    const missingConceptsData = missingConcepts.map((concept) => { return concepts.find((e) => e.concept_text === concept); });
+                                    const missingFactsData = missingFacts.map((fact) => { return facts.find((e) => e.fact_text === fact); });
+                                    documents.push({
+                                        "_source": sourceId,
+                                        "ctime": new Date(),
+                                        "status": "created",
+                                        "request_type": {
+                                            "type": "depth",
+                                            "bloom_level": bloom,
+                                            "n_reqs": ((_d = lastDepthRequest === null || lastDepthRequest === void 0 ? void 0 : lastDepthRequest.n_reqs) !== null && _d !== void 0 ? _d : 0) + 1
+                                        },
+                                        "params": {
+                                            "missing_concepts": missingConceptsData,
+                                            "missing_facts": missingFactsData,
+                                        },
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        documents.push({
+                            "_source": sourceId,
+                            "ctime": new Date(),
+                            "status": "created",
+                            "request_type": {
+                                "type": "depth",
+                                "bloom_level": bloom,
+                                "n_reqs": 1
+                            },
+                            "params": {
+                                "missing_concepts": concepts,
+                                "missing_facts": facts,
+                            },
+                        });
+                    }
+                    maxRequestsForBloom--;
+                }
+            }
+            return documents;
+        }
+        catch (error) {
+            console.log("Error while handling depth request: ", error);
+            throw error;
+        }
     });
 }
 //# sourceMappingURL=populate_queue.js.map

@@ -19,3 +19,6 @@ export declare const bulkWriteToDb: (parsedResponses: {
 }) => Promise<{
     status: string;
 }>;
+export declare const populateQueueForNextRequest: (sourceId: string) => Promise<{
+    status: string;
+}>;

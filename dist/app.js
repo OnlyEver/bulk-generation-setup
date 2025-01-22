@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bulkWriteToDb = exports.parseGeneratedData = exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareGenerationBatch = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
+exports.populateQueueForNextRequest = exports.bulkWriteToDb = exports.parseGeneratedData = exports.getFileContent = exports.getBatchStatus = exports.createBatchRequest = exports.prepareGenerationBatch = exports.openai = exports.getDbInstance = exports.setUpMongoClient = void 0;
 const check_batch_status_1 = require("./generation-jobs/3.batch-status/check_batch_status");
 const get_result_1 = require("./generation-jobs/4.batch-result/get_result");
 const create_batch_1 = require("./generation-jobs/2.batch-creation/create_batch");
@@ -19,6 +19,7 @@ const openai_helper_1 = require("./openai/openai_helper");
 const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
 const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
+const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 const setUpMongoClient = (connectionUri, dbName) => {
@@ -80,4 +81,11 @@ const bulkWriteToDb = (parsedResponses) => __awaiter(void 0, void 0, void 0, fun
     };
 });
 exports.bulkWriteToDb = bulkWriteToDb;
+const populateQueueForNextRequest = (sourceId) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, populate_queue_1.populateQueue)(sourceId);
+    return {
+        status: "Success",
+    };
+});
+exports.populateQueueForNextRequest = populateQueueForNextRequest;
 //# sourceMappingURL=app.js.map

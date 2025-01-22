@@ -40,7 +40,7 @@ export async function prepareBatch(): Promise<Object> {
           })
         );
 
-        const filePath = `batchinput${index}.jsonl`;
+        const filePath = `/tmp/batchinput${index}.jsonl`;
         await fsPromise.writeFile(
           filePath,
           batchDataList.map((entry) => JSON.stringify(entry)).join("\n"),

@@ -38,6 +38,8 @@ const config_1 = require("./config");
             yield generationDataCollection.updateMany({ _source: source._source }, { $set: { status: status } });
         })));
         console.log(batch);
+        var status = yield (0, app_1.getBatchStatus)('batch_6790a12c50bc8190a70f28a5b2f94469');
+        console.log(status);
     }
     catch (e) {
         throw e;

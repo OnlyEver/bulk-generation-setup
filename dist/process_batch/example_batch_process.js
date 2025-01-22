@@ -63,7 +63,7 @@ exports.handler = handler;
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
     // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
     // console.log(fileContent);
-    const batchStatus = yield (0, app_1.getBatchStatus)("batch_678f656b08d88190ae11a7f7573517a1");
+    const batchStatus = yield (0, app_1.getBatchStatus)("batch_6790a12c50bc8190a70f28a5b2f94469");
     console.log(batchStatus.status);
     if (batchStatus.status === "completed") {
         const fileContent = yield (0, app_1.getFileContent)((_c = batchStatus.output_file_id) !== null && _c !== void 0 ? _c : "");

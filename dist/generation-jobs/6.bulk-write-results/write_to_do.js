@@ -16,7 +16,7 @@ function handleBulkWrite(parsedResponse) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const database = (0, app_1.getDbInstance)();
-            const cardCollection = database.collection("_cards");
+            const cardCollection = database.collection("_card");
             const sourceCollection = database.collection("_source");
             const dbOps = yield (0, parsed_response_to_db_operations_1.convertParsedArrayToDbOperations)(parsedResponse);
             const cardsOps = dbOps._cards;

@@ -61,6 +61,8 @@ exports.handler = handler;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
+    // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
+    // console.log(fileContent);
     const batchStatus = yield (0, app_1.getBatchStatus)("batch_678f656b08d88190ae11a7f7573517a1");
     console.log(batchStatus.status);
     if (batchStatus.status === "completed") {

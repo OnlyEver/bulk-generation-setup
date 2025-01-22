@@ -67,6 +67,8 @@ export const handler = async () => {
   // console.log("batch process");
   setUpMongoClient(config.dbUri, config.dbName ?? "");
   openai(config.openAiKey ?? "");
+  // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
+  // console.log(fileContent);
 
   const batchStatus = await getBatchStatus(
     "batch_678f656b08d88190ae11a7f7573517a1"

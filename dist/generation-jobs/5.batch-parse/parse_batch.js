@@ -27,20 +27,15 @@ function parseBatchResponse(generatedResponses) {
                 batchId = elem.id;
                 const rawResponse = {
                     batch_id: elem.id,
-                    request_id: elem.response.request_id,
+                    request_id: customId,
                     response: elem.response,
                 };
                 if (customId.request_type.type === "depth") {
                     const taxonomyData = yield sourceCollection.findOne({
-                        _id: new mongodb_1.BSON.ObjectId(customId.source_id),
+                        _id: new mongodb_1.ObjectId(customId._source),
                     }, {
                         projection: { source_taxonomy: 1 },
                     });
-                    const rawResponse = {
-                        batch_id: elem.id,
-                        request_id: customId,
-                        response: elem.response.body,
-                    };
                     const depth = (0, parse_depth_1.parseDepth)({
                         rawResponse: rawResponse,
                         sourceTaxonomy: (_a = taxonomyData === null || taxonomyData === void 0 ? void 0 : taxonomyData.source_taxonomy) !== null && _a !== void 0 ? _a : {},
@@ -66,7 +61,7 @@ function parseBatchResponse(generatedResponses) {
 function extractCustomId(customId) {
     const customIdData = JSON.parse(customId);
     return {
-        source_id: customIdData.source_id,
+        _source: customIdData.source_id,
         request_type: {
             type: customIdData.request_type.type,
             bloom_level: customIdData.request_type.bloom_level,

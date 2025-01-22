@@ -5,7 +5,7 @@ const mongodb_1 = require("mongodb");
 function writeDBOpsForBreadth(data) {
     const reqId = data.requestIdentifier;
     var metadata = data.metadata;
-    const sourceId = reqId.source_id;
+    const sourceId = reqId._source;
     const generatedData = data.generated_data;
     const dbOPS = [];
     /// write metadata to generation info

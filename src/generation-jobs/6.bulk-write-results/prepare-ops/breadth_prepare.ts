@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
   const reqId = data.requestIdentifier;
   var metadata = data.metadata;
-  const sourceId = reqId.source_id;
+  const sourceId = reqId._source;
   const generatedData = data.generated_data as TypologyResponse;
   const dbOPS: any[] = [];
 

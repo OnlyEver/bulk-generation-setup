@@ -9,10 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertParsedArrayToDoOperations = convertParsedArrayToDoOperations;
+exports.convertParsedArrayToDbOperations = convertParsedArrayToDbOperations;
 const breadth_prepare_1 = require("./breadth_prepare");
 const prepare_db_ops_for_depth_1 = require("./prepare_db_ops_for_depth");
-function convertParsedArrayToDoOperations(parsedArray) {
+function convertParsedArrayToDbOperations(parsedArray) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const dbOperations = [];
@@ -34,8 +34,12 @@ function convertParsedArrayToDoOperations(parsedArray) {
                 }
             }
             return {
-                _cards: dbOperations.filter((elem) => elem.collection === "_cards"),
-                _source: dbOperations.filter((elem) => elem.collection === "_source"),
+                _cards: dbOperations
+                    .filter((elem) => elem.collection === "_cards")
+                    .map((elem) => elem.query),
+                _source: dbOperations
+                    .filter((elem) => elem.collection === "_source")
+                    .map((elem) => elem.query),
             };
         }
         catch (e) {

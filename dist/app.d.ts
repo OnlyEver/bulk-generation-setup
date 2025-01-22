@@ -13,4 +13,9 @@ export declare const parseGeneratedData: (jsonLinesFromFile: any[]) => Promise<{
     batch_id: string;
     parsed_response: ParsedResponse[];
 }>;
-export declare const bulkWriteToDb: (parsedResponses: ParsedResponse[]) => Promise<void>;
+export declare const bulkWriteToDb: (parsedResponses: {
+    batch_id: string;
+    parsed_response: ParsedResponse[];
+}) => Promise<{
+    status: string;
+}>;

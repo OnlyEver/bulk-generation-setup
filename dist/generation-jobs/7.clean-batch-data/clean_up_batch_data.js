@@ -19,8 +19,10 @@ function cleanUpBatchData(_a) {
             const database = (0, app_1.getDbInstance)();
             const generationDataCollection = database.collection("_generation_requests");
             const batchDataCollection = database.collection("_batch_data");
-            yield generationDataCollection.deleteMany(requestIdentifiers);
-            yield batchDataCollection.deleteMany({ id: batch_id });
+            yield generationDataCollection.deleteMany({
+                $or: requestIdentifiers,
+            });
+            yield batchDataCollection.deleteOne({ id: batch_id });
         }
         catch (error) {
             console.error("Error occurred while cleaning up the batch data:", error);

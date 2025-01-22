@@ -9,6 +9,7 @@ import { Db, MongoClient } from "mongodb";
 import { parseBatchResponse } from "./generation-jobs/5.batch-parse/parse_batch";
 import { handleBulkWrite } from "./generation-jobs/6.bulk-write-results/write_to_do";
 import { cleanUpBatchData } from "./generation-jobs/7.clean-batch-data/clean_up_batch_data";
+import { populateQueue } from "./generation-jobs/8.queue-next-request/populate_queue";
 
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
@@ -79,6 +80,13 @@ export const bulkWriteToDb = async (parsedResponses: {
       (e: ParsedResponse) => e.requestIdentifier
     ),
   });
+  return {
+    status: "Success",
+  };
+};
+
+export const populateQueueForNextRequest = async (sourceId: string) => {
+  const data = await populateQueue(sourceId);
   return {
     status: "Success",
   };

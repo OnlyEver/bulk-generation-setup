@@ -82,7 +82,7 @@ const getPrompt = async (
 
 const getCustomIdForBreadth = (doc: any): RequestId => {
   return {
-    source_id: doc.source._id.toString(),
+    _source: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
       n: doc.n | 1,
@@ -92,7 +92,7 @@ const getCustomIdForBreadth = (doc: any): RequestId => {
 
 const getCustomIdForDepth = (doc: any): RequestId => {
   return {
-    source_id: doc.source._id.toString(),
+    _source: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
       n: doc.n | 1,

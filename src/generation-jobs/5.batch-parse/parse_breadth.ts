@@ -12,7 +12,7 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
     const requestId = rawResponse.request_id;
     const content = rawResponse.response.body.choices[0].message.content;
     const parsedContent = JSON.parse(content);
-    const usage = rawResponse.response.response.usage;
+    const usage = rawResponse.response.usage;
 
     return {
       requestIdentifier: requestId,

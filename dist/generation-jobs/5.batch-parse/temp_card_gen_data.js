@@ -60,7 +60,7 @@ function getCardData() {
     return {
         batch_id: cardResponse.id,
         request_id: {
-            source_id: cardResponse.custom_id.source,
+            _source: cardResponse.custom_id.source,
             request_type: cardResponse.custom_id.request_type,
         },
         response: cardResponse.response.body,

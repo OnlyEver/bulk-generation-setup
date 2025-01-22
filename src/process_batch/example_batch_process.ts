@@ -21,6 +21,7 @@ import {
 import AWS from "aws-sdk";
 import { parseDepth } from "../generation-jobs/5.batch-parse/parse_depth";
 import { ObjectId } from "mongodb";
+import { populateQueue } from "../generation-jobs/8.queue-next-request/populate_queue";
 
 const lambda = new AWS.Lambda();
 
@@ -66,6 +67,8 @@ export const handler = async () => {
   // console.log("batch process");
   setUpMongoClient(config.dbUri, config.dbName ?? "");
   openai(config.openAiKey ?? "");
+  // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
+  // console.log(fileContent);
 
   const batchStatus = await getBatchStatus(
     "batch_678f656b08d88190ae11a7f7573517a1"
@@ -84,4 +87,6 @@ export const handler = async () => {
       batchStatus.error_file_id ?? ""
     );
   }
+
+  //await populateQueue('6753b17a7d070c44ecf24f9e');
 })();

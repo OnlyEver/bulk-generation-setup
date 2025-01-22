@@ -4,7 +4,7 @@ import { convertParsedArrayToDbOperations } from "./prepare-ops/parsed_response_
 export async function handleBulkWrite(parsedResponse: ParsedResponse[]) {
   try {
     const database = getDbInstance();
-    const cardCollection = database.collection("_cards");
+    const cardCollection = database.collection("_card");
     const sourceCollection = database.collection("_source");
     const dbOps = await convertParsedArrayToDbOperations(parsedResponse);
     const cardsOps = dbOps._cards;

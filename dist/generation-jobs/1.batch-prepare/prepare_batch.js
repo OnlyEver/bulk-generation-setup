@@ -78,7 +78,7 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
 });
 const getCustomIdForBreadth = (doc) => {
     return {
-        source_id: doc.source._id.toString(),
+        _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
             n: doc.n | 1,
@@ -87,7 +87,7 @@ const getCustomIdForBreadth = (doc) => {
 };
 const getCustomIdForDepth = (doc) => {
     return {
-        source_id: doc.source._id.toString(),
+        _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
             n: doc.n | 1,

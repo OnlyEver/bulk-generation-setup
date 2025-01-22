@@ -18,6 +18,7 @@ const connection_1 = require("./mongodb/connection");
 const openai_helper_1 = require("./openai/openai_helper");
 const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
+const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 const setUpMongoClient = (connectionUri, dbName) => {
@@ -69,8 +70,14 @@ const parseGeneratedData = (jsonLinesFromFile) => __awaiter(void 0, void 0, void
 });
 exports.parseGeneratedData = parseGeneratedData;
 const bulkWriteToDb = (parsedResponses) => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield (0, write_to_do_1.handleBulkWrite)(parsedResponses);
-    return data;
+    const data = yield (0, write_to_do_1.handleBulkWrite)(parsedResponses.parsed_response);
+    const cleanUp = yield (0, clean_up_batch_data_1.cleanUpBatchData)({
+        batch_id: parsedResponses.batch_id,
+        requestIdentifiers: parsedResponses.parsed_response.map((e) => e.requestIdentifier),
+    });
+    return {
+        status: "Success",
+    };
 });
 exports.bulkWriteToDb = bulkWriteToDb;
 //# sourceMappingURL=app.js.map

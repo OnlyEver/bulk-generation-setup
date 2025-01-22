@@ -57,16 +57,23 @@ const handler = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.handler = handler;
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
+    // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
+    // console.log(fileContent);
     const batchStatus = yield (0, app_1.getBatchStatus)("batch_678f656b08d88190ae11a7f7573517a1");
     console.log(batchStatus.status);
     if (batchStatus.status === "completed") {
         const fileContent = yield (0, app_1.getFileContent)((_c = batchStatus.output_file_id) !== null && _c !== void 0 ? _c : "");
         const parsedData = yield (0, app_1.parseGeneratedData)(fileContent);
-        const bulkWriteResult = yield (0, app_1.bulkWriteToDb)(parsedData.parsed_response);
+        const bulkWriteResult = yield (0, app_1.bulkWriteToDb)(parsedData);
     }
+    else if (batchStatus.status === "failed") {
+        console.log("Batch failed");
+        const errorFileContent = yield (0, app_1.getFileContent)((_d = batchStatus.error_file_id) !== null && _d !== void 0 ? _d : "");
+    }
+    //await populateQueue('6753b17a7d070c44ecf24f9e');
 }))();
 //# sourceMappingURL=example_batch_process.js.map

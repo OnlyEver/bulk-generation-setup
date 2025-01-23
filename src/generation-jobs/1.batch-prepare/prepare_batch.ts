@@ -5,6 +5,7 @@ import { returnTypologyPrompt } from "./fetch-prompts/fetch_typology_prompt";
 import { parseData } from "../1.batch-prepare/parse_source_content";
 import { Db, ObjectId } from "mongodb";
 import { returnCardGenPrompt } from "./fetch-prompts/fetch_card_gen_prompt";
+import { parse } from "path";
 
 /**
  * Prepares a batch file for processing by generating a set of data requests
@@ -136,10 +137,21 @@ const prepareBatchForBreadth = async (doc: any) => {
 
 const prepareBatchForDepth = async (doc: any) => {
   const parsedTypology = doc._source.source_taxonomy;
+  const params = doc.params;
   const cardGenPrompt = await getPrompt(
     doc.request_type.type,
     doc.request_type.bloom_level
   );
+  if (doc.request_type.bloom_level !== 1) {
+    if (params) {
+      if (params.missing_facts) {
+        parsedTypology.facts = params.missing_facts;
+      }
+      if (params.missing_concepts) {
+        parsedTypology.concepts = params.missing_concepts;
+      }
+    }
+  }
 
   return {
     custom_id: JSON.stringify(getCustomIdForDepth(doc)),

@@ -19,7 +19,7 @@ function parseBreadth(rawResponse) {
             requestIdentifier: requestId,
             generated_data: {
                 field: (0, parse_typology_1.parseFields)(parsedContent.field),
-                concepts: parsedContent.facts.map((fact) => ({
+                concepts: parsedContent.concepts.map((fact) => ({
                     fact_text: fact.fact_text,
                     reference: fact.reference,
                 })),

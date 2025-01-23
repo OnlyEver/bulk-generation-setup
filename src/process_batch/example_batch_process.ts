@@ -16,6 +16,7 @@ import {
   getFileContent,
   parseGeneratedData,
   bulkWriteToDb,
+  populateQueueForNextRequest,
 } from "../app";
 
 import AWS from "aws-sdk";
@@ -67,11 +68,11 @@ export const handler = async () => {
   // console.log("batch process");
   setUpMongoClient(config.dbUri, config.dbName ?? "");
   openai(config.openAiKey ?? "");
-  // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
+  const fileContent = await getFileContent("");
   // console.log(fileContent);
 
   const batchStatus = await getBatchStatus(
-    "batch_678f656b08d88190ae11a7f7573517a1"
+    "batch_6791cbe29c8c8190be254b0761ab12cb"
   );
   console.log(batchStatus.status);
 
@@ -79,8 +80,16 @@ export const handler = async () => {
     const fileContent = await getFileContent(batchStatus.output_file_id ?? "");
 
     const parsedData = await parseGeneratedData(fileContent);
+    const sourceIds = parsedData.parsed_response.map(
+      (item) => item.requestIdentifier._source
+    );
+    const uniqueSourceIds = [...new Set(sourceIds)];
 
     const bulkWriteResult = await bulkWriteToDb(parsedData);
+    uniqueSourceIds.forEach(async (sourceId) => {
+      console.log(`Source ID: ${sourceId}`);
+      await populateQueueForNextRequest(sourceId);
+    });
   } else if (batchStatus.status === "failed") {
     console.log("Batch failed");
     const errorFileContent = await getFileContent(

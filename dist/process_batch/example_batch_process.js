@@ -61,14 +61,20 @@ exports.handler = handler;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    // const fileContent = await getFileContent("file-AHL1qcGLCbTxA1Cc4ec7wm");
+    const fileContent = yield (0, app_1.getFileContent)("");
     // console.log(fileContent);
-    const batchStatus = yield (0, app_1.getBatchStatus)("batch_678f656b08d88190ae11a7f7573517a1");
+    const batchStatus = yield (0, app_1.getBatchStatus)("batch_6791cbe29c8c8190be254b0761ab12cb");
     console.log(batchStatus.status);
     if (batchStatus.status === "completed") {
         const fileContent = yield (0, app_1.getFileContent)((_c = batchStatus.output_file_id) !== null && _c !== void 0 ? _c : "");
         const parsedData = yield (0, app_1.parseGeneratedData)(fileContent);
+        const sourceIds = parsedData.parsed_response.map((item) => item.requestIdentifier._source);
+        const uniqueSourceIds = [...new Set(sourceIds)];
         const bulkWriteResult = yield (0, app_1.bulkWriteToDb)(parsedData);
+        uniqueSourceIds.forEach((sourceId) => __awaiter(void 0, void 0, void 0, function* () {
+            console.log(`Source ID: ${sourceId}`);
+            yield (0, app_1.populateQueueForNextRequest)(sourceId);
+        }));
     }
     else if (batchStatus.status === "failed") {
         console.log("Batch failed");

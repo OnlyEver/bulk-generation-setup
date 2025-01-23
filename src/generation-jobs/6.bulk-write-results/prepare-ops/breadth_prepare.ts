@@ -13,7 +13,7 @@ export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
     query: {
       updateOne: {
         filter: {
-          _source: new ObjectId(sourceId),
+          _id: new ObjectId(sourceId),
         },
         update: {
           $addToSet: {

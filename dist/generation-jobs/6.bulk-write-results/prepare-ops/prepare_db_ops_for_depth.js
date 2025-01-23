@@ -59,7 +59,7 @@ function writeDBOpsForDepth(data) {
                     query: {
                         updateOne: {
                             filter: {
-                                _source: new mongodb_1.ObjectId(sourceId),
+                                _id: new mongodb_1.ObjectId(sourceId),
                             },
                             update: {
                                 $addToSet: {
@@ -91,7 +91,7 @@ function writeDBOpsForDepth(data) {
                     query: {
                         updateOne: {
                             filter: {
-                                _source: new mongodb_1.ObjectId(sourceId),
+                                _id: new mongodb_1.ObjectId(sourceId),
                             },
                             update: {
                                 $addToSet: {

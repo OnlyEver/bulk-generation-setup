@@ -49,7 +49,7 @@ export async function writeDBOpsForDepth(data: ParsedResponse): Promise<any[]> {
         query: {
           updateOne: {
             filter: {
-              _source: new ObjectId(sourceId),
+              _id: new ObjectId(sourceId),
             },
             update: {
               $addToSet: {
@@ -88,7 +88,7 @@ export async function writeDBOpsForDepth(data: ParsedResponse): Promise<any[]> {
         query: {
           updateOne: {
             filter: {
-              _source: new ObjectId(sourceId),
+              _id: new ObjectId(sourceId),
             },
             update: {
               $addToSet: {

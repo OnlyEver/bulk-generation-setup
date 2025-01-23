@@ -18,7 +18,7 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
       requestIdentifier: requestId,
       generated_data: {
         field: parseFields(parsedContent.field),
-        concepts: parsedContent.facts.map(
+        concepts: parsedContent.concepts.map(
           (fact: { fact_text: string; reference: string }) => ({
             fact_text: fact.fact_text,
             reference: fact.reference,

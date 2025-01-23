@@ -19,10 +19,12 @@ function writeDBOpsForBreadth(data) {
                 update: {
                     $addToSet: {
                         generation_info: metadata,
-                        "source_taxonomy.fields": generatedData.field,
-                        "source_taxonomy.concepts": generatedData.concepts,
-                        "source_taxonomy.facts": generatedData.facts,
-                        "source_taxonomy.summary_cards": generatedData.summary_cards,
+                        "source_taxonomy.fields": { $each: generatedData.field },
+                        "source_taxonomy.concepts": { $each: generatedData.concepts },
+                        "source_taxonomy.facts": { $each: generatedData.facts },
+                        "source_taxonomy.summary_cards": {
+                            $each: generatedData.summary_cards,
+                        },
                     },
                     $set: {
                         "source_taxonomy.generate_cards": generatedData.generate_cards,

@@ -60,13 +60,16 @@ function parseBatchResponse(generatedResponses) {
 }
 function extractCustomId(customId) {
     const customIdData = JSON.parse(customId);
-    return {
-        _source: customIdData.source_id,
+    let identifier = {
+        _source: customIdData._source,
         request_type: {
             type: customIdData.request_type.type,
-            bloom_level: customIdData.request_type.bloom_level,
-            n: customIdData.request,
+            n: customIdData.request_type.n,
         },
     };
+    if (customIdData.request_type.bloom_level) {
+        identifier.request_type.bloom_level = customIdData.request_type.bloom_level;
+    }
+    return identifier;
 }
 //# sourceMappingURL=parse_batch.js.map

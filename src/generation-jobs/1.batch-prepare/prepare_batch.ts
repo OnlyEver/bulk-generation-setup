@@ -86,7 +86,7 @@ const getCustomIdForBreadth = (doc: any): RequestId => {
     _source: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
-      n: doc.n | 1,
+      n: doc.request_type.n | 1,
     },
   };
 };
@@ -104,6 +104,13 @@ const getCustomIdForDepth = (doc: any): RequestId => {
 
 const prepareBatchForBreadth = async (doc: any) => {
   const prompts = await getPrompt(doc.request_type.type);
+  const currentN = doc.request_type.n ?? 1;
+  let existingTypology = "";
+  if (currentN > 1) {
+    existingTypology =
+      "Dont generate Existing taxonomy data is as " +
+      JSON.stringify(doc.source?.source_taxonomy ?? {});
+  }
   return {
     custom_id: JSON.stringify(getCustomIdForBreadth(doc)), // Unique identifier for each request.
     method: "POST",
@@ -115,20 +122,21 @@ const prepareBatchForBreadth = async (doc: any) => {
         { role: "system", content: prompts },
         {
           role: "user",
-          content: parseData(
-            doc.source.content,
-            [
-              "See also",
-              "References",
-              "Further reading",
-              "External links",
-              "Notes and references",
-              "Bibliography",
-              "Notes",
-              "Cited sources",
-            ],
-            ["table", "empty_line"]
-          ),
+          content:
+            parseData(
+              doc.source.content,
+              [
+                "See also",
+                "References",
+                "Further reading",
+                "External links",
+                "Notes and references",
+                "Bibliography",
+                "Notes",
+                "Cited sources",
+              ],
+              ["table", "empty_line"]
+            ) + existingTypology,
         },
       ],
     },

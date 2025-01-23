@@ -69,18 +69,18 @@ export const handler = async () => {
   // console.log("batch process");
   setUpMongoClient(config.dbUri, config.dbName ?? "");
   openai(config.openAiKey ?? "");
-  await cleanUpBatchData({
-    batch_id: "batch_6792040ab01481909c1a1ca5d61c56a4",
-    requestIdentifiers: [
-      {
-        _source: "6753b17a7d070c44ecf24f9e",
-        request_type: {
-          type: "breadth",
-          n: 1,
-        },
-      },
-    ],
-  });
+  // await cleanUpBatchData({
+  //   batch_id: "batch_6792040ab01481909c1a1ca5d61c56a4",
+  //   requestIdentifiers: [
+  //     {
+  //       _source: "6753b17a7d070c44ecf24f9e",
+  //       request_type: {
+  //         type: "breadth",
+  //         n: 1,
+  //       },
+  //     },
+  //   ],
+  // });
   // const fileContent = await getFileContent("");
   // console.log(fileContent);
 
@@ -101,7 +101,7 @@ export const handler = async () => {
   //   const bulkWriteResult = await bulkWriteToDb(parsedData);
   //   uniqueSourceIds.forEach(async (sourceId) => {
   //     console.log(`Source ID: ${sourceId}`);
-  //     await populateQueueForNextRequest(sourceId);
+  await populateQueueForNextRequest("6753b17a7d070c44ecf24f9e");
   //   });
   // } else if (batchStatus.status === "failed") {
   //   console.log("Batch failed");

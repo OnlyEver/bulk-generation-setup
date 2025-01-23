@@ -22,7 +22,7 @@ const list_last_where_1 = require("../../utils/list_last_where");
  */
 function populateQueue(sourceId) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c;
         const sourceCollection = connection_1.database.collection("_source");
         const generationRequests = connection_1.database.collection("_generation_requests");
         const cardCollection = connection_1.database.collection("_card");
@@ -42,14 +42,14 @@ function populateQueue(sourceId) {
                 const generationInfo = source.generation_info;
                 const viewTime = source.view_time;
                 const sourceTaxonomy = source.source_taxonomy;
-                const aiCards = source._ai_cards.map((elem) => elem._id);
+                const aiCards = ((_a = source._ai_cards) !== null && _a !== void 0 ? _a : []).map((elem) => elem._id);
                 if (Array.isArray(generationInfo) && generationInfo.length > 0) {
                     const lastBreadthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => item.req_type.type === "breadth");
                     const calculatedViewTime = Math.floor(viewTime / 300);
                     // If the breadth request or source taxonomy exists
                     if (lastBreadthRequest || sourceTaxonomy) {
                         if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
-                            _insertBreadthRequest(((_b = (_a = lastBreadthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 0) + 1);
+                            _insertBreadthRequest(((_c = (_b = lastBreadthRequest.req_type) === null || _b === void 0 ? void 0 : _b.n) !== null && _c !== void 0 ? _c : 0) + 1);
                         }
                         else {
                             const depthDocuments = yield handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection);

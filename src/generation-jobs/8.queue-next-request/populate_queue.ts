@@ -35,7 +35,7 @@ export async function populateQueue(sourceId: string) {
       const generationInfo = source.generation_info;
       const viewTime = source.view_time;
       const sourceTaxonomy = source.source_taxonomy;
-      const aiCards = source._ai_cards.map(
+      const aiCards = (source._ai_cards ?? []).map(
         (elem: { _id: ObjectId; position: number }) => elem._id
       );
 
@@ -110,8 +110,8 @@ async function handleDepthRequest(
   try {
     let documents: any[] = [];
 
-    const concepts = sourceTaxonomy.concepts;
-    const facts = sourceTaxonomy.facts;
+    const concepts = sourceTaxonomy.concepts ?? [];
+    const facts = sourceTaxonomy.facts ?? [];
 
     const conceptTextArray = concepts.map(
       (concept: { concept_text: string; reference: string }) =>

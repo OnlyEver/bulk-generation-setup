@@ -23,7 +23,6 @@ exports.handler = void 0;
 const config_1 = require("../config");
 const app_1 = require("../app");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
-const clean_up_batch_data_1 = require("../generation-jobs/7.clean-batch-data/clean_up_batch_data");
 const lambda = new aws_sdk_1.default.Lambda();
 const CHILD_LAMBDA_NAME = "child-handler";
 const handler = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -62,18 +61,18 @@ exports.handler = handler;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    yield (0, clean_up_batch_data_1.cleanUpBatchData)({
-        batch_id: "batch_6792040ab01481909c1a1ca5d61c56a4",
-        requestIdentifiers: [
-            {
-                _source: "6753b17a7d070c44ecf24f9e",
-                request_type: {
-                    type: "breadth",
-                    n: 1,
-                },
-            },
-        ],
-    });
+    // await cleanUpBatchData({
+    //   batch_id: "batch_6792040ab01481909c1a1ca5d61c56a4",
+    //   requestIdentifiers: [
+    //     {
+    //       _source: "6753b17a7d070c44ecf24f9e",
+    //       request_type: {
+    //         type: "breadth",
+    //         n: 1,
+    //       },
+    //     },
+    //   ],
+    // });
     // const fileContent = await getFileContent("");
     // console.log(fileContent);
     // const batchStatus = await getBatchStatus(
@@ -90,7 +89,7 @@ exports.handler = handler;
     //   const bulkWriteResult = await bulkWriteToDb(parsedData);
     //   uniqueSourceIds.forEach(async (sourceId) => {
     //     console.log(`Source ID: ${sourceId}`);
-    //     await populateQueueForNextRequest(sourceId);
+    yield (0, app_1.populateQueueForNextRequest)("6753b17a7d070c44ecf24f9e");
     //   });
     // } else if (batchStatus.status === "failed") {
     //   console.log("Batch failed");

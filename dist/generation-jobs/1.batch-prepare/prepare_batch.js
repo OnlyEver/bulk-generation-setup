@@ -81,7 +81,7 @@ const getCustomIdForBreadth = (doc) => {
         _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
-            n: doc.n | 1,
+            n: doc.request_type.n | 1,
         },
     };
 };
@@ -96,7 +96,15 @@ const getCustomIdForDepth = (doc) => {
     };
 };
 const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
     const prompts = yield getPrompt(doc.request_type.type);
+    const currentN = (_a = doc.request_type.n) !== null && _a !== void 0 ? _a : 1;
+    let existingTypology = "";
+    if (currentN > 1) {
+        existingTypology =
+            "Dont generate Existing taxonomy data is as " +
+                JSON.stringify((_c = (_b = doc.source) === null || _b === void 0 ? void 0 : _b.source_taxonomy) !== null && _c !== void 0 ? _c : {});
+    }
     return {
         custom_id: JSON.stringify(getCustomIdForBreadth(doc)), // Unique identifier for each request.
         method: "POST",
@@ -117,7 +125,7 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
                         "Bibliography",
                         "Notes",
                         "Cited sources",
-                    ], ["table", "empty_line"]),
+                    ], ["table", "empty_line"]) + existingTypology,
                 },
             ],
         },
@@ -125,7 +133,18 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
     const parsedTypology = doc._source.source_taxonomy;
+    const params = doc.params;
     const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
+    if (doc.request_type.bloom_level !== 1) {
+        if (params) {
+            if (params.missing_facts) {
+                parsedTypology.facts = params.missing_facts;
+            }
+            if (params.missing_concepts) {
+                parsedTypology.concepts = params.missing_concepts;
+            }
+        }
+    }
     return {
         custom_id: JSON.stringify(getCustomIdForDepth(doc)),
         method: "POST", // HTTP method.

@@ -19,7 +19,7 @@ export async function cleanUpBatchData({
     await generationDataCollection.deleteMany({
       $or: requestIdentifiers,
     });
-    await batchDataCollection.deleteOne({ id: batch_id });
+    await batchDataCollection.deleteMany({ status: "completed" });
   } catch (error) {
     console.error("Error occurred while cleaning up the batch data:", error);
 

@@ -22,7 +22,7 @@ function cleanUpBatchData(_a) {
             yield generationDataCollection.deleteMany({
                 $or: requestIdentifiers,
             });
-            yield batchDataCollection.deleteOne({ id: batch_id });
+            yield batchDataCollection.deleteMany({ status: "completed" });
         }
         catch (error) {
             console.error("Error occurred while cleaning up the batch data:", error);

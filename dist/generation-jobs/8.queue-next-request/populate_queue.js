@@ -128,8 +128,8 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                     let missingFacts = [];
                     const lastDepthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => {
                         var _a, _b;
-                        return ((_a = item.req_type) === null || _a === void 0 ? void 0 : _a.type) === "depth" &&
-                            ((_b = item.req_type) === null || _b === void 0 ? void 0 : _b.bloom_level) === bloom;
+                        return ((_a = item.req_type) === null || _a === void 0 ? void 0 : _a.type) == "depth" &&
+                            ((_b = item.req_type) === null || _b === void 0 ? void 0 : _b.bloom_level) == bloom;
                     });
                     if (lastDepthRequest) {
                         if (((_d = (_c = lastDepthRequest.req_type) === null || _c === void 0 ? void 0 : _c.n) !== null && _d !== void 0 ? _d : 0) <= maxRequestsForBloom) {

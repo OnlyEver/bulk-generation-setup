@@ -149,8 +149,8 @@ async function handleDepthRequest(
         const lastDepthRequest = lastWhere(
           generationInfo,
           (item) =>
-            item.req_type?.type === "depth" &&
-            item.req_type?.bloom_level === bloom
+            item.req_type?.type == "depth" &&
+            item.req_type?.bloom_level == bloom
         );
 
         if (lastDepthRequest) {

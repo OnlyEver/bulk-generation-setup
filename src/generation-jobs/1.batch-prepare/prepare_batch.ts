@@ -17,7 +17,9 @@ export async function prepareBatch(): Promise<Object> {
     const generationDataCollection = database.collection(
       "_generation_requests"
     );
-    let docs = await generationDataCollection.find({}).toArray();
+    let docs = await generationDataCollection
+      .find({ status: "created" })
+      .toArray();
     let sources = await fetchSourceDocuments(docs);
     const result = [];
 

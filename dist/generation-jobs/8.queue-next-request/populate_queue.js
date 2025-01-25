@@ -60,8 +60,7 @@ function populateQueue(sourceId) {
                         /// Insert the initial breadth request with n = 1
                         _insertBreadthRequest(1);
                     }
-                    const genReqs = yield generationRequests.insertMany(documents);
-                    console.log("Inserted generation requests: ", genReqs.insertedCount);
+                    const genReqs = yield handleUniqueInsertions(documents);
                 }
             }
             console.log("Documents: ", documents);
@@ -210,6 +209,24 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
         catch (error) {
             console.log("Error while handling depth request: ", error);
             throw error;
+        }
+    });
+}
+function handleUniqueInsertions(documents) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const generationRequests = connection_1.database.collection("_generation_requests");
+        for (const doc of documents) {
+            const existingDoc = yield generationRequests.findOne({
+                _source: doc._source,
+                request_type: doc.request_type,
+            });
+            if (!existingDoc) {
+                yield generationRequests.insertOne(doc);
+                console.log(`Inserted document: ${JSON.stringify(doc)}`);
+            }
+            else {
+                console.log(`Duplicate document found for _source: ${doc._source}, skipping insertion.`);
+            }
         }
     });
 }

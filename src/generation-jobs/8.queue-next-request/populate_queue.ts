@@ -65,8 +65,7 @@ export async function populateQueue(sourceId: string) {
           _insertBreadthRequest(1);
         }
 
-        const genReqs = await generationRequests.insertMany(documents);
-        console.log("Inserted generation requests: ", genReqs.insertedCount);
+        const genReqs = await handleUniqueInsertions(documents);
       }
     }
 
@@ -249,5 +248,23 @@ async function handleDepthRequest(
   } catch (error) {
     console.log("Error while handling depth request: ", error);
     throw error;
+  }
+}
+async function handleUniqueInsertions(documents: any[]) {
+  const generationRequests = database.collection("_generation_requests");
+  for (const doc of documents) {
+    const existingDoc = await generationRequests.findOne({
+      _source: doc._source,
+      request_type: doc.request_type,
+    });
+
+    if (!existingDoc) {
+      await generationRequests.insertOne(doc);
+      console.log(`Inserted document: ${JSON.stringify(doc)}`);
+    } else {
+      console.log(
+        `Duplicate document found for _source: ${doc._source}, skipping insertion.`
+      );
+    }
   }
 }

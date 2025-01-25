@@ -28,7 +28,9 @@ function prepareBatch() {
         try {
             var inputFileList = [];
             const generationDataCollection = connection_1.database.collection("_generation_requests");
-            let docs = yield generationDataCollection.find({}).toArray();
+            let docs = yield generationDataCollection
+                .find({ status: "created" })
+                .toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
             for (let i = 0; i < sources.length; i += 300) {

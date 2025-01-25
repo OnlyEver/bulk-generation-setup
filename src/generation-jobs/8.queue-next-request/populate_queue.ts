@@ -64,11 +64,11 @@ export async function populateQueue(sourceId: string) {
           /// Insert the initial breadth request with n = 1
           _insertBreadthRequest(1);
         }
-
-        const genReqs = await handleUniqueInsertions(documents);
+      } else {
+        _insertBreadthRequest(1);
       }
     }
-
+    const genReqs = await handleUniqueInsertions(documents);
     console.log("Documents: ", documents);
   } catch (error) {
     console.log("Error while populating queue: ", error);

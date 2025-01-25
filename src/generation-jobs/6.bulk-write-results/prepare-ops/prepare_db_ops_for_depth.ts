@@ -39,6 +39,7 @@ export async function writeDBOpsForDepth(data: ParsedResponse): Promise<any[]> {
           generated_info: {
             concepts: elem.concepts,
             facts: elem.facts,
+            blooms_level: elem.bloom,
           },
         };
       });

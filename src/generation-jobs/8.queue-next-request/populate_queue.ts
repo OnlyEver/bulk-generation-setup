@@ -44,7 +44,7 @@ export async function populateQueue(sourceId: string) {
           generationInfo,
           (item) => item.req_type.type === "breadth"
         );
-        const calculatedViewTime = Math.floor(viewTime / 300);
+        const calculatedViewTime = Math.floor(viewTime / 3000);
 
         // If the breadth request or source taxonomy exists
         if (lastBreadthRequest || sourceTaxonomy) {
@@ -157,7 +157,7 @@ async function handleDepthRequest(
           if ((lastDepthRequest.req_type?.n ?? 0) <= maxRequestsForBloom) {
             let levelCards = [];
             levelCards =
-              bloomLevelCards.find((item) => item.level === bloom)?.cards || [];
+              bloomLevelCards.find((item) => item.level == bloom)?.cards || [];
 
             if (levelCards.length > 0) {
               for (let card of levelCards) {

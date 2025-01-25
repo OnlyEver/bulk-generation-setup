@@ -50,6 +50,7 @@ function writeDBOpsForDepth(data) {
                         generated_info: {
                             concepts: elem.concepts,
                             facts: elem.facts,
+                            blooms_level: elem.bloom,
                         },
                     };
                 });

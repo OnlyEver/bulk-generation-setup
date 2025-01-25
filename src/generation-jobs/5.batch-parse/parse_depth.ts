@@ -17,7 +17,8 @@ export function parseDepth(params: parseDepth): ParsedResponse {
     const generatedData = JSON.parse(response.choices[0].message.content);
     const cardData = new ParseCardResponse().parse(
       generatedData,
-      params.sourceTaxonomy
+      params.sourceTaxonomy,
+      requestId.request_type?.n ?? 1
     );
 
     const cardResponse: CardGenResponse = {

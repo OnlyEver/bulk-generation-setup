@@ -45,7 +45,7 @@ function populateQueue(sourceId) {
                 const aiCards = ((_a = source._ai_cards) !== null && _a !== void 0 ? _a : []).map((elem) => elem._id);
                 if (Array.isArray(generationInfo) && generationInfo.length > 0) {
                     const lastBreadthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => item.req_type.type === "breadth");
-                    const calculatedViewTime = Math.floor(viewTime / 300);
+                    const calculatedViewTime = Math.floor(viewTime / 3000);
                     // If the breadth request or source taxonomy exists
                     if (lastBreadthRequest || sourceTaxonomy) {
                         if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
@@ -135,7 +135,7 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                         if (((_d = (_c = lastDepthRequest.req_type) === null || _c === void 0 ? void 0 : _c.n) !== null && _d !== void 0 ? _d : 0) <= maxRequestsForBloom) {
                             let levelCards = [];
                             levelCards =
-                                ((_e = bloomLevelCards.find((item) => item.level === bloom)) === null || _e === void 0 ? void 0 : _e.cards) || [];
+                                ((_e = bloomLevelCards.find((item) => item.level == bloom)) === null || _e === void 0 ? void 0 : _e.cards) || [];
                             if (levelCards.length > 0) {
                                 for (let card of levelCards) {
                                     if (card.generated_info.concepts) {

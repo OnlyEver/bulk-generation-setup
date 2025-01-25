@@ -1,5 +1,5 @@
 export class ParseClozeCard {
-  parse(data: any) {
+  parse(data: any): any {
     try {
       const content = data.card_content;
       let correctOptions = content.correct_options;

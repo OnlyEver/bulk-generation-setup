@@ -134,7 +134,7 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedTypology = doc._source.source_taxonomy;
+    const parsedTypology = doc.source.source_taxonomy;
     const params = doc.params;
     const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
     if (doc.request_type.bloom_level !== 1) {

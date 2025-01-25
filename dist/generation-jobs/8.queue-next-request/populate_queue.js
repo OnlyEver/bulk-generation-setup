@@ -60,9 +60,12 @@ function populateQueue(sourceId) {
                         /// Insert the initial breadth request with n = 1
                         _insertBreadthRequest(1);
                     }
-                    const genReqs = yield handleUniqueInsertions(documents);
+                }
+                else {
+                    _insertBreadthRequest(1);
                 }
             }
+            const genReqs = yield handleUniqueInsertions(documents);
             console.log("Documents: ", documents);
         }
         catch (error) {

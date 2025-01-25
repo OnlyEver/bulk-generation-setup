@@ -146,7 +146,7 @@ const prepareBatchForBreadth = async (doc: any) => {
 };
 
 const prepareBatchForDepth = async (doc: any) => {
-  const parsedTypology = doc._source.source_taxonomy;
+  const parsedTypology = doc.source.source_taxonomy;
   const params = doc.params;
   const cardGenPrompt = await getPrompt(
     doc.request_type.type,

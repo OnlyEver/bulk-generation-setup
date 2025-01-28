@@ -38,10 +38,10 @@ function parseFields(fields) {
         "Reference & Indexing",
         "Other",
     ];
-    const fieldKeys = ['primary_field', 'secondary_field', 'tertiary_field'];
+    const fieldKeys = ["primary_field", "secondary_field", "tertiary_field"];
     return fields.slice(0, 3).map((item, index) => ({
         [fieldKeys[index]]: item,
-        "reconcile": !(expectedFields.includes(item.toLowerCase()))
+        reconcile: !expectedFields.includes(item.toLowerCase()),
     }));
 }
 //# sourceMappingURL=parse_typology.js.map

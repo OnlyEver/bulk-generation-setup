@@ -18,7 +18,6 @@ const connection_1 = require("./mongodb/connection");
 const openai_helper_1 = require("./openai/openai_helper");
 const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
-const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
@@ -72,20 +71,47 @@ const parseGeneratedData = (jsonLinesFromFile) => __awaiter(void 0, void 0, void
 exports.parseGeneratedData = parseGeneratedData;
 const bulkWriteToDb = (parsedResponses) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield (0, write_to_do_1.handleBulkWrite)(parsedResponses.parsed_response);
-    const cleanUp = yield (0, clean_up_batch_data_1.cleanUpBatchData)({
-        batch_id: parsedResponses.batch_id,
-        requestIdentifiers: parsedResponses.parsed_response.map((e) => e.requestIdentifier),
-    });
+    // const cleanUp = await cleanUpBatchData({
+    //   batch_id: parsedResponses.batch_id,
+    //   requestIdentifiers: parsedResponses.parsed_response.map(
+    //     (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
+    //   ),
+    // });
     return {
         status: "Success",
     };
 });
 exports.bulkWriteToDb = bulkWriteToDb;
-const populateQueueForNextRequest = (sourceId) => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield (0, populate_queue_1.populateQueue)(sourceId);
+const populateQueueForNextRequest = (sourceId, viewTimeThreshold) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, populate_queue_1.populateQueue)(sourceId, viewTimeThreshold !== null && viewTimeThreshold !== void 0 ? viewTimeThreshold : 3000);
     return {
         status: "Success",
     };
 });
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
+// (async () => {
+//   setUpMongoClient(config.dbUri, config.dbName ?? "");
+//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // const files = await prepareGenerationBatch();
+//   // const batchData = await createBatchRequest(files as []);
+//   // console.log(batchData);
+//   // const data = await parseGeneratedData([getCardData()]);
+//   // console.log(data);
+//   // const dbOpes = await bulkWriteToDb(data);
+//   // console.log(dbOpes);
+// })();
+// function extractCustomId(customId: string): RequestId {
+//   const customIdData = JSON.parse(customId);
+//   let identifier: RequestId = {
+//     _source: customIdData._source,
+//     request_type: {
+//       type: customIdData.request_type.type,
+//       n: customIdData.request_type.n,
+//     },
+//   };
+//   if (customIdData.request_type.bloom_level) {
+//     identifier.request_type.bloom_level = customIdData.request_type.bloom_level;
+//   }
+//   return identifier;
+// }
 //# sourceMappingURL=app.js.map

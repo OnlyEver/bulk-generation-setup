@@ -10,6 +10,10 @@ import { parseBatchResponse } from "./generation-jobs/5.batch-parse/parse_batch"
 import { handleBulkWrite } from "./generation-jobs/6.bulk-write-results/write_to_do";
 import { cleanUpBatchData } from "./generation-jobs/7.clean-batch-data/clean_up_batch_data";
 import { populateQueue } from "./generation-jobs/8.queue-next-request/populate_queue";
+import { config } from "./config";
+import { parseBreadth } from "./generation-jobs/5.batch-parse/parse_breadth";
+import { cleanRequestsIdentifier } from "./utils/identifier_for_clearing_requests";
+import { getCardData } from "./generation-jobs/5.batch-parse/temp_card_gen_data";
 
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
@@ -74,20 +78,51 @@ export const bulkWriteToDb = async (parsedResponses: {
   parsed_response: ParsedResponse[];
 }) => {
   const data = await handleBulkWrite(parsedResponses.parsed_response);
-  const cleanUp = await cleanUpBatchData({
-    batch_id: parsedResponses.batch_id,
-    requestIdentifiers: parsedResponses.parsed_response.map(
-      (e: ParsedResponse) => e.requestIdentifier
-    ),
-  });
+  // const cleanUp = await cleanUpBatchData({
+  //   batch_id: parsedResponses.batch_id,
+  //   requestIdentifiers: parsedResponses.parsed_response.map(
+  //     (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
+  //   ),
+  // });
   return {
     status: "Success",
   };
 };
 
-export const populateQueueForNextRequest = async (sourceId: string) => {
-  const data = await populateQueue(sourceId);
+export const populateQueueForNextRequest = async (
+  sourceId: string,
+  viewTimeThreshold?: number
+) => {
+  const data = await populateQueue(sourceId, viewTimeThreshold ?? 3000);
   return {
     status: "Success",
   };
 };
+
+// (async () => {
+//   setUpMongoClient(config.dbUri, config.dbName ?? "");
+//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // const files = await prepareGenerationBatch();
+//   // const batchData = await createBatchRequest(files as []);
+//   // console.log(batchData);
+
+//   // const data = await parseGeneratedData([getCardData()]);
+//   // console.log(data);
+//   // const dbOpes = await bulkWriteToDb(data);
+//   // console.log(dbOpes);
+// })();
+
+// function extractCustomId(customId: string): RequestId {
+//   const customIdData = JSON.parse(customId);
+//   let identifier: RequestId = {
+//     _source: customIdData._source,
+//     request_type: {
+//       type: customIdData.request_type.type,
+//       n: customIdData.request_type.n,
+//     },
+//   };
+//   if (customIdData.request_type.bloom_level) {
+//     identifier.request_type.bloom_level = customIdData.request_type.bloom_level;
+//   }
+//   return identifier;
+// }

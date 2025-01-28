@@ -1,7 +1,5 @@
-export declare const getCardData: () => {
-    _id: {
-        $oid: string;
-    };
+export declare const cardData: () => {
+    _id: string;
     id: string;
     custom_id: string;
     response: {

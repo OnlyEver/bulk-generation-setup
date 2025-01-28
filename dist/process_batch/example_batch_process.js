@@ -23,6 +23,7 @@ exports.handler = void 0;
 const config_1 = require("../config");
 const app_1 = require("../app");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
+const populate_queue_1 = require("../generation-jobs/8.queue-next-request/populate_queue");
 const lambda = new aws_sdk_1.default.Lambda();
 const CHILD_LAMBDA_NAME = "child-handler";
 const handler = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -89,7 +90,7 @@ exports.handler = handler;
     //   const bulkWriteResult = await bulkWriteToDb(parsedData);
     //   uniqueSourceIds.forEach(async (sourceId) => {
     //     console.log(`Source ID: ${sourceId}`);
-    yield (0, app_1.populateQueueForNextRequest)("6753b17a7d070c44ecf24f9e");
+    //   await populateQueueForNextRequest("6753b17a7d070c44ecf24f9e");
     //   });
     // } else if (batchStatus.status === "failed") {
     //   console.log("Batch failed");
@@ -97,6 +98,6 @@ exports.handler = handler;
     //     batchStatus.error_file_id ?? ""
     //   );
     // }
-    //await populateQueue('6753b17a7d070c44ecf24f9e');
+    yield (0, populate_queue_1.populateQueue)("6753b17a7d070c44ecf24f9e");
 }))();
 //# sourceMappingURL=example_batch_process.js.map

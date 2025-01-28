@@ -50,6 +50,7 @@ function writeDBOpsForDepth(data) {
                         generated_info: {
                             concepts: elem.concepts,
                             facts: elem.facts,
+                            blooms_level: elem.bloom,
                         },
                     };
                 });
@@ -64,8 +65,10 @@ function writeDBOpsForDepth(data) {
                             update: {
                                 $addToSet: {
                                     generation_info: metadata,
-                                    "source_taxonomy.concepts": generatedData.missing_concepts,
-                                    "source_taxonomy.facts": generatedData.missing_facts,
+                                    // "source_taxonomy.concepts": {
+                                    //   $ele: generatedData.missing_concepts,
+                                    // },
+                                    // "source_taxonomy.facts": { $elem: generatedData.missing_facts },
                                 },
                             },
                             upsert: true,

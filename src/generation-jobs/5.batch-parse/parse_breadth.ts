@@ -12,16 +12,16 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
     const requestId = rawResponse.request_id;
     const content = rawResponse.response.body.choices[0].message.content;
     const parsedContent = JSON.parse(content);
-    const usage = rawResponse.response.usage;
+    const usage = rawResponse.response.body.usage;
 
     return {
       requestIdentifier: requestId,
       generated_data: {
         field: parseFields(parsedContent.field),
         concepts: parsedContent.concepts.map(
-          (fact: { fact_text: string; reference: string }) => ({
-            fact_text: fact.fact_text,
-            reference: fact.reference,
+          (concept: { concept_text: string; reference: string }) => ({
+            concept_text: concept.concept_text,
+            reference: concept.reference,
           })
         ),
         facts: parsedContent.facts.map(

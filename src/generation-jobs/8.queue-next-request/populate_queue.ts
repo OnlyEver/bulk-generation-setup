@@ -1,6 +1,9 @@
 import { Collection, ObjectId } from "mongodb";
 import { database } from "../../mongodb/connection";
-import { lastWhere } from "../../utils/list_last_where";
+import {
+  findLastBreadthRequest,
+  findLastDepthRequest,
+} from "../../utils/list_last_where";
 
 /**
  * Function for populating the queue with generation requests based on the depth (card_gen)
@@ -9,7 +12,10 @@ import { lastWhere } from "../../utils/list_last_where";
  * @async
  * @param sourceId - The `_id` of the source
  */
-export async function populateQueue(sourceId: string) {
+export async function populateQueue(
+  sourceId: string,
+  viewTimeThreshold: number
+) {
   const sourceCollection = database.collection("_source");
   const generationRequests = database.collection("_generation_requests");
   const cardCollection: Collection<Document> = database.collection("_card");
@@ -40,11 +46,8 @@ export async function populateQueue(sourceId: string) {
       );
 
       if (Array.isArray(generationInfo) && generationInfo.length > 0) {
-        const lastBreadthRequest = lastWhere(
-          generationInfo,
-          (item) => item.req_type.type === "breadth"
-        );
-        const calculatedViewTime = Math.floor(viewTime / 300);
+        const lastBreadthRequest = findLastBreadthRequest(generationInfo);
+        const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
 
         // If the breadth request or source taxonomy exists
         if (lastBreadthRequest || sourceTaxonomy) {
@@ -64,12 +67,11 @@ export async function populateQueue(sourceId: string) {
           /// Insert the initial breadth request with n = 1
           _insertBreadthRequest(1);
         }
-
-        const genReqs = await generationRequests.insertMany(documents);
-        console.log("Inserted generation requests: ", genReqs.insertedCount);
+      } else {
+        _insertBreadthRequest(1);
       }
     }
-
+    const genReqs = await handleUniqueInsertions(documents);
     console.log("Documents: ", documents);
   } catch (error) {
     console.log("Error while populating queue: ", error);
@@ -136,7 +138,7 @@ async function handleDepthRequest(
       .toArray();
 
     if (sourceTaxonomy.generate_cards.state) {
-      let maxRequestsForBloom = 5;
+      let maxRequestsForBloom = 4;
 
       let levelConcepts = []; /// An array of concept_text according to the bloom level
       let levelFacts = []; /// An array of fact_text according to the bloom level
@@ -147,34 +149,30 @@ async function handleDepthRequest(
         let missingConcepts = [];
         let missingFacts = [];
 
-        const lastDepthRequest = lastWhere(
+        const lastDepthRequest = findLastDepthRequest(
           generationInfo,
-          (item) =>
-            item.req_type?.type === "depth" &&
-            item.req_type?.bloom_level === bloom
+          "depth",
+          bloom
         );
+        const cards = [];
 
         if (lastDepthRequest) {
-          if ((lastDepthRequest.req_type?.n ?? 0) <= maxRequestsForBloom) {
+          if ((lastDepthRequest.req_type?.n ?? 1) <= maxRequestsForBloom) {
             let levelCards = [];
             levelCards =
-              bloomLevelCards.find((item) => item.level === bloom)?.cards || [];
+              bloomLevelCards.find((item) => item.level == bloom)?.cards || [];
 
             if (levelCards.length > 0) {
               for (let card of levelCards) {
                 if (card.generated_info.concepts) {
                   for (let concept of card.generated_info.concepts) {
-                    if (concept.concept_text) {
-                      levelConcepts.push(concept.concept_text);
-                    }
+                    levelConcepts.push(concept);
                   }
                 }
 
                 if (card.generated_info.facts) {
                   for (let fact of card.generated_info.facts) {
-                    if (fact.fact_text) {
-                      levelFacts.push(fact.fact_text);
-                    }
+                    levelFacts.push(fact);
                   }
                 }
               }
@@ -214,7 +212,7 @@ async function handleDepthRequest(
                   request_type: {
                     type: "depth",
                     bloom_level: bloom,
-                    n: (lastDepthRequest?.n ?? 0) + 1,
+                    n: (lastDepthRequest?.req_type?.n ?? 0) + 1,
                   },
                   params: {
                     missing_concepts: missingConceptsData,
@@ -222,6 +220,21 @@ async function handleDepthRequest(
                   },
                 });
               }
+            } else {
+              documents.push({
+                _source: sourceId,
+                ctime: new Date(),
+                status: "created",
+                request_type: {
+                  type: "depth",
+                  bloom_level: bloom,
+                  n: (lastDepthRequest.req_type?.n ?? 0) + 1,
+                },
+                params: {
+                  missing_concepts: concepts,
+                  missing_facts: facts,
+                },
+              });
             }
           }
         } else {
@@ -249,5 +262,23 @@ async function handleDepthRequest(
   } catch (error) {
     console.log("Error while handling depth request: ", error);
     throw error;
+  }
+}
+async function handleUniqueInsertions(documents: any[]) {
+  const generationRequests = database.collection("_generation_requests");
+  for (const doc of documents) {
+    const existingDoc = await generationRequests.findOne({
+      _source: doc._source,
+      request_type: doc.request_type,
+    });
+
+    if (!existingDoc) {
+      await generationRequests.insertOne(doc);
+      console.log(`Inserted document: ${JSON.stringify(doc)}`);
+    } else {
+      console.log(
+        `Duplicate document found for _source: ${doc._source}, skipping insertion.`
+      );
+    }
   }
 }

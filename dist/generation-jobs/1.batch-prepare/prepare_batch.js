@@ -28,14 +28,15 @@ function prepareBatch() {
         try {
             var inputFileList = [];
             const generationDataCollection = connection_1.database.collection("_generation_requests");
-            let docs = yield generationDataCollection.find({}).toArray();
+            let docs = yield generationDataCollection
+                .find({ status: "created" })
+                .toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
             for (let i = 0; i < sources.length; i += 300) {
                 // Slice the array into chunks of maxCount elements
                 result.push(sources.slice(i, i + 300));
             }
-            console.log(result);
             yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
                 const batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
@@ -48,11 +49,10 @@ function prepareBatch() {
                         batchDataList.push(batchData);
                     }
                 })));
-                const filePath = `batchinput${index}.jsonl`;
+                const filePath = `/tmp/batchinput${index}.jsonl`;
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
             })));
-            console.log(inputFileList);
             return {
                 sources,
                 inputFileList,
@@ -132,7 +132,7 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedTypology = doc._source.source_taxonomy;
+    const parsedTypology = doc.source.source_taxonomy;
     const params = doc.params;
     const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
     if (doc.request_type.bloom_level !== 1) {

@@ -17,7 +17,9 @@ export async function prepareBatch(): Promise<Object> {
     const generationDataCollection = database.collection(
       "_generation_requests"
     );
-    let docs = await generationDataCollection.find({}).toArray();
+    let docs = await generationDataCollection
+      .find({ status: "created" })
+      .toArray();
     let sources = await fetchSourceDocuments(docs);
     const result = [];
 
@@ -25,7 +27,6 @@ export async function prepareBatch(): Promise<Object> {
       // Slice the array into chunks of maxCount elements
       result.push(sources.slice(i, i + 300));
     }
-    console.log(result);
     await Promise.all(
       result.map(async (element, index) => {
         const batchDataList: any[] = [];
@@ -41,7 +42,7 @@ export async function prepareBatch(): Promise<Object> {
           })
         );
 
-        const filePath = `batchinput${index}.jsonl`;
+        const filePath = `/tmp/batchinput${index}.jsonl`;
         await fsPromise.writeFile(
           filePath,
           batchDataList.map((entry) => JSON.stringify(entry)).join("\n"),
@@ -52,7 +53,6 @@ export async function prepareBatch(): Promise<Object> {
       })
     );
 
-    console.log(inputFileList);
     return {
       sources,
       inputFileList,
@@ -144,7 +144,7 @@ const prepareBatchForBreadth = async (doc: any) => {
 };
 
 const prepareBatchForDepth = async (doc: any) => {
-  const parsedTypology = doc._source.source_taxonomy;
+  const parsedTypology = doc.source.source_taxonomy;
   const params = doc.params;
   const cardGenPrompt = await getPrompt(
     doc.request_type.type,

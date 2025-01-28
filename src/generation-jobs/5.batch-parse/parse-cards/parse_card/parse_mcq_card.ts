@@ -1,5 +1,5 @@
 export class ParseMcqCard {
-  parse(data: any) {
+  parse(data: any): any {
     try {
       let mcqAnswers = [];
       if (

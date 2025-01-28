@@ -1,5 +1,5 @@
 type parseDepth = {
-    rawResponse?: RawResponse;
+    rawResponse: RawResponse;
     sourceTaxonomy: any;
 };
 export declare function parseDepth(params: parseDepth): ParsedResponse;

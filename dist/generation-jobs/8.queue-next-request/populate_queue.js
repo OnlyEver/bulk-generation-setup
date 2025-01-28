@@ -20,7 +20,7 @@ const list_last_where_1 = require("../../utils/list_last_where");
  * @async
  * @param sourceId - The `_id` of the source
  */
-function populateQueue(sourceId) {
+function populateQueue(sourceId, viewTimeThreshold) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
         const sourceCollection = connection_1.database.collection("_source");
@@ -44,8 +44,8 @@ function populateQueue(sourceId) {
                 const sourceTaxonomy = source.source_taxonomy;
                 const aiCards = ((_a = source._ai_cards) !== null && _a !== void 0 ? _a : []).map((elem) => elem._id);
                 if (Array.isArray(generationInfo) && generationInfo.length > 0) {
-                    const lastBreadthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => item.req_type.type === "breadth");
-                    const calculatedViewTime = Math.floor(viewTime / 300);
+                    const lastBreadthRequest = (0, list_last_where_1.findLastBreadthRequest)(generationInfo);
+                    const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
                     // If the breadth request or source taxonomy exists
                     if (lastBreadthRequest || sourceTaxonomy) {
                         if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
@@ -60,10 +60,12 @@ function populateQueue(sourceId) {
                         /// Insert the initial breadth request with n = 1
                         _insertBreadthRequest(1);
                     }
-                    const genReqs = yield generationRequests.insertMany(documents);
-                    console.log("Inserted generation requests: ", genReqs.insertedCount);
+                }
+                else {
+                    _insertBreadthRequest(1);
                 }
             }
+            const genReqs = yield handleUniqueInsertions(documents);
             console.log("Documents: ", documents);
         }
         catch (error) {
@@ -96,11 +98,11 @@ function populateQueue(sourceId) {
  */
 function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         try {
             let documents = [];
-            const concepts = sourceTaxonomy.concepts;
-            const facts = sourceTaxonomy.facts;
+            const concepts = (_a = sourceTaxonomy.concepts) !== null && _a !== void 0 ? _a : [];
+            const facts = (_b = sourceTaxonomy.facts) !== null && _b !== void 0 ? _b : [];
             const conceptTextArray = concepts.map((concept) => concept.concept_text);
             const factTextArray = facts.map((fact) => fact.fact_text);
             const bloomLevelCards = yield cardCollection
@@ -117,37 +119,30 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
             ])
                 .toArray();
             if (sourceTaxonomy.generate_cards.state) {
-                let maxRequestsForBloom = 5;
+                let maxRequestsForBloom = 4;
                 let levelConcepts = []; /// An array of concept_text according to the bloom level
                 let levelFacts = []; /// An array of fact_text according to the bloom level
                 for (let bloom = 1; bloom <= 5; bloom++) {
                     console.log("Bloom level: ", bloom);
                     let missingConcepts = [];
                     let missingFacts = [];
-                    const lastDepthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => {
-                        var _a, _b;
-                        return ((_a = item.req_type) === null || _a === void 0 ? void 0 : _a.type) === "depth" &&
-                            ((_b = item.req_type) === null || _b === void 0 ? void 0 : _b.bloom_level) === bloom;
-                    });
+                    const lastDepthRequest = (0, list_last_where_1.findLastDepthRequest)(generationInfo, "depth", bloom);
+                    const cards = [];
                     if (lastDepthRequest) {
-                        if (((_b = (_a = lastDepthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 0) <= maxRequestsForBloom) {
+                        if (((_d = (_c = lastDepthRequest.req_type) === null || _c === void 0 ? void 0 : _c.n) !== null && _d !== void 0 ? _d : 1) <= maxRequestsForBloom) {
                             let levelCards = [];
                             levelCards =
-                                ((_c = bloomLevelCards.find((item) => item.level === bloom)) === null || _c === void 0 ? void 0 : _c.cards) || [];
+                                ((_e = bloomLevelCards.find((item) => item.level == bloom)) === null || _e === void 0 ? void 0 : _e.cards) || [];
                             if (levelCards.length > 0) {
                                 for (let card of levelCards) {
                                     if (card.generated_info.concepts) {
                                         for (let concept of card.generated_info.concepts) {
-                                            if (concept.concept_text) {
-                                                levelConcepts.push(concept.concept_text);
-                                            }
+                                            levelConcepts.push(concept);
                                         }
                                     }
                                     if (card.generated_info.facts) {
                                         for (let fact of card.generated_info.facts) {
-                                            if (fact.fact_text) {
-                                                levelFacts.push(fact.fact_text);
-                                            }
+                                            levelFacts.push(fact);
                                         }
                                     }
                                 }
@@ -175,7 +170,7 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                                         request_type: {
                                             type: "depth",
                                             bloom_level: bloom,
-                                            n: ((_d = lastDepthRequest === null || lastDepthRequest === void 0 ? void 0 : lastDepthRequest.n) !== null && _d !== void 0 ? _d : 0) + 1,
+                                            n: ((_g = (_f = lastDepthRequest === null || lastDepthRequest === void 0 ? void 0 : lastDepthRequest.req_type) === null || _f === void 0 ? void 0 : _f.n) !== null && _g !== void 0 ? _g : 0) + 1,
                                         },
                                         params: {
                                             missing_concepts: missingConceptsData,
@@ -183,6 +178,22 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                                         },
                                     });
                                 }
+                            }
+                            else {
+                                documents.push({
+                                    _source: sourceId,
+                                    ctime: new Date(),
+                                    status: "created",
+                                    request_type: {
+                                        type: "depth",
+                                        bloom_level: bloom,
+                                        n: ((_j = (_h = lastDepthRequest.req_type) === null || _h === void 0 ? void 0 : _h.n) !== null && _j !== void 0 ? _j : 0) + 1,
+                                    },
+                                    params: {
+                                        missing_concepts: concepts,
+                                        missing_facts: facts,
+                                    },
+                                });
                             }
                         }
                     }
@@ -210,6 +221,24 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
         catch (error) {
             console.log("Error while handling depth request: ", error);
             throw error;
+        }
+    });
+}
+function handleUniqueInsertions(documents) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const generationRequests = connection_1.database.collection("_generation_requests");
+        for (const doc of documents) {
+            const existingDoc = yield generationRequests.findOne({
+                _source: doc._source,
+                request_type: doc.request_type,
+            });
+            if (!existingDoc) {
+                yield generationRequests.insertOne(doc);
+                console.log(`Inserted document: ${JSON.stringify(doc)}`);
+            }
+            else {
+                console.log(`Duplicate document found for _source: ${doc._source}, skipping insertion.`);
+            }
         }
     });
 }

@@ -6,7 +6,7 @@ const parse_flash_cards_1 = require("./parse_card/parse_flash_cards");
 const parse_match_card_1 = require("./parse_card/parse_match_card");
 const parse_mcq_card_1 = require("./parse_card/parse_mcq_card");
 class ParseCardResponse {
-    parse(generatedData, sourceTaxonomy) {
+    parse(generatedData, sourceTaxonomy, bloom) {
         try {
             const cardData = [];
             const unparsedTestCards = generatedData.test_cards;
@@ -16,6 +16,7 @@ class ParseCardResponse {
                         const flashCard = new parse_flash_cards_1.ParseFlashCard().parse(elem);
                         if (flashCard != null && flashCard) {
                             flashCard.heading = this._getCardReference(flashCard, sourceTaxonomy);
+                            flashCard.bloom = bloom;
                             cardData.push(flashCard);
                         }
                     }
@@ -23,6 +24,7 @@ class ParseCardResponse {
                         const mcqCard = new parse_mcq_card_1.ParseMcqCard().parse(elem);
                         if (mcqCard != null && mcqCard) {
                             mcqCard.heading = this._getCardReference(mcqCard, sourceTaxonomy);
+                            mcqCard.bloom = bloom;
                             cardData.push(mcqCard);
                         }
                     }
@@ -30,6 +32,7 @@ class ParseCardResponse {
                         const clozeCard = new parse_cloze_card_1.ParseClozeCard().parse(elem);
                         if (clozeCard && clozeCard != null) {
                             clozeCard.heading = this._getCardReference(clozeCard, sourceTaxonomy);
+                            clozeCard.bloom = bloom;
                             cardData.push(clozeCard);
                         }
                     }
@@ -37,6 +40,7 @@ class ParseCardResponse {
                         const matchCard = new parse_match_card_1.ParseMatchCard().parse(elem);
                         if (matchCard && matchCard != null) {
                             matchCard.heading = this._getCardReference(matchCard, sourceTaxonomy);
+                            matchCard.bloom = bloom;
                             cardData.push(matchCard);
                         }
                     }

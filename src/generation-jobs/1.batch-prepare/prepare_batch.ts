@@ -86,7 +86,7 @@ const getCustomIdForBreadth = (doc: any): RequestId => {
     _source: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
-      n: doc.request_type.n | 1,
+      n: doc.request_type?.n ?? 1,
     },
   };
 };
@@ -96,7 +96,7 @@ const getCustomIdForDepth = (doc: any): RequestId => {
     _source: doc.source._id.toString(),
     request_type: {
       type: doc.request_type.type,
-      n: doc.n | 1,
+      n: doc.request_type?.n ?? 1,
       bloom_level: doc.request_type.bloom_level,
     },
   };

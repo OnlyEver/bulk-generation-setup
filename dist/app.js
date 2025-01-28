@@ -91,7 +91,25 @@ const populateQueueForNextRequest = (sourceId, viewTimeThreshold) => __awaiter(v
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
 // (async () => {
 //   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   openai(config.openAiKey ?? "");
+//   const db = getDbInstance();
+//   const created = prepareGenerationBatch();
+//   // const parsedResponses = await db
+//   //   .collection("_parsed_response")
+//   //   .find({})
+//   //   .toArray();
+//   // const parsedIds = [];
+//   // const genReqs = db.collection("_generation_requests");
+//   // for (const response of parsedResponses) {
+//   //   const identifier = response.requestIdentifier;
+//   //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
+//   //   if (parsedIdentifier) {
+//   //     parsedIds.push(parsedIdentifier);
+//   //   }
+//   // }
+//   // const req = await genReqs.find({ $or: parsedIds }).toArray();
+//   // console.log(req?.length);
+//   // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
 //   // const files = await prepareGenerationBatch();
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);

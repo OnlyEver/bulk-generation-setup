@@ -77,20 +77,22 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 const getCustomIdForBreadth = (doc) => {
+    var _a, _b;
     return {
         _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
-            n: doc.request_type.n | 1,
+            n: (_b = (_a = doc.request_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 1,
         },
     };
 };
 const getCustomIdForDepth = (doc) => {
+    var _a, _b;
     return {
         _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
-            n: doc.n | 1,
+            n: (_b = (_a = doc.request_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 1,
             bloom_level: doc.request_type.bloom_level,
         },
     };

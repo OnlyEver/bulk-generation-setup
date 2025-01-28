@@ -15,4 +15,13 @@
  * console.log(lastEven); // Output: 4
  *
  */
-export declare function lastWhere<T>(array: T[], predicate: (item: T) => boolean): T | undefined;
+export declare function findLastBreadthRequest(array: any[]): any | undefined;
+/**
+ * Finds the last matching request in the array for a specific condition and the highest `n` value.
+ *
+ * @param array - The array of request objects.
+ * @param type - The type to match (e.g., "depth").
+ * @param bloomLevel - The bloom level to match.
+ * @returns The last matching request object or undefined if none is found.
+ */
+export declare function findLastDepthRequest(array: any[], type: string, bloomLevel: number): any | undefined;

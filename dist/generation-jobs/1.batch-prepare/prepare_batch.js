@@ -37,7 +37,6 @@ function prepareBatch() {
                 // Slice the array into chunks of maxCount elements
                 result.push(sources.slice(i, i + 300));
             }
-            console.log(result);
             yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
                 const batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
@@ -54,7 +53,6 @@ function prepareBatch() {
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
             })));
-            console.log(inputFileList);
             return {
                 sources,
                 inputFileList,

@@ -8,7 +8,7 @@ export async function cleanUpBatchData({
   requestIdentifiers,
 }: {
   batch_id: string;
-  requestIdentifiers: RequestId[];
+  requestIdentifiers: any[];
 }): Promise<void> {
   try {
     const database = getDbInstance();

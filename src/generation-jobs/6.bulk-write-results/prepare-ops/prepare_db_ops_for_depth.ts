@@ -55,8 +55,10 @@ export async function writeDBOpsForDepth(data: ParsedResponse): Promise<any[]> {
             update: {
               $addToSet: {
                 generation_info: metadata,
-                "source_taxonomy.concepts": generatedData.missing_concepts,
-                "source_taxonomy.facts": generatedData.missing_facts,
+                // "source_taxonomy.concepts": {
+                //   $ele: generatedData.missing_concepts,
+                // },
+                // "source_taxonomy.facts": { $elem: generatedData.missing_facts },
               },
             },
             upsert: true,

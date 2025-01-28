@@ -18,7 +18,7 @@ export function parseDepth(params: parseDepth): ParsedResponse {
     const cardData = new ParseCardResponse().parse(
       generatedData,
       params.sourceTaxonomy,
-      requestId.request_type?.n ?? 1
+      requestId.request_type?.bloom_level ?? 1
     );
 
     const cardResponse: CardGenResponse = {

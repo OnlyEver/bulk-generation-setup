@@ -20,7 +20,7 @@ const list_last_where_1 = require("../../utils/list_last_where");
  * @async
  * @param sourceId - The `_id` of the source
  */
-function populateQueue(sourceId) {
+function populateQueue(sourceId, viewTimeThreshold) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
         const sourceCollection = connection_1.database.collection("_source");
@@ -44,8 +44,8 @@ function populateQueue(sourceId) {
                 const sourceTaxonomy = source.source_taxonomy;
                 const aiCards = ((_a = source._ai_cards) !== null && _a !== void 0 ? _a : []).map((elem) => elem._id);
                 if (Array.isArray(generationInfo) && generationInfo.length > 0) {
-                    const lastBreadthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => item.req_type.type === "breadth");
-                    const calculatedViewTime = Math.floor(viewTime / 3000);
+                    const lastBreadthRequest = (0, list_last_where_1.findLastBreadthRequest)(generationInfo);
+                    const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
                     // If the breadth request or source taxonomy exists
                     if (lastBreadthRequest || sourceTaxonomy) {
                         if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
@@ -98,7 +98,7 @@ function populateQueue(sourceId) {
  */
 function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         try {
             let documents = [];
             const concepts = (_a = sourceTaxonomy.concepts) !== null && _a !== void 0 ? _a : [];
@@ -119,20 +119,17 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
             ])
                 .toArray();
             if (sourceTaxonomy.generate_cards.state) {
-                let maxRequestsForBloom = 5;
+                let maxRequestsForBloom = 4;
                 let levelConcepts = []; /// An array of concept_text according to the bloom level
                 let levelFacts = []; /// An array of fact_text according to the bloom level
                 for (let bloom = 1; bloom <= 5; bloom++) {
                     console.log("Bloom level: ", bloom);
                     let missingConcepts = [];
                     let missingFacts = [];
-                    const lastDepthRequest = (0, list_last_where_1.lastWhere)(generationInfo, (item) => {
-                        var _a, _b;
-                        return ((_a = item.req_type) === null || _a === void 0 ? void 0 : _a.type) == "depth" &&
-                            ((_b = item.req_type) === null || _b === void 0 ? void 0 : _b.bloom_level) == bloom;
-                    });
+                    const lastDepthRequest = (0, list_last_where_1.findLastDepthRequest)(generationInfo, "depth", bloom);
+                    const cards = [];
                     if (lastDepthRequest) {
-                        if (((_d = (_c = lastDepthRequest.req_type) === null || _c === void 0 ? void 0 : _c.n) !== null && _d !== void 0 ? _d : 0) <= maxRequestsForBloom) {
+                        if (((_d = (_c = lastDepthRequest.req_type) === null || _c === void 0 ? void 0 : _c.n) !== null && _d !== void 0 ? _d : 1) <= maxRequestsForBloom) {
                             let levelCards = [];
                             levelCards =
                                 ((_e = bloomLevelCards.find((item) => item.level == bloom)) === null || _e === void 0 ? void 0 : _e.cards) || [];
@@ -140,16 +137,12 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                                 for (let card of levelCards) {
                                     if (card.generated_info.concepts) {
                                         for (let concept of card.generated_info.concepts) {
-                                            if (concept.concept_text) {
-                                                levelConcepts.push(concept.concept_text);
-                                            }
+                                            levelConcepts.push(concept);
                                         }
                                     }
                                     if (card.generated_info.facts) {
                                         for (let fact of card.generated_info.facts) {
-                                            if (fact.fact_text) {
-                                                levelFacts.push(fact.fact_text);
-                                            }
+                                            levelFacts.push(fact);
                                         }
                                     }
                                 }
@@ -177,7 +170,7 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                                         request_type: {
                                             type: "depth",
                                             bloom_level: bloom,
-                                            n: ((_f = lastDepthRequest === null || lastDepthRequest === void 0 ? void 0 : lastDepthRequest.n) !== null && _f !== void 0 ? _f : 0) + 1,
+                                            n: ((_g = (_f = lastDepthRequest === null || lastDepthRequest === void 0 ? void 0 : lastDepthRequest.req_type) === null || _f === void 0 ? void 0 : _f.n) !== null && _g !== void 0 ? _g : 0) + 1,
                                         },
                                         params: {
                                             missing_concepts: missingConceptsData,
@@ -185,6 +178,22 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
                                         },
                                     });
                                 }
+                            }
+                            else {
+                                documents.push({
+                                    _source: sourceId,
+                                    ctime: new Date(),
+                                    status: "created",
+                                    request_type: {
+                                        type: "depth",
+                                        bloom_level: bloom,
+                                        n: ((_j = (_h = lastDepthRequest.req_type) === null || _h === void 0 ? void 0 : _h.n) !== null && _j !== void 0 ? _j : 0) + 1,
+                                    },
+                                    params: {
+                                        missing_concepts: concepts,
+                                        missing_facts: facts,
+                                    },
+                                });
                             }
                         }
                     }

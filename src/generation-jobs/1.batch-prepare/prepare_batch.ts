@@ -27,7 +27,6 @@ export async function prepareBatch(): Promise<Object> {
       // Slice the array into chunks of maxCount elements
       result.push(sources.slice(i, i + 300));
     }
-    console.log(result);
     await Promise.all(
       result.map(async (element, index) => {
         const batchDataList: any[] = [];
@@ -54,7 +53,6 @@ export async function prepareBatch(): Promise<Object> {
       })
     );
 
-    console.log(inputFileList);
     return {
       sources,
       inputFileList,

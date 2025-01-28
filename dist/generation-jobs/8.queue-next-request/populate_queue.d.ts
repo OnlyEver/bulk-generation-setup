@@ -5,4 +5,4 @@
  * @async
  * @param sourceId - The `_id` of the source
  */
-export declare function populateQueue(sourceId: string): Promise<void>;
+export declare function populateQueue(sourceId: string, viewTimeThreshold: number): Promise<void>;

@@ -11,7 +11,7 @@ import { parse } from "path";
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-export async function prepareBatch(): Promise<Object> {
+export async function prepareBatch(model: string): Promise<Object> {
   try {
     var inputFileList: string[] = [];
     const generationDataCollection = database.collection(
@@ -33,10 +33,10 @@ export async function prepareBatch(): Promise<Object> {
         await Promise.all(
           element.map(async (elem) => {
             if (elem.request_type.type === "breadth") {
-              const batchData = await prepareBatchForBreadth(elem);
+              const batchData = await prepareBatchForBreadth(elem, model);
               batchDataList.push(batchData);
             } else {
-              const batchData = await prepareBatchForDepth(elem);
+              const batchData = await prepareBatchForDepth(elem, model);
               batchDataList.push(batchData);
             }
           })
@@ -102,7 +102,7 @@ const getCustomIdForDepth = (doc: any): RequestId => {
   };
 };
 
-const prepareBatchForBreadth = async (doc: any) => {
+const prepareBatchForBreadth = async (doc: any, model: string) => {
   const prompts = await getPrompt(doc.request_type.type);
   const currentN = doc.request_type.n ?? 1;
   let existingTypology = "";
@@ -116,7 +116,7 @@ const prepareBatchForBreadth = async (doc: any) => {
     method: "POST",
     url: "/v1/chat/completions", // API endpoint.
     body: {
-      model: "gpt-4o-mini",
+      model: model,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: prompts },
@@ -143,7 +143,7 @@ const prepareBatchForBreadth = async (doc: any) => {
   };
 };
 
-const prepareBatchForDepth = async (doc: any) => {
+const prepareBatchForDepth = async (doc: any, model: string) => {
   const parsedTypology = doc.source.source_taxonomy;
   const params = doc.params;
   const cardGenPrompt = await getPrompt(
@@ -166,7 +166,7 @@ const prepareBatchForDepth = async (doc: any) => {
     method: "POST", // HTTP method.
     url: "/v1/chat/completions", // API endpoint.
     body: {
-      model: "gpt-4o-mini",
+      model: model,
       response_format: { type: "json_object" }, // Specify the model.
       messages: [
         { role: "system", content: cardGenPrompt }, // System message.

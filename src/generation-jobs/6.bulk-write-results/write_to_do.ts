@@ -13,7 +13,7 @@ export async function handleBulkWrite(parsedResponse: ParsedResponse[]) {
       await cardCollection.bulkWrite(cardsOps);
     }
     if (sourceOps.length > 0) {
-      await sourceCollection.bulkWrite(sourceOps);
+      await sourceCollection.bulkWrite(sourceOps, { ordered: true });
     }
     return dbOps;
   } catch (e: any) {

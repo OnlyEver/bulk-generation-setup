@@ -22,7 +22,7 @@ function writeDBOpsForBreadth(data) {
                         "source_taxonomy.fields": { $each: generatedData.field },
                         "source_taxonomy.concepts": { $each: generatedData.concepts },
                         "source_taxonomy.facts": { $each: generatedData.facts },
-                        "source_taxonomy.summary_cards": {
+                        summary_cards: {
                             $each: generatedData.summary_cards,
                         },
                     },

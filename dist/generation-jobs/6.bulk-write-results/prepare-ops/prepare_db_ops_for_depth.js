@@ -53,26 +53,22 @@ function writeDBOpsForDepth(data) {
                     };
                 });
                 /// write metadata to generation info
-                dbOPS.push({
-                    collection: "_source",
-                    query: {
-                        updateOne: {
-                            filter: {
-                                _id: new mongodb_1.ObjectId(sourceId),
-                            },
-                            update: {
-                                $addToSet: {
-                                    generation_info: metadata,
-                                    // "source_taxonomy.concepts": {
-                                    //   $ele: generatedData.missing_concepts,
-                                    // },
-                                    // "source_taxonomy.facts": { $elem: generatedData.missing_facts },
-                                },
-                            },
-                            upsert: true,
-                        },
-                    },
-                });
+                // dbOPS.push({
+                //   collection: "_source",
+                //   query: {
+                //     updateOne: {
+                //       filter: {
+                //         _id: new ObjectId(sourceId),
+                //       },
+                //       update: {
+                //         $addToSet: {
+                //           generation_info: metadata,
+                //         },
+                //       },
+                //       upsert: true,
+                //     },
+                //   },
+                // });
                 // insert to _cards
                 cardsObjects.forEach((elem) => {
                     dbOPS.push({
@@ -99,11 +95,27 @@ function writeDBOpsForDepth(data) {
                                     _ai_cards: {
                                         $each: createdCardsIds,
                                     },
+                                    generation_info: metadata,
                                     test_set: {
                                         $each: createdCardsIds,
                                     },
                                 },
                             },
+                        },
+                    },
+                });
+                dbOPS.push({
+                    collection: "_source",
+                    query: {
+                        updateOne: {
+                            filter: {
+                                _id: new mongodb_1.ObjectId(sourceId),
+                            },
+                            update: [
+                                {
+                                    $set: { n_cards: { $size: "$test_set" } },
+                                },
+                            ],
                         },
                     },
                 });

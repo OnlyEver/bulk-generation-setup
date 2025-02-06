@@ -21,7 +21,7 @@ function writeDBOpsForDepth(data) {
         const generatedData = data.generated_data;
         const dbOPS = [];
         const momoUserID = "11111111";
-        const momoUserObjectID = new mongodb_1.ObjectId("665585e813684f253ea761b4");
+        const momoUserObjectID = new mongodb_1.ObjectId("66543e0a6d7bc33e60d12e31");
         const sourceCollection = database.collection("_source");
         try {
             const source = yield sourceCollection.findOne({
@@ -33,8 +33,7 @@ function writeDBOpsForDepth(data) {
                     return {
                         _id: new mongodb_1.ObjectId(),
                         _source: new mongodb_1.ObjectId(sourceId),
-                        _user_id: momoUserID,
-                        _owner: momoUserObjectID,
+                        _owners: [momoUserObjectID],
                         type: elem.type,
                         source_info: {
                             source_heading: elem.heading,
@@ -43,7 +42,6 @@ function writeDBOpsForDepth(data) {
                         content: elem.content,
                         ctime: new Date(),
                         mtime: new Date(),
-                        display_title: elem.displayTitle,
                         _access_to: [],
                         ai_generated: true,
                         explanation: elem.explanation,

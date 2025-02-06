@@ -4,20 +4,21 @@ import { ParseCardResponse } from "./parse-cards/parse_card_response";
 import { getCardData } from "./temp_card_gen_data";
 
 type parseDepth = {
-  rawResponse?: RawResponse;
+  rawResponse: RawResponse;
   sourceTaxonomy: any;
 };
 
 export function parseDepth(params: parseDepth): ParsedResponse {
   try {
-    const rawResponse = getCardData();
+    const rawResponse = params.rawResponse;
     const requestId = rawResponse.request_id;
-    const response = rawResponse.response;
+    const response = rawResponse.response.body;
     const usage = response.usage;
     const generatedData = JSON.parse(response.choices[0].message.content);
     const cardData = new ParseCardResponse().parse(
       generatedData,
-      params.sourceTaxonomy
+      params.sourceTaxonomy,
+      requestId.request_type?.bloom_level ?? 1
     );
 
     const cardResponse: CardGenResponse = {

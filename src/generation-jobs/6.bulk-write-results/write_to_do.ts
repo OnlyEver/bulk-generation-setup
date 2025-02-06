@@ -15,6 +15,7 @@ export async function handleBulkWrite(parsedResponse: ParsedResponse[]) {
     if (sourceOps.length > 0) {
       await sourceCollection.bulkWrite(sourceOps);
     }
+    return dbOps;
   } catch (e: any) {
     console.error(
       "Error occurred while converting the parsed array to db operations:",

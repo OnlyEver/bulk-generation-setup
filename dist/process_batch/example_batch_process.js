@@ -23,6 +23,7 @@ exports.handler = void 0;
 const config_1 = require("../config");
 const app_1 = require("../app");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
+const populate_queue_1 = require("../generation-jobs/8.queue-next-request/populate_queue");
 const lambda = new aws_sdk_1.default.Lambda();
 const CHILD_LAMBDA_NAME = "child-handler";
 const handler = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -57,29 +58,46 @@ const handler = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.handler = handler;
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
+    var _a, _b;
     // console.log("batch process");
     (0, app_1.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
     (0, app_1.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    const fileContent = yield (0, app_1.getFileContent)("");
+    // await cleanUpBatchData({
+    //   batch_id: "batch_6792040ab01481909c1a1ca5d61c56a4",
+    //   requestIdentifiers: [
+    //     {
+    //       _source: "6753b17a7d070c44ecf24f9e",
+    //       request_type: {
+    //         type: "breadth",
+    //         n: 1,
+    //       },
+    //     },
+    //   ],
+    // });
+    // const fileContent = await getFileContent("");
     // console.log(fileContent);
-    const batchStatus = yield (0, app_1.getBatchStatus)("batch_6791cbe29c8c8190be254b0761ab12cb");
-    console.log(batchStatus.status);
-    if (batchStatus.status === "completed") {
-        const fileContent = yield (0, app_1.getFileContent)((_c = batchStatus.output_file_id) !== null && _c !== void 0 ? _c : "");
-        const parsedData = yield (0, app_1.parseGeneratedData)(fileContent);
-        const sourceIds = parsedData.parsed_response.map((item) => item.requestIdentifier._source);
-        const uniqueSourceIds = [...new Set(sourceIds)];
-        const bulkWriteResult = yield (0, app_1.bulkWriteToDb)(parsedData);
-        uniqueSourceIds.forEach((sourceId) => __awaiter(void 0, void 0, void 0, function* () {
-            console.log(`Source ID: ${sourceId}`);
-            yield (0, app_1.populateQueueForNextRequest)(sourceId);
-        }));
-    }
-    else if (batchStatus.status === "failed") {
-        console.log("Batch failed");
-        const errorFileContent = yield (0, app_1.getFileContent)((_d = batchStatus.error_file_id) !== null && _d !== void 0 ? _d : "");
-    }
-    //await populateQueue('6753b17a7d070c44ecf24f9e');
+    // const batchStatus = await getBatchStatus(
+    //   "batch_6792040ab01481909c1a1ca5d61c56a4"
+    // );
+    // console.log(batchStatus.status);
+    // if (batchStatus.status === "completed") {
+    //   const fileContent = await getFileContent(batchStatus.output_file_id ?? "");
+    //   const parsedData = await parseGeneratedData(fileContent);
+    //   const sourceIds = parsedData.parsed_response.map(
+    //     (item) => item.requestIdentifier._source
+    //   );
+    //   const uniqueSourceIds = [...new Set(sourceIds)];
+    //   const bulkWriteResult = await bulkWriteToDb(parsedData);
+    //   uniqueSourceIds.forEach(async (sourceId) => {
+    //     console.log(`Source ID: ${sourceId}`);
+    //   await populateQueueForNextRequest("6753b17a7d070c44ecf24f9e");
+    //   });
+    // } else if (batchStatus.status === "failed") {
+    //   console.log("Batch failed");
+    //   const errorFileContent = await getFileContent(
+    //     batchStatus.error_file_id ?? ""
+    //   );
+    // }
+    yield (0, populate_queue_1.populateQueue)("6753b17a7d070c44ecf24f9e");
 }))();
 //# sourceMappingURL=example_batch_process.js.map

@@ -4,7 +4,7 @@ import { ParseMatchCard } from "./parse_card/parse_match_card";
 import { ParseMcqCard } from "./parse_card/parse_mcq_card";
 
 export class ParseCardResponse {
-  parse(generatedData: any, sourceTaxonomy: any) {
+  parse(generatedData: any, sourceTaxonomy: any, bloom: number) {
     try {
       const cardData = [];
       const unparsedTestCards = generatedData.test_cards;
@@ -18,12 +18,14 @@ export class ParseCardResponse {
                 flashCard,
                 sourceTaxonomy
               );
+              flashCard.bloom = bloom;
               cardData.push(flashCard);
             }
           } else if (elem.type == "mcq") {
             const mcqCard = new ParseMcqCard().parse(elem);
             if (mcqCard != null && mcqCard) {
               mcqCard.heading = this._getCardReference(mcqCard, sourceTaxonomy);
+              mcqCard.bloom = bloom;
               cardData.push(mcqCard);
             }
           } else if (elem.type == "cloze") {
@@ -33,6 +35,7 @@ export class ParseCardResponse {
                 clozeCard,
                 sourceTaxonomy
               );
+              clozeCard.bloom = bloom;
               cardData.push(clozeCard);
             }
           } else if (elem.type == "match") {
@@ -42,6 +45,7 @@ export class ParseCardResponse {
                 matchCard,
                 sourceTaxonomy
               );
+              matchCard.bloom = bloom;
               cardData.push(matchCard);
             }
           }

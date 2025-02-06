@@ -11,7 +11,7 @@ type OutputItem = {
 };
 
 export class ParseMatchCard {
-  parse(cardData: any) {
+  parse(cardData: any): any {
     try {
       let content = cardData.card_content;
       const finalContent = this._parseMatchContent(content);

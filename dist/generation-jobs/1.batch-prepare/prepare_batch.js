@@ -28,14 +28,15 @@ function prepareBatch() {
         try {
             var inputFileList = [];
             const generationDataCollection = connection_1.database.collection("_generation_requests");
-            let docs = yield generationDataCollection.find({}).toArray();
+            let docs = yield generationDataCollection
+                .find({ status: "created" })
+                .toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
             for (let i = 0; i < sources.length; i += 300) {
                 // Slice the array into chunks of maxCount elements
                 result.push(sources.slice(i, i + 300));
             }
-            console.log(result);
             yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
                 const batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
@@ -48,11 +49,10 @@ function prepareBatch() {
                         batchDataList.push(batchData);
                     }
                 })));
-                const filePath = `batchinput${index}.jsonl`;
+                const filePath = `/tmp/batchinput${index}.jsonl`;
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
             })));
-            console.log(inputFileList);
             return {
                 sources,
                 inputFileList,
@@ -81,7 +81,7 @@ const getCustomIdForBreadth = (doc) => {
         _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
-            n: doc.n | 1,
+            n: doc.request_type.n | 1,
         },
     };
 };
@@ -96,7 +96,15 @@ const getCustomIdForDepth = (doc) => {
     };
 };
 const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
     const prompts = yield getPrompt(doc.request_type.type);
+    const currentN = (_a = doc.request_type.n) !== null && _a !== void 0 ? _a : 1;
+    let existingTypology = "";
+    if (currentN > 1) {
+        existingTypology =
+            "Dont generate Existing taxonomy data is as " +
+                JSON.stringify((_c = (_b = doc.source) === null || _b === void 0 ? void 0 : _b.source_taxonomy) !== null && _c !== void 0 ? _c : {});
+    }
     return {
         custom_id: JSON.stringify(getCustomIdForBreadth(doc)), // Unique identifier for each request.
         method: "POST",
@@ -117,15 +125,26 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
                         "Bibliography",
                         "Notes",
                         "Cited sources",
-                    ], ["table", "empty_line"]),
+                    ], ["table", "empty_line"]) + existingTypology,
                 },
             ],
         },
     };
 });
 const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
-    const parsedTypology = doc._source.source_taxonomy;
+    const parsedTypology = doc.source.source_taxonomy;
+    const params = doc.params;
     const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
+    if (doc.request_type.bloom_level !== 1) {
+        if (params) {
+            if (params.missing_facts) {
+                parsedTypology.facts = params.missing_facts;
+            }
+            if (params.missing_concepts) {
+                parsedTypology.concepts = params.missing_concepts;
+            }
+        }
+    }
     return {
         custom_id: JSON.stringify(getCustomIdForDepth(doc)),
         method: "POST", // HTTP method.

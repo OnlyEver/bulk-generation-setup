@@ -1,5 +1,5 @@
 export declare class ParseCardResponse {
-    parse(generatedData: any, sourceTaxonomy: any): {
+    parse(generatedData: any, sourceTaxonomy: any, bloom: number): {
         status_code: number;
         cards_data: any[];
         type?: undefined;

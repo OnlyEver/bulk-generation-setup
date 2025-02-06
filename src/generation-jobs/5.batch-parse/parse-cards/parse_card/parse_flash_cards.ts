@@ -1,5 +1,5 @@
 export class ParseFlashCard {
-  parse(data: any) {
+  parse(data: any): any {
     try {
       let displayTitle = this.generateFlashCardDisplayTitle(
         data.card_content.front,

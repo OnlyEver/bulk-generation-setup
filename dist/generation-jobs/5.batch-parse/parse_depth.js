@@ -2,18 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseDepth = parseDepth;
 const parse_card_response_1 = require("./parse-cards/parse_card_response");
-const temp_card_gen_data_1 = require("./temp_card_gen_data");
 function parseDepth(params) {
-    var _a;
+    var _a, _b, _c;
     try {
-        const rawResponse = (0, temp_card_gen_data_1.getCardData)();
+        const rawResponse = params.rawResponse;
         const requestId = rawResponse.request_id;
-        const response = rawResponse.response;
+        const response = rawResponse.response.body;
         const usage = response.usage;
         const generatedData = JSON.parse(response.choices[0].message.content);
-        const cardData = new parse_card_response_1.ParseCardResponse().parse(generatedData, params.sourceTaxonomy);
+        const cardData = new parse_card_response_1.ParseCardResponse().parse(generatedData, params.sourceTaxonomy, (_b = (_a = requestId.request_type) === null || _a === void 0 ? void 0 : _a.bloom_level) !== null && _b !== void 0 ? _b : 1);
         const cardResponse = {
-            cards_data: (_a = cardData.cards_data) !== null && _a !== void 0 ? _a : [],
+            cards_data: (_c = cardData.cards_data) !== null && _c !== void 0 ? _c : [],
             missing_facts: [],
             missing_concepts: [],
         };

@@ -1,9 +1,9 @@
 {
   "name": "only_ever_bulk_generator",
   "version": "0.0.4",
-  "main": "dist/process_batch/example_batch_process.js",
+  "main": "dist/app.js",
   "scripts": {
-    "start": "npm run build && nodemon dist/process_batch/example_batch_process.js",
+    "start": "npm run build && nodemon dist/app.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "example": "npm run build && nodemon dist/app.js"

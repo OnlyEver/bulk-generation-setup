@@ -27,6 +27,7 @@ function handleBulkWrite(parsedResponse) {
             if (sourceOps.length > 0) {
                 yield sourceCollection.bulkWrite(sourceOps);
             }
+            return dbOps;
         }
         catch (e) {
             console.error("Error occurred while converting the parsed array to db operations:", e);

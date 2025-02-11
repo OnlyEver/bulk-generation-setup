@@ -12,8 +12,8 @@ export function parseDepth(params: parseDepth): ParsedResponse {
   try {
     const rawResponse = params.rawResponse;
     const requestId = rawResponse.request_id;
-    const response = rawResponse.response.body;
-    const usage = response.usage;
+    const response = rawResponse.response.response.body;
+    const usage = rawResponse.response.response.body.usage;
     const generatedData = JSON.parse(response.choices[0].message.content);
     const cardData = new ParseCardResponse().parse(
       generatedData,

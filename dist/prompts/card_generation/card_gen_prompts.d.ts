@@ -1,5 +1,10 @@
 export declare const cardGenDocs: {
     role: string;
+    role_bloom_1: string;
+    role_bloom_2: string;
+    role_bloom_3: string;
+    role_bloom_4: string;
+    role_bloom_5: string;
     generate_bloom_1: string;
     generate_bloom_2: string;
     generate_bloom_3: string;

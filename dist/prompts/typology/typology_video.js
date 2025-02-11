@@ -4,7 +4,8 @@ exports.videoTypologyDocs = void 0;
 exports.videoTypologyDocs = {
     role: "676529e259c0563f42607ae5",
     inputs: "676529f059c0563f42607ae6",
-    steps: "6765298b59c0563f42607adf",
+    // steps: "6765298b59c0563f42607adf",
+    steps: "67a9adb49e517b6febb9a6ea",
     schema: "67652a2559c0563f42607ae7",
     fields: "676529a259c0563f42607ae1",
     concepts: "67652a3459c0563f42607ae8",

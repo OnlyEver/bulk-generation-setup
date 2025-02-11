@@ -4,7 +4,8 @@ exports.typologyTextDocs = void 0;
 exports.typologyTextDocs = {
     role: "676528fc59c0563f42607add",
     input: "6765298059c0563f42607ade",
-    steps: "6765298b59c0563f42607adf",
+    // steps: "6765298b59c0563f42607adf",
+    steps: "67a9adb49e517b6febb9a6ea",
     schema: "6765299559c0563f42607ae0",
     fields: "676529a259c0563f42607ae1",
     concepts: "676529b759c0563f42607ae2",

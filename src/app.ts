@@ -12,6 +12,7 @@ import { cleanUpBatchData } from "./generation-jobs/7.clean-batch-data/clean_up_
 import { populateQueue } from "./generation-jobs/8.queue-next-request/populate_queue";
 import { config } from "./config";
 import { parseBreadth } from "./generation-jobs/5.batch-parse/parse_breadth";
+import { parseDepth } from "./generation-jobs/5.batch-parse/parse_depth";
 import { cleanRequestsIdentifier } from "./utils/identifier_for_clearing_requests";
 import { getCardData } from "./generation-jobs/5.batch-parse/temp_card_gen_data";
 
@@ -99,18 +100,86 @@ export const populateQueueForNextRequest = async (
   };
 };
 
+<<<<<<< Updated upstream
 // (async () => {
 //   setUpMongoClient(config.dbUri, config.dbName ?? "");
 //   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
 //   // const files = await prepareGenerationBatch();
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);
+=======
+(async () => {
+  setUpMongoClient(config.dbUri, config.dbName ?? "");
+  openai(config.openAiKey ?? "");
+  // const db = getDbInstance();
 
-//   // const data = await parseGeneratedData([getCardData()]);
-//   // console.log(data);
-//   // const dbOpes = await bulkWriteToDb(data);
-//   // console.log(dbOpes);
-// })();
+  const created: any = await prepareGenerationBatch('o3-mini');
+  const batch = await createBatchRequest(created.inputFileList);
+  console.log(batch);
+  const status = await checkBatchStatus(batch[0].id);
+
+  // const status = await checkBatchStatus('batch_67ab0f7f19cc819081ea4b32717c1eb4');
+
+  // console.log(status);
+  // const file = await getResult(status.output_file_id ?? '');
+  // console.log(file);
+
+>>>>>>> Stashed changes
+
+  // if (status.status === 'completed') {
+  //   const parsedData = await parseDepth({
+  //     rawResponse: {
+  //       batch_id: status.id,
+  //       request_id: {
+  //         request_type: {
+  //           type: "depth",
+  //           n: 1,
+  //         },
+  //         _source: '',
+  //         params: '',
+  //       },
+  //       response: file[0],
+  //     },
+  //     sourceTaxonomy: {},
+  //   });
+  //   var parsed = await (file);
+  //   await bulkWriteToDb({
+  //     batch_id: status.id,
+  //     parsed_response: [parsedData],
+  //   });
+  //   console.log(file);
+  // }
+  // const result = await getResult(status.files[0].id);
+  // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+  // console.log(file);
+
+  // const parsedResponses = await db
+  //   .collection("_parsed_response")
+  //   .find({})
+  //   .toArray();
+  // const parsedIds = [];
+  // const genReqs = db.collection("_generation_requests");
+  // for (const response of parsedResponses) {
+  //   const identifier = response.requestIdentifier;
+  //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
+  //   if (parsedIdentifier) {
+  //     parsedIds.push(parsedIdentifier);
+  //   }
+  // }
+
+  // const req = await genReqs.find({ $or: parsedIds }).toArray();
+  // console.log(req?.length);
+
+  // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+  // const files = await prepareGenerationBatch();
+  // const batchData = await createBatchRequest(files as []);
+  // console.log(batchData);
+
+  // const data = await parseGeneratedData([getCardData()]);
+  // console.log(data);
+  // const dbOpes = await bulkWriteToDb(data);
+  // console.log(dbOpes);
+})();
 
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);

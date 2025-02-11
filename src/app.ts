@@ -100,20 +100,12 @@ export const populateQueueForNextRequest = async (
   };
 };
 
-<<<<<<< Updated upstream
-// (async () => {
-//   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-//   // const files = await prepareGenerationBatch();
-//   // const batchData = await createBatchRequest(files as []);
-//   // console.log(batchData);
-=======
 (async () => {
   setUpMongoClient(config.dbUri, config.dbName ?? "");
   openai(config.openAiKey ?? "");
   // const db = getDbInstance();
 
-  const created: any = await prepareGenerationBatch('o3-mini');
+  const created: any = await prepareGenerationBatch();
   const batch = await createBatchRequest(created.inputFileList);
   console.log(batch);
   const status = await checkBatchStatus(batch[0].id);
@@ -124,7 +116,6 @@ export const populateQueueForNextRequest = async (
   // const file = await getResult(status.output_file_id ?? '');
   // console.log(file);
 
->>>>>>> Stashed changes
 
   // if (status.status === 'completed') {
   //   const parsedData = await parseDepth({

@@ -33,8 +33,8 @@ export const openai = (openaiKey: string) => {
 };
 
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources
-export const prepareGenerationBatch = async () => {
-  const data = await prepareBatch();
+export const prepareGenerationBatch = async (model: string | null) => {
+  const data = await prepareBatch(model ?? "gpt-4o-mini");
   return data;
 };
 
@@ -79,12 +79,12 @@ export const bulkWriteToDb = async (parsedResponses: {
   parsed_response: ParsedResponse[];
 }) => {
   const data = await handleBulkWrite(parsedResponses.parsed_response);
-  // const cleanUp = await cleanUpBatchData({
-  //   batch_id: parsedResponses.batch_id,
-  //   requestIdentifiers: parsedResponses.parsed_response.map(
-  //     (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
-  //   ),
-  // });
+  const cleanUp = await cleanUpBatchData({
+    batch_id: parsedResponses.batch_id,
+    requestIdentifiers: parsedResponses.parsed_response.map(
+      (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
+    ),
+  });
   return {
     status: "Success",
   };
@@ -100,77 +100,42 @@ export const populateQueueForNextRequest = async (
   };
 };
 
-(async () => {
-  setUpMongoClient(config.dbUri, config.dbName ?? "");
-  openai(config.openAiKey ?? "");
-  // const db = getDbInstance();
+// (async () => {
+//   setUpMongoClient(config.dbUri, config.dbName ?? "");
+//   // openai(config.openAiKey ?? "");
+//   const db = getDbInstance();
 
-  const created: any = await prepareGenerationBatch();
-  const batch = await createBatchRequest(created.inputFileList);
-  console.log(batch);
-  const status = await checkBatchStatus(batch[0].id);
+//   // const created = prepareGenerationBatch();
+//   // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // console.log(file);
 
-  // const status = await checkBatchStatus('batch_67ab0f7f19cc819081ea4b32717c1eb4');
+//   // const parsedResponses = await db
+//   //   .collection("_parsed_response")
+//   //   .find({})
+//   //   .toArray();
+//   // const parsedIds = [];
+//   // const genReqs = db.collection("_generation_requests");
+//   // for (const response of parsedResponses) {
+//   //   const identifier = response.requestIdentifier;
+//   //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
+//   //   if (parsedIdentifier) {
+//   //     parsedIds.push(parsedIdentifier);
+//   //   }
+//   // }
 
-  // console.log(status);
-  // const file = await getResult(status.output_file_id ?? '');
-  // console.log(file);
+//   // const req = await genReqs.find({ $or: parsedIds }).toArray();
+//   // console.log(req?.length);
 
+//   // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // const files = await prepareGenerationBatch();
+//   // const batchData = await createBatchRequest(files as []);
+//   // console.log(batchData);
 
-  // if (status.status === 'completed') {
-  //   const parsedData = await parseDepth({
-  //     rawResponse: {
-  //       batch_id: status.id,
-  //       request_id: {
-  //         request_type: {
-  //           type: "depth",
-  //           n: 1,
-  //         },
-  //         _source: '',
-  //         params: '',
-  //       },
-  //       response: file[0],
-  //     },
-  //     sourceTaxonomy: {},
-  //   });
-  //   var parsed = await (file);
-  //   await bulkWriteToDb({
-  //     batch_id: status.id,
-  //     parsed_response: [parsedData],
-  //   });
-  //   console.log(file);
-  // }
-  // const result = await getResult(status.files[0].id);
-  // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-  // console.log(file);
-
-  // const parsedResponses = await db
-  //   .collection("_parsed_response")
-  //   .find({})
-  //   .toArray();
-  // const parsedIds = [];
-  // const genReqs = db.collection("_generation_requests");
-  // for (const response of parsedResponses) {
-  //   const identifier = response.requestIdentifier;
-  //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
-  //   if (parsedIdentifier) {
-  //     parsedIds.push(parsedIdentifier);
-  //   }
-  // }
-
-  // const req = await genReqs.find({ $or: parsedIds }).toArray();
-  // console.log(req?.length);
-
-  // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-  // const files = await prepareGenerationBatch();
-  // const batchData = await createBatchRequest(files as []);
-  // console.log(batchData);
-
-  // const data = await parseGeneratedData([getCardData()]);
-  // console.log(data);
-  // const dbOpes = await bulkWriteToDb(data);
-  // console.log(dbOpes);
-})();
+// const data = await parseGeneratedData([getCardData()]);
+// console.log(data);
+// const dbOpes = await bulkWriteToDb(data);
+// console.log(dbOpes);
+// }) ();
 
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);

@@ -18,12 +18,9 @@ const connection_1 = require("./mongodb/connection");
 const openai_helper_1 = require("./openai/openai_helper");
 const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
+const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
-<<<<<<< Updated upstream
-=======
-const config_1 = require("./config");
 const identifier_for_clearing_requests_1 = require("./utils/identifier_for_clearing_requests");
->>>>>>> Stashed changes
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 const setUpMongoClient = (connectionUri, dbName) => {
@@ -40,8 +37,8 @@ const openai = (openaiKey) => {
 };
 exports.openai = openai;
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources
-const prepareGenerationBatch = () => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield (0, prepare_batch_1.prepareBatch)();
+const prepareGenerationBatch = (model) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, prepare_batch_1.prepareBatch)(model !== null && model !== void 0 ? model : "gpt-4o-mini");
     return data;
 });
 exports.prepareGenerationBatch = prepareGenerationBatch;
@@ -76,12 +73,10 @@ const parseGeneratedData = (jsonLinesFromFile) => __awaiter(void 0, void 0, void
 exports.parseGeneratedData = parseGeneratedData;
 const bulkWriteToDb = (parsedResponses) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield (0, write_to_do_1.handleBulkWrite)(parsedResponses.parsed_response);
-    // const cleanUp = await cleanUpBatchData({
-    //   batch_id: parsedResponses.batch_id,
-    //   requestIdentifiers: parsedResponses.parsed_response.map(
-    //     (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
-    //   ),
-    // });
+    const cleanUp = yield (0, clean_up_batch_data_1.cleanUpBatchData)({
+        batch_id: parsedResponses.batch_id,
+        requestIdentifiers: parsedResponses.parsed_response.map((e) => (0, identifier_for_clearing_requests_1.cleanRequestsIdentifier)(e.requestIdentifier)),
+    });
     return {
         status: "Success",
     };
@@ -94,83 +89,37 @@ const populateQueueForNextRequest = (sourceId, viewTimeThreshold) => __awaiter(v
     };
 });
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
-<<<<<<< Updated upstream
 // (async () => {
 //   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // openai(config.openAiKey ?? "");
+//   const db = getDbInstance();
+//   // const created = prepareGenerationBatch();
+//   // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // console.log(file);
+//   // const parsedResponses = await db
+//   //   .collection("_parsed_response")
+//   //   .find({})
+//   //   .toArray();
+//   // const parsedIds = [];
+//   // const genReqs = db.collection("_generation_requests");
+//   // for (const response of parsedResponses) {
+//   //   const identifier = response.requestIdentifier;
+//   //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
+//   //   if (parsedIdentifier) {
+//   //     parsedIds.push(parsedIdentifier);
+//   //   }
+//   // }
+//   // const req = await genReqs.find({ $or: parsedIds }).toArray();
+//   // console.log(req?.length);
+//   // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
 //   // const files = await prepareGenerationBatch();
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);
-//   // const data = await parseGeneratedData([getCardData()]);
-//   // console.log(data);
-//   // const dbOpes = await bulkWriteToDb(data);
-//   // console.log(dbOpes);
-// })();
-=======
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
-    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    // const db = getDbInstance();
-    const created = yield (0, exports.prepareGenerationBatch)('o3-mini');
-    const batch = yield (0, exports.createBatchRequest)(created.inputFileList);
-    console.log(batch);
-    const status = yield (0, check_batch_status_1.checkBatchStatus)(batch[0].id);
-    // const status = await checkBatchStatus('batch_67ab0f7f19cc819081ea4b32717c1eb4');
-    // console.log(status);
-    // const file = await getResult(status.output_file_id ?? '');
-    // console.log(file);
-    // if (status.status === 'completed') {
-    //   const parsedData = await parseDepth({
-    //     rawResponse: {
-    //       batch_id: status.id,
-    //       request_id: {
-    //         request_type: {
-    //           type: "depth",
-    //           n: 1,
-    //         },
-    //         _source: '',
-    //         params: '',
-    //       },
-    //       response: file[0],
-    //     },
-    //     sourceTaxonomy: {},
-    //   });
-    //   var parsed = await (file);
-    //   await bulkWriteToDb({
-    //     batch_id: status.id,
-    //     parsed_response: [parsedData],
-    //   });
-    //   console.log(file);
-    // }
-    // const result = await getResult(status.files[0].id);
-    // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-    // console.log(file);
-    // const parsedResponses = await db
-    //   .collection("_parsed_response")
-    //   .find({})
-    //   .toArray();
-    // const parsedIds = [];
-    // const genReqs = db.collection("_generation_requests");
-    // for (const response of parsedResponses) {
-    //   const identifier = response.requestIdentifier;
-    //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
-    //   if (parsedIdentifier) {
-    //     parsedIds.push(parsedIdentifier);
-    //   }
-    // }
-    // const req = await genReqs.find({ $or: parsedIds }).toArray();
-    // console.log(req?.length);
-    // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-    // const files = await prepareGenerationBatch();
-    // const batchData = await createBatchRequest(files as []);
-    // console.log(batchData);
-    // const data = await parseGeneratedData([getCardData()]);
-    // console.log(data);
-    // const dbOpes = await bulkWriteToDb(data);
-    // console.log(dbOpes);
-}))();
->>>>>>> Stashed changes
+// const data = await parseGeneratedData([getCardData()]);
+// console.log(data);
+// const dbOpes = await bulkWriteToDb(data);
+// console.log(dbOpes);
+// }) ();
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);
 //   let identifier: RequestId = {

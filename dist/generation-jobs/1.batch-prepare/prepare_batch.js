@@ -23,7 +23,7 @@ const fetch_card_gen_prompt_1 = require("./fetch-prompts/fetch_card_gen_prompt")
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-function prepareBatch() {
+function prepareBatch(model) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var inputFileList = [];
@@ -41,11 +41,11 @@ function prepareBatch() {
                 const batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
                     if (elem.request_type.type === "breadth") {
-                        const batchData = yield prepareBatchForBreadth(elem);
+                        const batchData = yield prepareBatchForBreadth(elem, model);
                         batchDataList.push(batchData);
                     }
                     else {
-                        const batchData = yield prepareBatchForDepth(elem);
+                        const batchData = yield prepareBatchForDepth(elem, model);
                         batchDataList.push(batchData);
                     }
                 })));
@@ -77,25 +77,27 @@ const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 const getCustomIdForBreadth = (doc) => {
+    var _a, _b;
     return {
         _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
-            n: doc.request_type.n | 1,
+            n: (_b = (_a = doc.request_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 1,
         },
     };
 };
 const getCustomIdForDepth = (doc) => {
+    var _a, _b;
     return {
         _source: doc.source._id.toString(),
         request_type: {
             type: doc.request_type.type,
-            n: doc.n | 1,
+            n: (_b = (_a = doc.request_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 1,
             bloom_level: doc.request_type.bloom_level,
         },
     };
 };
-const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
+const prepareBatchForBreadth = (doc, model) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     const prompts = yield getPrompt(doc.request_type.type);
     const currentN = (_a = doc.request_type.n) !== null && _a !== void 0 ? _a : 1;
@@ -110,7 +112,7 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
         method: "POST",
         url: "/v1/chat/completions", // API endpoint.
         body: {
-            model: "gpt-4o-mini",
+            model: model,
             response_format: { type: "json_object" },
             messages: [
                 { role: "system", content: prompts },
@@ -131,7 +133,7 @@ const prepareBatchForBreadth = (doc) => __awaiter(void 0, void 0, void 0, functi
         },
     };
 });
-const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function* () {
+const prepareBatchForDepth = (doc, model) => __awaiter(void 0, void 0, void 0, function* () {
     const parsedTypology = doc.source.source_taxonomy;
     const params = doc.params;
     const cardGenPrompt = yield getPrompt(doc.request_type.type, doc.request_type.bloom_level);
@@ -150,7 +152,7 @@ const prepareBatchForDepth = (doc) => __awaiter(void 0, void 0, void 0, function
         method: "POST", // HTTP method.
         url: "/v1/chat/completions", // API endpoint.
         body: {
-            model: "gpt-4o-mini",
+            model: model,
             response_format: { type: "json_object" }, // Specify the model.
             messages: [
                 { role: "system", content: cardGenPrompt }, // System message.

@@ -115,11 +115,11 @@ exports.populateQueueForNextRequest = populateQueueForNextRequest;
 //   // const files = await prepareGenerationBatch();
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);
-//   // const data = await parseGeneratedData([getCardData()]);
-//   // console.log(data);
-//   // const dbOpes = await bulkWriteToDb(data);
-//   // console.log(dbOpes);
-// })();
+// const data = await parseGeneratedData([getCardData()]);
+// console.log(data);
+// const dbOpes = await bulkWriteToDb(data);
+// console.log(dbOpes);
+// }) ();
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);
 //   let identifier: RequestId = {

@@ -254,6 +254,13 @@ const getBloomObjectId = (level) => {
     const key = `generate_bloom_${level}`;
     return card_gen_prompts_1.cardGenDocs[key];
 };
+const getRoleObjectId = (level) => {
+    if (level < 1 || level > 5) {
+        console.error(`Invalid level: ${level}. Must be between 1 and 6.`);
+    }
+    const key = `role_bloom_${level}`;
+    return card_gen_prompts_1.cardGenDocs[key];
+};
 /**
  * Returns prompts for card generation based on the bloom level
  *
@@ -261,9 +268,11 @@ const getBloomObjectId = (level) => {
  */
 function returnCardGenPrompt(bloomLevel) {
     return __awaiter(this, void 0, void 0, function* () {
+        const roleObjectId = getRoleObjectId(bloomLevel);
+        const bloomObjectId = getBloomObjectId(bloomLevel);
         const cardGenObjectIds = [
-            card_gen_prompts_1.cardGenDocs.role,
-            getBloomObjectId(bloomLevel),
+            roleObjectId, // cardGenDocs.role,
+            bloomObjectId,
             card_gen_prompts_1.cardGenDocs.cloze,
             card_gen_prompts_1.cardGenDocs.flash,
             card_gen_prompts_1.cardGenDocs.match,

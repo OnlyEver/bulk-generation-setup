@@ -26,22 +26,30 @@ function getPromptData(promptIds) {
         let result = yield promptCollection
             .aggregate([
             {
-                /// match the ids of prompt docs
+                // Match the IDs of prompt docs
                 $match: {
-                    _id: {
-                        $in: objectIds,
-                    },
+                    _id: { $in: objectIds },
                 },
             },
             {
-                /// create a new field allContent(in memory) and pushes the "prompt" field from _prompt doc
+                // Assign an order based on the index in objectIds array
+                $addFields: {
+                    order: { $indexOfArray: [objectIds, "$_id"] },
+                },
+            },
+            {
+                // Sort the results based on the original order
+                $sort: { order: 1 },
+            },
+            {
+                // Group all prompts into an array while maintaining order
                 $group: {
                     _id: null,
                     allContent: { $push: "$prompt" },
                 },
             },
             {
-                /// concat each element in above created `allContent temp field`, and update that to "concatenatedContent"(temp field)
+                // Concatenate all prompts in order
                 $project: {
                     concatenatedContent: {
                         $reduce: {
@@ -54,7 +62,7 @@ function getPromptData(promptIds) {
             },
         ])
             .toArray();
-        return result.length > 0 ? result[0].concatenatedContent : "";
+        return result.length > 0 ? result[0].concatenatedContent : '';
     });
 }
 //# sourceMappingURL=get_prompt_data.js.map

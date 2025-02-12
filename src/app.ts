@@ -12,6 +12,7 @@ import { cleanUpBatchData } from "./generation-jobs/7.clean-batch-data/clean_up_
 import { populateQueue } from "./generation-jobs/8.queue-next-request/populate_queue";
 import { config } from "./config";
 import { parseBreadth } from "./generation-jobs/5.batch-parse/parse_breadth";
+import { parseDepth } from "./generation-jobs/5.batch-parse/parse_depth";
 import { cleanRequestsIdentifier } from "./utils/identifier_for_clearing_requests";
 import { getCardData } from "./generation-jobs/5.batch-parse/temp_card_gen_data";
 
@@ -130,11 +131,11 @@ export const populateQueueForNextRequest = async (
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);
 
-//   // const data = await parseGeneratedData([getCardData()]);
-//   // console.log(data);
-//   // const dbOpes = await bulkWriteToDb(data);
-//   // console.log(dbOpes);
-// })();
+// const data = await parseGeneratedData([getCardData()]);
+// console.log(data);
+// const dbOpes = await bulkWriteToDb(data);
+// console.log(dbOpes);
+// }) ();
 
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);

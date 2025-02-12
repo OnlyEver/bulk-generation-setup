@@ -7,8 +7,8 @@ function parseDepth(params) {
     try {
         const rawResponse = params.rawResponse;
         const requestId = rawResponse.request_id;
-        const response = rawResponse.response.body;
-        const usage = response.usage;
+        const response = rawResponse.response.response.body;
+        const usage = rawResponse.response.response.body.usage;
         const generatedData = JSON.parse(response.choices[0].message.content);
         const cardData = new parse_card_response_1.ParseCardResponse().parse(generatedData, params.sourceTaxonomy, (_b = (_a = requestId.request_type) === null || _a === void 0 ? void 0 : _a.bloom_level) !== null && _b !== void 0 ? _b : 1);
         const cardResponse = {

@@ -32,8 +32,8 @@ export const openai = (openaiKey: string) => {
 };
 
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources
-export const prepareGenerationBatch = async () => {
-  const data = await prepareBatch();
+export const prepareGenerationBatch = async (model: string | null) => {
+  const data = await prepareBatch(model ?? "gpt-4o-mini");
   return data;
 };
 
@@ -78,12 +78,12 @@ export const bulkWriteToDb = async (parsedResponses: {
   parsed_response: ParsedResponse[];
 }) => {
   const data = await handleBulkWrite(parsedResponses.parsed_response);
-  // const cleanUp = await cleanUpBatchData({
-  //   batch_id: parsedResponses.batch_id,
-  //   requestIdentifiers: parsedResponses.parsed_response.map(
-  //     (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
-  //   ),
-  // });
+  const cleanUp = await cleanUpBatchData({
+    batch_id: parsedResponses.batch_id,
+    requestIdentifiers: parsedResponses.parsed_response.map(
+      (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
+    ),
+  });
   return {
     status: "Success",
   };
@@ -101,7 +101,31 @@ export const populateQueueForNextRequest = async (
 
 // (async () => {
 //   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // openai(config.openAiKey ?? "");
+//   const db = getDbInstance();
+
+//   // const created = prepareGenerationBatch();
+//   // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // console.log(file);
+
+//   // const parsedResponses = await db
+//   //   .collection("_parsed_response")
+//   //   .find({})
+//   //   .toArray();
+//   // const parsedIds = [];
+//   // const genReqs = db.collection("_generation_requests");
+//   // for (const response of parsedResponses) {
+//   //   const identifier = response.requestIdentifier;
+//   //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
+//   //   if (parsedIdentifier) {
+//   //     parsedIds.push(parsedIdentifier);
+//   //   }
+//   // }
+
+//   // const req = await genReqs.find({ $or: parsedIds }).toArray();
+//   // console.log(req?.length);
+
+//   // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
 //   // const files = await prepareGenerationBatch();
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);

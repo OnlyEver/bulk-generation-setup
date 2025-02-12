@@ -18,7 +18,9 @@ const connection_1 = require("./mongodb/connection");
 const openai_helper_1 = require("./openai/openai_helper");
 const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
+const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
+const identifier_for_clearing_requests_1 = require("./utils/identifier_for_clearing_requests");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 const setUpMongoClient = (connectionUri, dbName) => {
@@ -35,8 +37,8 @@ const openai = (openaiKey) => {
 };
 exports.openai = openai;
 // This function prepares the batch for the Breadth generation, basically typology or concept/gap fills for the sources
-const prepareGenerationBatch = () => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield (0, prepare_batch_1.prepareBatch)();
+const prepareGenerationBatch = (model) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, prepare_batch_1.prepareBatch)(model !== null && model !== void 0 ? model : "gpt-4o-mini");
     return data;
 });
 exports.prepareGenerationBatch = prepareGenerationBatch;
@@ -71,12 +73,10 @@ const parseGeneratedData = (jsonLinesFromFile) => __awaiter(void 0, void 0, void
 exports.parseGeneratedData = parseGeneratedData;
 const bulkWriteToDb = (parsedResponses) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield (0, write_to_do_1.handleBulkWrite)(parsedResponses.parsed_response);
-    // const cleanUp = await cleanUpBatchData({
-    //   batch_id: parsedResponses.batch_id,
-    //   requestIdentifiers: parsedResponses.parsed_response.map(
-    //     (e: ParsedResponse) => cleanRequestsIdentifier(e.requestIdentifier)
-    //   ),
-    // });
+    const cleanUp = yield (0, clean_up_batch_data_1.cleanUpBatchData)({
+        batch_id: parsedResponses.batch_id,
+        requestIdentifiers: parsedResponses.parsed_response.map((e) => (0, identifier_for_clearing_requests_1.cleanRequestsIdentifier)(e.requestIdentifier)),
+    });
     return {
         status: "Success",
     };
@@ -91,7 +91,27 @@ const populateQueueForNextRequest = (sourceId, viewTimeThreshold) => __awaiter(v
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
 // (async () => {
 //   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // openai(config.openAiKey ?? "");
+//   const db = getDbInstance();
+//   // const created = prepareGenerationBatch();
+//   // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
+//   // console.log(file);
+//   // const parsedResponses = await db
+//   //   .collection("_parsed_response")
+//   //   .find({})
+//   //   .toArray();
+//   // const parsedIds = [];
+//   // const genReqs = db.collection("_generation_requests");
+//   // for (const response of parsedResponses) {
+//   //   const identifier = response.requestIdentifier;
+//   //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
+//   //   if (parsedIdentifier) {
+//   //     parsedIds.push(parsedIdentifier);
+//   //   }
+//   // }
+//   // const req = await genReqs.find({ $or: parsedIds }).toArray();
+//   // console.log(req?.length);
+//   // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
 //   // const files = await prepareGenerationBatch();
 //   // const batchData = await createBatchRequest(files as []);
 //   // console.log(batchData);

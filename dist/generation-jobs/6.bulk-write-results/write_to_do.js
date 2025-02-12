@@ -25,7 +25,7 @@ function handleBulkWrite(parsedResponse) {
                 yield cardCollection.bulkWrite(cardsOps);
             }
             if (sourceOps.length > 0) {
-                yield sourceCollection.bulkWrite(sourceOps);
+                yield sourceCollection.bulkWrite(sourceOps, { ordered: true });
             }
             return dbOps;
         }

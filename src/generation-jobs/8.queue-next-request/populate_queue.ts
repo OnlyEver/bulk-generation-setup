@@ -14,71 +14,100 @@ import {
  */
 export async function populateQueue(
   sourceId: string,
-  viewTimeThreshold: number
+  viewTimeThreshold: number,
+  generateBreadthOnly: boolean = false,
 ) {
   const sourceCollection = database.collection("_source");
   const generationRequests = database.collection("_generation_requests");
   const cardCollection: Collection<Document> = database.collection("_card");
 
-  let documents = []; // Array of documents to be inserted in the generation_requests collection
+  let documents: any[] = []; // Array of documents to be inserted in the generation_requests collection
 
   try {
-    const source = await sourceCollection.findOne(
-      {
-        _id: new ObjectId(sourceId),
-      },
-      {
-        projection: {
-          generation_info: 1,
-          view_time: 1,
-          source_taxonomy: 1,
-          _ai_cards: 1,
+    if (generateBreadthOnly) {
+      await _generateBreadthRequest();
+    } else {
+      const source = await sourceCollection.findOne(
+        {
+          _id: new ObjectId(sourceId),
         },
-      }
-    );
-
-    if (source) {
-      const generationInfo = source.generation_info;
-      const viewTime = source.view_time;
-      const sourceTaxonomy = source.source_taxonomy;
-      const aiCards = (source._ai_cards ?? []).map(
-        (elem: { _id: ObjectId; position: number }) => elem._id
+        {
+          projection: {
+            generation_info: 1,
+            view_time: 1,
+            source_taxonomy: 1,
+            _ai_cards: 1,
+          },
+        }
       );
 
-      if (Array.isArray(generationInfo) && generationInfo.length > 0) {
-        const lastBreadthRequest = findLastBreadthRequest(generationInfo);
-        const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
+      if (source) {
+        const generationInfo = source.generation_info;
+        const viewTime = source.view_time;
+        const sourceTaxonomy = source.source_taxonomy;
+        const aiCards = (source._ai_cards ?? []).map(
+          (elem: { _id: ObjectId; position: number }) => elem._id
+        );
 
-        // If the breadth request or source taxonomy exists
-        if (lastBreadthRequest || sourceTaxonomy) {
-          if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
-            _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1);
+        if (Array.isArray(generationInfo) && generationInfo.length > 0) {
+          const lastBreadthRequest = findLastBreadthRequest(generationInfo);
+          const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
+
+          // If the breadth request or source taxonomy exists
+          if (lastBreadthRequest || sourceTaxonomy) {
+            if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
+              _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1);
+            } else {
+              const depthDocuments = await handleDepthRequest(
+                sourceId,
+                sourceTaxonomy,
+                generationInfo,
+                aiCards,
+                cardCollection
+              );
+              documents.push(...depthDocuments);
+            }
           } else {
-            const depthDocuments = await handleDepthRequest(
-              sourceId,
-              sourceTaxonomy,
-              generationInfo,
-              aiCards,
-              cardCollection
-            );
-            documents.push(...depthDocuments);
+            /// Insert the initial breadth request with n = 1
+            _insertBreadthRequest(1);
           }
         } else {
-          /// Insert the initial breadth request with n = 1
           _insertBreadthRequest(1);
         }
-      } else {
-        _insertBreadthRequest(1);
       }
+      const genReqs = await handleUniqueInsertions(documents);
+      console.log("Documents: ", documents);
     }
-    const genReqs = await handleUniqueInsertions(documents);
-    console.log("Documents: ", documents);
   } catch (error) {
     console.log("Error while populating queue: ", error);
     throw Error;
   }
 
-  function _insertBreadthRequest(n: number) {
+  async function _generateBreadthRequest() {
+    try {
+      const sources = await sourceCollection.find({}).toArray();
+      for (const source of sources) {
+        const generationInfo = source.generation_info;
+        const viewTime = source.view_time;
+        if (viewTime > 700) {
+          if (Array.isArray(generationInfo) && generationInfo.length > 0) {
+            const lastBreadthRequest = findLastBreadthRequest(generationInfo);
+            _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1, source._id.toHexString());
+          }
+          _insertBreadthRequest(1, source._id.toHexString());
+        } else {
+          _insertBreadthRequest(1, source._id.toHexString());
+        }
+      }
+      const genReqs = await handleUniqueInsertions(documents);
+      return genReqs;
+    } catch (e) {
+      console.error("Error while generating breadth request: ", e);
+    }
+
+  }
+
+  function _insertBreadthRequest(n: number, sourceId: string = "") {
     documents.push({
       _source: sourceId,
       ctime: new Date(),

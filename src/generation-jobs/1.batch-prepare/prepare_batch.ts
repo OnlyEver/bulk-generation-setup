@@ -15,7 +15,7 @@ export async function prepareBatch(model: string): Promise<Object> {
   try {
     var inputFileList: string[] = [];
     let docs: any[] = [];
-    let sourcesPerBatch = 300;
+    let sourcesPerBatch = 100;
     // if (breadthGeneration) {
     //   docs = await filterDocsForBreadthGeneration();
     // } else {
@@ -23,10 +23,10 @@ export async function prepareBatch(model: string): Promise<Object> {
       "_generation_requests"
     );
     docs = await generationDataCollection
-      .find({ status: "created" }).limit(900).toArray();
+      .find({ status: "created" }).limit(400).toArray();
     // .toArray();
 
-    //seperate batch prep acc to doc type
+
 
     let sources = await fetchSourceDocuments(docs);
     const result = [];
@@ -39,13 +39,12 @@ export async function prepareBatch(model: string): Promise<Object> {
     await Promise.all(
       result.map(async (element, index) => {
         var batchDataList: any[] = [];
-
         await Promise.all(
           element.map(async (elem) => {
             if (elem.request_type.type === "breadth") {
               const batchData = await prepareBatchForBreadth(elem, model);
               batchDataList.push(batchData);
-            } else {
+            } else {//update else if function
               const batchData = await prepareBatchForDepth(elem, model);
               batchDataList.push(batchData);
             }
@@ -54,7 +53,7 @@ export async function prepareBatch(model: string): Promise<Object> {
 
 
         // const filePath = `/tmp/batchinput${index}.jsonl`;
-        const filePath = `/batchinput${index}.jsonl`;
+        const filePath = `/tmp/batchinput${index}.jsonl`;
         await fsPromise.writeFile(
           filePath,
           batchDataList.map((entry) => JSON.stringify(entry)).join("\n"),

@@ -18,7 +18,7 @@ export async function populateQueue(
   generateBreadthOnly: boolean = false,
 ) {
   const sourceCollection = database.collection("_source");
-  const generationRequests = database.collection("_generation_requests");
+  // const generationRequests = database.collection("_generation_requests");
   const cardCollection: Collection<Document> = database.collection("_card");
 
   let documents: any[] = []; // Array of documents to be inserted in the generation_requests collection
@@ -85,7 +85,7 @@ export async function populateQueue(
 
   async function _generateBreadthRequest() {
     try {
-      const sources = await sourceCollection.find({}).toArray();
+      const sources = await sourceCollection.find({}).limit(10000).toArray();
       for (const source of sources) {
         const generationInfo = source.generation_info;
         const viewTime = source.view_time;
@@ -94,8 +94,6 @@ export async function populateQueue(
             const lastBreadthRequest = findLastBreadthRequest(generationInfo);
             _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1, source._id.toHexString());
           }
-          _insertBreadthRequest(1, source._id.toHexString());
-        } else {
           _insertBreadthRequest(1, source._id.toHexString());
         }
       }
@@ -121,7 +119,7 @@ export async function populateQueue(
 }
 
 /**
- * Handles the depth request generation by determining missing concepts and facts for each bloom level.
+ * Handles the depth request generation by determining mis sing concepts and facts for each bloom level.
  *
  * @async
  * @param sourceId - The `_id` of the source.
@@ -302,7 +300,12 @@ async function handleUniqueInsertions(documents: any[]) {
     });
 
     if (!existingDoc) {
-      await generationRequests.insertOne(doc);
+      try {
+        await generationRequests.insertOne(doc);
+      } catch (e) {
+        console.log(`Error while inserting document: ${JSON.stringify(doc)}`);
+        console.log(e);
+      }
       console.log(`Inserted document: ${JSON.stringify(doc)}`);
     } else {
       console.log(

@@ -8,6 +8,13 @@ function writeDBOpsForBreadth(data) {
     const sourceId = reqId._source;
     const generatedData = data.generated_data;
     const dbOPS = [];
+    const facts = generatedData.facts.map((e) => {
+        return {
+            concept_text: e.fact_text,
+            reference: e.reference,
+        };
+    });
+    const concepts = [...generatedData.concepts, ...facts];
     /// write metadata to generation info
     dbOPS.push({
         collection: "_source",
@@ -20,7 +27,7 @@ function writeDBOpsForBreadth(data) {
                     $addToSet: {
                         generation_info: metadata,
                         "source_taxonomy.fields": { $each: generatedData.field },
-                        "source_taxonomy.concepts": { $each: generatedData.concepts },
+                        "source_taxonomy.concepts": { $each: concepts },
                         "source_taxonomy.facts": { $each: generatedData.facts },
                         summary_cards: {
                             $each: generatedData.summary_cards,

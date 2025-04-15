@@ -15,6 +15,8 @@ import { parseBreadth } from "./generation-jobs/5.batch-parse/parse_breadth";
 import { parseDepth } from "./generation-jobs/5.batch-parse/parse_depth";
 import { cleanRequestsIdentifier } from "./utils/identifier_for_clearing_requests";
 import { getCardData } from "./generation-jobs/5.batch-parse/temp_card_gen_data";
+import express from 'express';
+import { convertParsedArrayToDbOperations } from "./generation-jobs/6.bulk-write-results/prepare-ops/parsed_response_to_db_operations";
 
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
@@ -92,50 +94,74 @@ export const bulkWriteToDb = async (parsedResponses: {
 
 export const populateQueueForNextRequest = async (
   sourceId: string,
-  viewTimeThreshold?: number
+  viewTimeThreshold?: number,
+  generateBreadthOnly?: boolean
 ) => {
-  const data = await populateQueue(sourceId, viewTimeThreshold ?? 3000);
+  const data = await populateQueue(sourceId, viewTimeThreshold ?? 3000, generateBreadthOnly ?? false);
   return {
     status: "Success",
   };
 };
 
+
+(async () => {
+  setUpMongoClient(config.dbUri, config.dbName ?? "");
+  openai(config.openAiKey ?? "");
+  var data = await getBatchStatus("batch_67f8d48f932c81908ffee9d88c7a0a76");
+  console.log(data);
+})();
+
+//batch_67f8d48f26e48190b6067acfe86eb97c
+//batch_67f8d48f26e48190b6067acfe86eb97c
+//batch_67f8d48f932c81908ffee9d88c7a0a76
+//batch_67f8d4ad2a1481908da99751950463eb
 // (async () => {
 //   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   // openai(config.openAiKey ?? "");
-//   const db = getDbInstance();
-
-//   // const created = prepareGenerationBatch();
-//   // const file = await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-//   // console.log(file);
-
-//   // const parsedResponses = await db
-//   //   .collection("_parsed_response")
-//   //   .find({})
-//   //   .toArray();
-//   // const parsedIds = [];
-//   // const genReqs = db.collection("_generation_requests");
-//   // for (const response of parsedResponses) {
-//   //   const identifier = response.requestIdentifier;
-//   //   const parsedIdentifier = cleanRequestsIdentifier(identifier);
-//   //   if (parsedIdentifier) {
-//   //     parsedIds.push(parsedIdentifier);
-//   //   }
+//   openai(config.openAiKey ?? "");
+//   // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
+//   // const sourcesOnBatch = prepareResponse.sources;
+//   // if (sourcesOnBatch.length === 0) {
+//   //   console.log("No sources found on batch");
+//   //   return;
 //   // }
 
-//   // const req = await genReqs.find({ $or: parsedIds }).toArray();
-//   // console.log(req?.length);
+//   // //create batch
+//   // const batch = await createBatchRequest(prepareResponse.inputFileList);
+//   const batchStatus = await getBatchStatus('batch_67f789f953048190b169b6fe7e71f38f');
+//   console.log(batchStatus);
 
-//   // await populateQueueForNextRequest("6753b20fb3139953f3145df6");
-//   // const files = await prepareGenerationBatch();
-//   // const batchData = await createBatchRequest(files as []);
-//   // console.log(batchData);
+//   // const app = express();
+//   // const PORT = process.env.PORT || 3000;
+//   // const batchData = await getBatchStatus("batch_67f629474c8c8190a2731c5838f92b6f");
+//   const content = await getFileContent("file-8yapiBda8x1dQRMEVyFUvs");
+//   console.log(content);
+//   // const parsedData = await parseGeneratedData(content);
+//   // console.log(parsedData);
+//   // const dbOps = await convertParsedArrayToDbOperations(parsedData.parsed_response);
 
-// const data = await parseGeneratedData([getCardData()]);
-// console.log(data);
-// const dbOpes = await bulkWriteToDb(data);
-// console.log(dbOpes);
-// }) ();
+//   // console.log(content);
+// })();
+
+
+
+// Middleware to parse JSON bodies
+// app.use(express.json());
+
+// POST endpoint to populate queue
+// app.get('/api/populate-queue', async () => {
+//   try {
+//     const result = await populateQueue('asds', 1, true);
+//   } catch (error) {
+//     console.error('Error populating queue:', error);
+//   }
+// });
+
+// Start the server
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+
+
 
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);

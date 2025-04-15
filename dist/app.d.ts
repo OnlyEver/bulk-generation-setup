@@ -19,6 +19,6 @@ export declare const bulkWriteToDb: (parsedResponses: {
 }) => Promise<{
     status: string;
 }>;
-export declare const populateQueueForNextRequest: (sourceId: string, viewTimeThreshold?: number) => Promise<{
+export declare const populateQueueForNextRequest: (sourceId: string, viewTimeThreshold?: number, generateBreadthOnly?: boolean) => Promise<{
     status: string;
 }>;

@@ -20,59 +20,91 @@ const list_last_where_1 = require("../../utils/list_last_where");
  * @async
  * @param sourceId - The `_id` of the source
  */
-function populateQueue(sourceId, viewTimeThreshold) {
-    return __awaiter(this, void 0, void 0, function* () {
+function populateQueue(sourceId_1, viewTimeThreshold_1) {
+    return __awaiter(this, arguments, void 0, function* (sourceId, viewTimeThreshold, generateBreadthOnly = false) {
         var _a, _b, _c;
         const sourceCollection = connection_1.database.collection("_source");
-        const generationRequests = connection_1.database.collection("_generation_requests");
+        // const generationRequests = database.collection("_generation_requests");
         const cardCollection = connection_1.database.collection("_card");
         let documents = []; // Array of documents to be inserted in the generation_requests collection
         try {
-            const source = yield sourceCollection.findOne({
-                _id: new mongodb_1.ObjectId(sourceId),
-            }, {
-                projection: {
-                    generation_info: 1,
-                    view_time: 1,
-                    source_taxonomy: 1,
-                    _ai_cards: 1,
-                },
-            });
-            if (source) {
-                const generationInfo = source.generation_info;
-                const viewTime = source.view_time;
-                const sourceTaxonomy = source.source_taxonomy;
-                const aiCards = ((_a = source._ai_cards) !== null && _a !== void 0 ? _a : []).map((elem) => elem._id);
-                if (Array.isArray(generationInfo) && generationInfo.length > 0) {
-                    const lastBreadthRequest = (0, list_last_where_1.findLastBreadthRequest)(generationInfo);
-                    const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
-                    // If the breadth request or source taxonomy exists
-                    if (lastBreadthRequest || sourceTaxonomy) {
-                        if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
-                            _insertBreadthRequest(((_c = (_b = lastBreadthRequest.req_type) === null || _b === void 0 ? void 0 : _b.n) !== null && _c !== void 0 ? _c : 0) + 1);
+            if (generateBreadthOnly) {
+                yield _generateBreadthRequest();
+            }
+            else {
+                const source = yield sourceCollection.findOne({
+                    _id: new mongodb_1.ObjectId(sourceId),
+                }, {
+                    projection: {
+                        generation_info: 1,
+                        view_time: 1,
+                        source_taxonomy: 1,
+                        _ai_cards: 1,
+                    },
+                });
+                if (source) {
+                    const generationInfo = source.generation_info;
+                    const viewTime = source.view_time;
+                    const sourceTaxonomy = source.source_taxonomy;
+                    const aiCards = ((_a = source._ai_cards) !== null && _a !== void 0 ? _a : []).map((elem) => elem._id);
+                    if (Array.isArray(generationInfo) && generationInfo.length > 0) {
+                        const lastBreadthRequest = (0, list_last_where_1.findLastBreadthRequest)(generationInfo);
+                        const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
+                        // If the breadth request or source taxonomy exists
+                        if (lastBreadthRequest || sourceTaxonomy) {
+                            if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
+                                _insertBreadthRequest(((_c = (_b = lastBreadthRequest.req_type) === null || _b === void 0 ? void 0 : _b.n) !== null && _c !== void 0 ? _c : 0) + 1);
+                            }
+                            else {
+                                const depthDocuments = yield handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection);
+                                documents.push(...depthDocuments);
+                            }
                         }
                         else {
-                            const depthDocuments = yield handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, cardCollection);
-                            documents.push(...depthDocuments);
+                            /// Insert the initial breadth request with n = 1
+                            _insertBreadthRequest(1);
                         }
                     }
                     else {
-                        /// Insert the initial breadth request with n = 1
                         _insertBreadthRequest(1);
                     }
                 }
-                else {
-                    _insertBreadthRequest(1);
-                }
+                const genReqs = yield handleUniqueInsertions(documents);
+                console.log("Documents: ", documents);
             }
-            const genReqs = yield handleUniqueInsertions(documents);
-            console.log("Documents: ", documents);
         }
         catch (error) {
             console.log("Error while populating queue: ", error);
             throw Error;
         }
-        function _insertBreadthRequest(n) {
+        function _generateBreadthRequest() {
+            return __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
+                try {
+                    const sources = yield sourceCollection.find({}).limit(10000).toArray();
+                    for (const source of sources) {
+                        const generationInfo = source.generation_info;
+                        const viewTime = source.view_time;
+                        if (viewTime > 700) {
+                            if (Array.isArray(generationInfo) && generationInfo.length > 0) {
+                                const lastBreadthRequest = (0, list_last_where_1.findLastBreadthRequest)(generationInfo);
+                                _insertBreadthRequest(((_b = (_a = lastBreadthRequest.req_type) === null || _a === void 0 ? void 0 : _a.n) !== null && _b !== void 0 ? _b : 0) + 1, source._id.toHexString());
+                            }
+                            _insertBreadthRequest(1, source._id.toHexString());
+                        }
+                        else {
+                            _insertBreadthRequest(1, source._id.toHexString());
+                        }
+                    }
+                    const genReqs = yield handleUniqueInsertions(documents);
+                    return genReqs;
+                }
+                catch (e) {
+                    console.error("Error while generating breadth request: ", e);
+                }
+            });
+        }
+        function _insertBreadthRequest(n, sourceId = "") {
             documents.push({
                 _source: sourceId,
                 ctime: new Date(),
@@ -86,7 +118,7 @@ function populateQueue(sourceId, viewTimeThreshold) {
     });
 }
 /**
- * Handles the depth request generation by determining missing concepts and facts for each bloom level.
+ * Handles the depth request generation by determining mis sing concepts and facts for each bloom level.
  *
  * @async
  * @param sourceId - The `_id` of the source.
@@ -233,7 +265,13 @@ function handleUniqueInsertions(documents) {
                 request_type: doc.request_type,
             });
             if (!existingDoc) {
-                yield generationRequests.insertOne(doc);
+                try {
+                    yield generationRequests.insertOne(doc);
+                }
+                catch (e) {
+                    console.log(`Error while inserting document: ${JSON.stringify(doc)}`);
+                    console.log(e);
+                }
                 console.log(`Inserted document: ${JSON.stringify(doc)}`);
             }
             else {

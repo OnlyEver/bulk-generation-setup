@@ -15,7 +15,7 @@ import {
 export async function populateQueue(
   sourceId: string,
   viewTimeThreshold: number,
-  generateBreadthOnly: boolean = false,
+  generateBreadthOnly: boolean = false
 ) {
   const sourceCollection = database.collection("_source");
   // const generationRequests = database.collection("_generation_requests");
@@ -24,40 +24,41 @@ export async function populateQueue(
   let documents: any[] = []; // Array of documents to be inserted in the generation_requests collection
 
   try {
-    if (generateBreadthOnly) {
-      await _generateBreadthRequest();
-    } else {
-      const source = await sourceCollection.findOne(
-        {
-          _id: new ObjectId(sourceId),
+    // if (generateBreadthOnly) {
+    //   await _generateBreadthRequest();
+    // } else {
+    const source = await sourceCollection.findOne(
+      {
+        _id: new ObjectId(sourceId),
+      },
+      {
+        projection: {
+          generation_info: 1,
+          view_time: 1,
+          source_taxonomy: 1,
+          _ai_cards: 1,
         },
-        {
-          projection: {
-            generation_info: 1,
-            view_time: 1,
-            source_taxonomy: 1,
-            _ai_cards: 1,
-          },
-        }
+      }
+    );
+
+    if (source) {
+      const generationInfo = source.generation_info;
+      const viewTime = source.view_time;
+      const sourceTaxonomy = source.source_taxonomy;
+      const aiCards = (source._ai_cards ?? []).map(
+        (elem: { _id: ObjectId; position: number }) => elem._id
       );
 
-      if (source) {
-        const generationInfo = source.generation_info;
-        const viewTime = source.view_time;
-        const sourceTaxonomy = source.source_taxonomy;
-        const aiCards = (source._ai_cards ?? []).map(
-          (elem: { _id: ObjectId; position: number }) => elem._id
-        );
+      if (Array.isArray(generationInfo) && generationInfo.length > 0) {
+        const lastBreadthRequest = findLastBreadthRequest(generationInfo);
+        const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
 
-        if (Array.isArray(generationInfo) && generationInfo.length > 0) {
-          const lastBreadthRequest = findLastBreadthRequest(generationInfo);
-          const calculatedViewTime = Math.floor(viewTime / viewTimeThreshold);
-
-          // If the breadth request or source taxonomy exists
-          if (lastBreadthRequest || sourceTaxonomy) {
-            if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
-              _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1);
-            } else {
+        // If the breadth request or source taxonomy exists
+        if (lastBreadthRequest || sourceTaxonomy) {
+          if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
+            _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1);
+          } else {
+            if (!generateBreadthOnly) {
               const depthDocuments = await handleDepthRequest(
                 sourceId,
                 sourceTaxonomy,
@@ -67,17 +68,18 @@ export async function populateQueue(
               );
               documents.push(...depthDocuments);
             }
-          } else {
-            /// Insert the initial breadth request with n = 1
-            _insertBreadthRequest(1);
           }
         } else {
+          /// Insert the initial breadth request with n = 1
           _insertBreadthRequest(1);
         }
+      } else {
+        _insertBreadthRequest(1);
       }
-      const genReqs = await handleUniqueInsertions(documents);
-      console.log("Documents: ", documents);
     }
+    const genReqs = await handleUniqueInsertions(documents);
+    console.log("Documents: ", documents);
+    // }
   } catch (error) {
     console.log("Error while populating queue: ", error);
     throw Error;
@@ -92,7 +94,10 @@ export async function populateQueue(
         if (viewTime > 700) {
           if (Array.isArray(generationInfo) && generationInfo.length > 0) {
             const lastBreadthRequest = findLastBreadthRequest(generationInfo);
-            _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1, source._id.toHexString());
+            _insertBreadthRequest(
+              (lastBreadthRequest.req_type?.n ?? 0) + 1,
+              source._id.toHexString()
+            );
           }
           _insertBreadthRequest(1, source._id.toHexString());
         }
@@ -102,7 +107,6 @@ export async function populateQueue(
     } catch (e) {
       console.error("Error while generating breadth request: ", e);
     }
-
   }
 
   function _insertBreadthRequest(n: number, sourceId: string = "") {

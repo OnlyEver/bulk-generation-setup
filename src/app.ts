@@ -15,7 +15,7 @@ import { parseBreadth } from "./generation-jobs/5.batch-parse/parse_breadth";
 import { parseDepth } from "./generation-jobs/5.batch-parse/parse_depth";
 import { cleanRequestsIdentifier } from "./utils/identifier_for_clearing_requests";
 import { getCardData } from "./generation-jobs/5.batch-parse/temp_card_gen_data";
-import express from 'express';
+import express from "express";
 import { convertParsedArrayToDbOperations } from "./generation-jobs/6.bulk-write-results/prepare-ops/parsed_response_to_db_operations";
 
 // Connect to mongodb
@@ -97,19 +97,22 @@ export const populateQueueForNextRequest = async (
   viewTimeThreshold?: number,
   generateBreadthOnly?: boolean
 ) => {
-  const data = await populateQueue(sourceId, viewTimeThreshold ?? 3000, generateBreadthOnly ?? false);
+  const data = await populateQueue(
+    sourceId,
+    viewTimeThreshold ?? 3000,
+    generateBreadthOnly ?? false
+  );
   return {
     status: "Success",
   };
 };
 
-
-(async () => {
-  setUpMongoClient(config.dbUri, config.dbName ?? "");
-  openai(config.openAiKey ?? "");
-  var data = await getBatchStatus("batch_67f8d48f932c81908ffee9d88c7a0a76");
-  console.log(data);
-})();
+// (async () => {
+//   setUpMongoClient(config.dbUri, config.dbName ?? "");
+//   openai(config.openAiKey ?? "");
+//   var data = await getBatchStatus("batch_67f8d48f932c81908ffee9d88c7a0a76");
+//   console.log(data);
+// })();
 
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f26e48190b6067acfe86eb97c
@@ -142,8 +145,6 @@ export const populateQueueForNextRequest = async (
 //   // console.log(content);
 // })();
 
-
-
 // Middleware to parse JSON bodies
 // app.use(express.json());
 
@@ -160,8 +161,6 @@ export const populateQueueForNextRequest = async (
 // app.listen(PORT, () => {
 //   console.log(`Server running on port ${PORT}`);
 // });
-
-
 
 // function extractCustomId(customId: string): RequestId {
 //   const customIdData = JSON.parse(customId);

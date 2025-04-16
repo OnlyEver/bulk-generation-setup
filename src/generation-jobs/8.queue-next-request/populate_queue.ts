@@ -56,7 +56,10 @@ export async function populateQueue(
         // If the breadth request or source taxonomy exists
         if (lastBreadthRequest || sourceTaxonomy) {
           if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
-            _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1);
+            _insertBreadthRequest(
+              (lastBreadthRequest.req_type?.n ?? 0) + 1,
+              sourceId
+            );
           } else {
             if (!generateBreadthOnly) {
               const depthDocuments = await handleDepthRequest(
@@ -71,10 +74,10 @@ export async function populateQueue(
           }
         } else {
           /// Insert the initial breadth request with n = 1
-          _insertBreadthRequest(1);
+          _insertBreadthRequest(1, sourceId);
         }
       } else {
-        _insertBreadthRequest(1);
+        _insertBreadthRequest(1, sourceId);
       }
     }
     const genReqs = await handleUniqueInsertions(documents);

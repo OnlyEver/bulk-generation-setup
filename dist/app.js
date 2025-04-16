@@ -20,7 +20,6 @@ const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
 const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
-const config_1 = require("./config");
 const identifier_for_clearing_requests_1 = require("./utils/identifier_for_clearing_requests");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
@@ -90,13 +89,12 @@ const populateQueueForNextRequest = (sourceId, viewTimeThreshold, generateBreadt
     };
 });
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
-    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    var data = yield (0, exports.getBatchStatus)("batch_67f8d48f932c81908ffee9d88c7a0a76");
-    console.log(data);
-}))();
+// (async () => {
+//   setUpMongoClient(config.dbUri, config.dbName ?? "");
+//   openai(config.openAiKey ?? "");
+//   var data = await getBatchStatus("batch_67f8d48f932c81908ffee9d88c7a0a76");
+//   console.log(data);
+// })();
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f932c81908ffee9d88c7a0a76

@@ -7,12 +7,12 @@ export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
   const generatedData = data.generated_data as TypologyResponse;
   const dbOPS: any[] = [];
   const facts: { concept_text: string; reference: string }[] =
-    generatedData.facts.map((e) => {
+    generatedData.facts?.map((e) => {
       return {
         concept_text: e.fact_text,
         reference: e.reference,
       };
-    });
+    }) ?? [];
   const concepts: any[] = [...generatedData.concepts, ...facts];
 
   /// write metadata to generation info
@@ -28,7 +28,6 @@ export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
             generation_info: metadata,
             "source_taxonomy.fields": { $each: generatedData.field },
             "source_taxonomy.concepts": { $each: concepts },
-            "source_taxonomy.facts": { $each: generatedData.facts },
             summary_cards: {
               $each: generatedData.summary_cards,
             },

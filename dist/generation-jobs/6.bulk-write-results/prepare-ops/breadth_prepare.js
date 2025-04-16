@@ -3,17 +3,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.writeDBOpsForBreadth = writeDBOpsForBreadth;
 const mongodb_1 = require("mongodb");
 function writeDBOpsForBreadth(data) {
+    var _a, _b;
     const reqId = data.requestIdentifier;
     var metadata = data.metadata;
     const sourceId = reqId._source;
     const generatedData = data.generated_data;
     const dbOPS = [];
-    const facts = generatedData.facts.map((e) => {
+    const facts = (_b = (_a = generatedData.facts) === null || _a === void 0 ? void 0 : _a.map((e) => {
         return {
             concept_text: e.fact_text,
             reference: e.reference,
         };
-    });
+    })) !== null && _b !== void 0 ? _b : [];
     const concepts = [...generatedData.concepts, ...facts];
     /// write metadata to generation info
     dbOPS.push({
@@ -28,7 +29,6 @@ function writeDBOpsForBreadth(data) {
                         generation_info: metadata,
                         "source_taxonomy.fields": { $each: generatedData.field },
                         "source_taxonomy.concepts": { $each: concepts },
-                        "source_taxonomy.facts": { $each: generatedData.facts },
                         summary_cards: {
                             $each: generatedData.summary_cards,
                         },

@@ -15,18 +15,20 @@ function parseBreadth(rawResponse) {
         const content = rawResponse.response.body.choices[0].message.content;
         const parsedContent = JSON.parse(content);
         const usage = rawResponse.response.body.usage;
+        const concepts = parsedContent.concepts.map((concept) => ({
+            concept_text: concept.concept_text,
+            reference: concept.reference,
+        }));
+        const facts = parsedContent.facts.map((fact) => ({
+            concept_text: fact.fact_text,
+            reference: fact.reference,
+        }));
+        const mixedConcepts = [...concepts, ...facts];
         return {
             requestIdentifier: requestId,
             generated_data: {
                 field: (0, parse_typology_1.parseFields)(parsedContent.field),
-                concepts: parsedContent.concepts.map((concept) => ({
-                    concept_text: concept.concept_text,
-                    reference: concept.reference,
-                })),
-                facts: parsedContent.facts.map((fact) => ({
-                    fact_text: fact.fact_text,
-                    reference: fact.reference,
-                })),
+                concepts: mixedConcepts,
                 generate_cards: {
                     state: parsedContent.generate_cards.state,
                     reason: parsedContent.generate_cards.reason,

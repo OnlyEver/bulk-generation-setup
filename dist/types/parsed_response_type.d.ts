@@ -19,7 +19,7 @@ type TypologyResponse = {
         concept_text: string;
         reference: string;
     }>;
-    facts: Array<{
+    facts?: Array<{
         fact_text: string;
         reference: string;
     }>;

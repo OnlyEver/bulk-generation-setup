@@ -23,7 +23,7 @@ export async function prepareBatch(model: string): Promise<Object> {
       "_generation_requests"
     );
     docs = await generationDataCollection
-      .find({ status: "created" }).limit(400).toArray();
+      .find({ status: "created", _source: "67ff79ac65d1e36c90661ac1" }).limit(400).toArray();
     // .toArray();
 
 

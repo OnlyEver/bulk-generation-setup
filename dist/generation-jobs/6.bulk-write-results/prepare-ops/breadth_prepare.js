@@ -13,9 +13,17 @@ function writeDBOpsForBreadth(data) {
         return {
             concept_text: e.fact_text,
             reference: e.reference,
+            type: "fact",
         };
     })) !== null && _b !== void 0 ? _b : [];
-    const concepts = [...generatedData.concepts, ...facts];
+    const generatedConcepts = generatedData.concepts.map((e) => {
+        return {
+            concept_text: e.concept_text,
+            reference: e.reference,
+            type: "concept",
+        };
+    });
+    const concepts = [...generatedConcepts, ...facts];
     /// write metadata to generation info
     dbOPS.push({
         collection: "_source",

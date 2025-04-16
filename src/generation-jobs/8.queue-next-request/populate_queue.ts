@@ -150,7 +150,7 @@ async function handleDepthRequest(
     const facts = sourceTaxonomy.facts ?? [];
 
     const conceptTextArray = concepts.map(
-      (concept: { concept_text: string; reference: string }) =>
+      (concept: { concept_text: string; reference: string; type?: string }) =>
         concept.concept_text
     );
     const factTextArray = facts.map(

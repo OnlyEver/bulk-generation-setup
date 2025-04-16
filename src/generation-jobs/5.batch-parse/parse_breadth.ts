@@ -17,6 +17,7 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
       (concept: { concept_text: string; reference: string }) => ({
         concept_text: concept.concept_text,
         reference: concept.reference,
+        type: "concept",
       })
     );
 
@@ -24,6 +25,7 @@ export function parseBreadth(rawResponse: RawResponse): ParsedResponse {
       (fact: { fact_text: string; reference: string }) => ({
         concept_text: fact.fact_text,
         reference: fact.reference,
+        type: "fact",
       })
     );
     const mixedConcepts = [...concepts, ...facts];

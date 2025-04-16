@@ -18,10 +18,12 @@ function parseBreadth(rawResponse) {
         const concepts = parsedContent.concepts.map((concept) => ({
             concept_text: concept.concept_text,
             reference: concept.reference,
+            type: "concept",
         }));
         const facts = parsedContent.facts.map((fact) => ({
             concept_text: fact.fact_text,
             reference: fact.reference,
+            type: "fact",
         }));
         const mixedConcepts = [...concepts, ...facts];
         return {

@@ -11,9 +11,17 @@ export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
       return {
         concept_text: e.fact_text,
         reference: e.reference,
+        type: "fact",
       };
     }) ?? [];
-  const concepts: any[] = [...generatedData.concepts, ...facts];
+  const generatedConcepts = generatedData.concepts.map((e) => {
+    return {
+      concept_text: e.concept_text,
+      reference: e.reference,
+      type: "concept",
+    };
+  });
+  const concepts: any[] = [...generatedConcepts, ...facts];
 
   /// write metadata to generation info
   dbOPS.push({

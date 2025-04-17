@@ -153,9 +153,17 @@ async function handleDepthRequest(
       (concept: { concept_text: string; reference: string; type?: string }) =>
         concept.concept_text
     );
-    const factTextArray = facts.map(
+    const oldfactTextArray = facts.map(
       (fact: { fact_text: string; reference: string }) => fact.fact_text
     );
+    const factTextArray = [...oldfactTextArray, ...concepts.map(
+      (concept: { concept_text: string; reference: string; type?: string }) => {
+        if (concept.type === "fact") {
+          return concept.concept_text;
+        }
+      }
+    )
+    ];
 
     const bloomLevelCards = await cardCollection
       .aggregate([

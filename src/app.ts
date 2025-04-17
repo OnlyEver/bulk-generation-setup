@@ -107,32 +107,6 @@ export const populateQueueForNextRequest = async (
   };
 };
 
-(async () => {
-  setUpMongoClient(config.dbUri, config.dbName ?? "");
-  openai(config.openAiKey ?? "");
-  // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
-  // console.log(prepareResponse);
-  // const createBatchResponse: any = await createBatchRequest(prepareResponse.inputFileList);
-  // console.log(createBatchResponse);
-  const batchStatus = await getBatchStatus('batch_67ff7bb978b08190b55e9864c61f254c');
-  console.log(batchStatus);
-  // if (batchStatus.status === "completed") {
-  //   const fileContent = await getFileContent(batchStatus.output_file_id ?? '');
-  //   console.log(fileContent);
-  //   const parsedData = await parseGeneratedData(fileContent);
-  //   console.log(parsedData);
-  //   const dbOps = await convertParsedArrayToDbOperations(parsedData.parsed_response);
-  //   console.log(dbOps);
-  //   const bulkWriteResponse = await bulkWriteToDb({
-  //     batch_id: batchStatus.id,
-  //     parsed_response: parsedData.parsed_response,
-  //   });
-  //   console.log(bulkWriteResponse);
-  // }
-
-  // var data = await getBatchStatus("batch_67f8d48f932c81908ffee9d88c7a0a76");
-  // console.log(data);
-})();
 
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f26e48190b6067acfe86eb97c

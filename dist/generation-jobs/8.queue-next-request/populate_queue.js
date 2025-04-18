@@ -134,7 +134,13 @@ function handleDepthRequest(sourceId, sourceTaxonomy, generationInfo, aiCards, c
             const concepts = (_a = sourceTaxonomy.concepts) !== null && _a !== void 0 ? _a : [];
             const facts = (_b = sourceTaxonomy.facts) !== null && _b !== void 0 ? _b : [];
             const conceptTextArray = concepts.map((concept) => concept.concept_text);
-            const factTextArray = facts.map((fact) => fact.fact_text);
+            const oldfactTextArray = facts.map((fact) => fact.fact_text);
+            const factTextArray = [...oldfactTextArray, ...concepts.map((concept) => {
+                    if (concept.type === "fact") {
+                        return concept.concept_text;
+                    }
+                })
+            ];
             const bloomLevelCards = yield cardCollection
                 .aggregate([
                 { $match: { _id: { $in: aiCards } } },

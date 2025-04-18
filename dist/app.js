@@ -22,7 +22,6 @@ const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clea
 const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
 const config_1 = require("./config");
 const identifier_for_clearing_requests_1 = require("./utils/identifier_for_clearing_requests");
-const parsed_response_to_db_operations_1 = require("./generation-jobs/6.bulk-write-results/prepare-ops/parsed_response_to_db_operations");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
 const setUpMongoClient = (connectionUri, dbName) => {
@@ -91,59 +90,38 @@ const populateQueueForNextRequest = (sourceId, viewTimeThreshold, generateBreadt
     };
 });
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
-    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
-    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
-    // console.log(prepareResponse);
-    // const createBatchResponse: any = await createBatchRequest(prepareResponse.inputFileList);
-    // console.log(createBatchResponse);
-    const batchStatus = yield (0, exports.getBatchStatus)('batch_67ff7bb978b08190b55e9864c61f254c');
-    console.log(batchStatus);
-    if (batchStatus.status === "completed") {
-        const fileContent = yield (0, exports.getFileContent)((_c = batchStatus.output_file_id) !== null && _c !== void 0 ? _c : '');
-        console.log(fileContent);
-        const parsedData = yield (0, exports.parseGeneratedData)(fileContent);
-        console.log(parsedData);
-        const dbOps = yield (0, parsed_response_to_db_operations_1.convertParsedArrayToDbOperations)(parsedData.parsed_response);
-        console.log(dbOps);
-        const bulkWriteResponse = yield (0, exports.bulkWriteToDb)({
-            batch_id: batchStatus.id,
-            parsed_response: parsedData.parsed_response,
-        });
-        console.log(bulkWriteResponse);
-    }
-    // var data = await getBatchStatus("batch_67f8d48f932c81908ffee9d88c7a0a76");
-    // console.log(data);
-}))();
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f932c81908ffee9d88c7a0a76
 //batch_67f8d4ad2a1481908da99751950463eb
-// (async () => {
-//   setUpMongoClient(config.dbUri, config.dbName ?? "");
-//   openai(config.openAiKey ?? "");
-//   // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
-//   // const sourcesOnBatch = prepareResponse.sources;
-//   // if (sourcesOnBatch.length === 0) {
-//   //   console.log("No sources found on batch");
-//   //   return;
-//   // }
-//   // //create batch
-//   // const batch = await createBatchRequest(prepareResponse.inputFileList);
-//   const batchStatus = await getBatchStatus('batch_67f789f953048190b169b6fe7e71f38f');
-//   console.log(batchStatus);
-//   // const app = express();
-//   // const PORT = process.env.PORT || 3000;
-//   // const batchData = await getBatchStatus("batch_67f629474c8c8190a2731c5838f92b6f");
-//   const content = await getFileContent("file-8yapiBda8x1dQRMEVyFUvs");
-//   console.log(content);
-//   // const parsedData = await parseGeneratedData(content);
-//   // console.log(parsedData);
-//   // const dbOps = await convertParsedArrayToDbOperations(parsedData.parsed_response);
-//   // console.log(content);
-// })();
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
+    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
+    const generationDataCollection = connection_1.database.collection("_generation_requests");
+    const docs = yield generationDataCollection
+        .find({ status: "created", 'request_type.type': { $ne: 'embedding' } }).limit(400).toArray();
+    console.log(docs);
+    // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
+    // const sourcesOnBatch = prepareResponse.sources;
+    // if (sourcesOnBatch.length === 0) {
+    //   console.log("No sources found on batch");
+    //   return;
+    // }ß
+    // //create batch
+    // // const batch = await createBatchRequest(prepareResponse.inputFileList);
+    // const batchStatus = await getBatchStatus('batch_67f789f953048190b169b6fe7e71f38f');
+    // console.log(batchStatus);
+    // // const app = express();
+    // // const PORT = process.env.PORT || 3000;
+    // // const batchData = await getBatchStatus("batch_67f629474c8c8190a2731c5838f92b6f");
+    // const content = await getFileContent("file-8yapiBda8x1dQRMEVyFUvs");
+    // console.log(content);
+    // const parsedData = await parseGeneratedData(content);
+    // console.log(parsedData);
+    // const dbOps = await convertParsedArrayToDbOperations(parsedData.parsed_response);
+    // console.log(content);
+}))();
 // Middleware to parse JSON bodies
 // app.use(express.json());
 // POST endpoint to populate queue

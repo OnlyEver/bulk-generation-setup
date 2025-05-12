@@ -36,7 +36,7 @@ function parseBatchResponse(generatedResponses) {
                     }, {
                         projection: { source_taxonomy: 1 },
                     });
-                    const depth = (0, parse_depth_1.parseDepth)({
+                    const depth = yield (0, parse_depth_1.parseDepth)({
                         rawResponse: rawResponse,
                         sourceTaxonomy: (_a = taxonomyData === null || taxonomyData === void 0 ? void 0 : taxonomyData.source_taxonomy) !== null && _a !== void 0 ? _a : {},
                     });
@@ -44,7 +44,7 @@ function parseBatchResponse(generatedResponses) {
                 }
                 else if (customId.request_type.type === "breadth") {
                     // handle typology parsing
-                    const parsedBreadth = (0, parse_breadth_1.parseBreadth)(rawResponse);
+                    const parsedBreadth = yield (0, parse_breadth_1.parseBreadth)(rawResponse);
                     parsedData.push(parsedBreadth);
                 }
             }

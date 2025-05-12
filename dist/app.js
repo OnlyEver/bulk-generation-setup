@@ -90,38 +90,51 @@ const populateQueueForNextRequest = (sourceId, viewTimeThreshold, generateBreadt
     };
 });
 exports.populateQueueForNextRequest = populateQueueForNextRequest;
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    // batch_68217c0ef9348190929c5945c6bd1a6d
+    //'batch_6821b377a2b48190aefd0304b6ae14b1'
+    var _a, _b;
+    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
+    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
+    // const batchStatus = await getBatchStatus('batch_6821e19ad8dc819085cdf5eb3193e723');
+    // console.log(batchStatus);
+    // const prepareResponse = await prepareGenerationBatch('o3-mini');
+    // const createBatchResponse = await createBatchRequest(prepareResponse.inputFileList);
+    // const batchStatus = await getBatchStatus(createBatchResponse[0]?.id ?? '');
+    // console.log(batchStatus);
+    const fileContent = yield (0, exports.getFileContent)('file-CXZXxyPaMVEhRHnRMSVHtM');
+    const parsedData = yield (0, exports.parseGeneratedData)(fileContent);
+    console.log(parsedData);
+    // const writeToDb = await bulkWriteToDb(parsedData);
+    // console.log(writeToDb);
+}))();
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f932c81908ffee9d88c7a0a76
 //batch_67f8d4ad2a1481908da99751950463eb
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
-    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
-    const generationDataCollection = connection_1.database.collection("_generation_requests");
-    const docs = yield generationDataCollection
-        .find({ status: "created", 'request_type.type': { $ne: 'embedding' } }).limit(400).toArray();
-    console.log(docs);
-    // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
-    // const sourcesOnBatch = prepareResponse.sources;
-    // if (sourcesOnBatch.length === 0) {
-    //   console.log("No sources found on batch");
-    //   return;
-    // }ß
-    // //create batch
-    // // const batch = await createBatchRequest(prepareResponse.inputFileList);
-    // const batchStatus = await getBatchStatus('batch_67f789f953048190b169b6fe7e71f38f');
-    // console.log(batchStatus);
-    // // const app = express();
-    // // const PORT = process.env.PORT || 3000;
-    // // const batchData = await getBatchStatus("batch_67f629474c8c8190a2731c5838f92b6f");
-    // const content = await getFileContent("file-8yapiBda8x1dQRMEVyFUvs");
-    // console.log(content);
-    // const parsedData = await parseGeneratedData(content);
-    // console.log(parsedData);
-    // const dbOps = await convertParsedArrayToDbOperations(parsedData.parsed_response);
-    // console.log(content);
-}))();
+// (async () => {
+//   setUpMongoClient(config.dbUri, config.dbName ?? "");
+//   openai(config.openAiKey ?? "");
+//   // const prepareResponse: any = await prepareGenerationBatch('o3-mini');
+//   // const sourcesOnBatch = prepareResponse.sources;
+//   // if (sourcesOnBatch.length === 0) {
+//   //   console.log("No sources found on batch");
+//   //   return;
+//   // }
+//   // //create batch
+//   // const batch = await createBatchRequest(prepareResponse.inputFileList);
+//   const batchStatus = await getBatchStatus('batch_67f789f953048190b169b6fe7e71f38f');
+//   console.log(batchStatus);
+//   // const app = express();
+//   // const PORT = process.env.PORT || 3000;
+//   // const batchData = await getBatchStatus("batch_67f629474c8c8190a2731c5838f92b6f");
+//   const content = await getFileContent("file-8yapiBda8x1dQRMEVyFUvs");
+//   console.log(content);
+//   // const parsedData = await parseGeneratedData(content);
+//   // console.log(parsedData);
+//   // const dbOps = await convertParsedArrayToDbOperations(parsedData.parsed_response);
+//   // console.log(content);
+// })();
 // Middleware to parse JSON bodies
 // app.use(express.json());
 // POST endpoint to populate queue

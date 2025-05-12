@@ -20,7 +20,7 @@ export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
           $addToSet: {
             generation_info: metadata,
             "source_taxonomy.fields": { $each: generatedData.field },
-            "source_taxonomy.concepts": { $each: generatedData.concepts },
+            "source_taxonomy.concepts_facts": { $each: generatedData.concepts },
             summary_cards: {
               $each: generatedData.summary_cards,
             },
@@ -35,3 +35,5 @@ export function writeDBOpsForBreadth(data: ParsedResponse): any[] {
   });
   return dbOPS;
 }
+
+

@@ -1,5 +1,13 @@
+import { MongoConceptFactCards } from "../../../../types/mongo_concept_fact_type";
+import { RawFlashCardResponseType } from "../../../../types/generate_card_response_type";
+
 export class ParseFlashCard {
-  parse(data: any): any {
+  parse(data: {
+    card_content: RawFlashCardResponseType;
+    type: string;
+    concepts_facts: MongoConceptFactCards[];
+    bloom_level: number;
+  }) {
     try {
       let displayTitle = this.generateFlashCardDisplayTitle(
         data.card_content.front,
@@ -8,7 +16,7 @@ export class ParseFlashCard {
       let flashCardData = {
         type: {
           category: "learning",
-          sub_type: data.type,
+          sub_type: "flash",
         },
         heading: "",
         displayTitle: displayTitle,
@@ -16,9 +24,9 @@ export class ParseFlashCard {
           front_content: data.card_content.front,
           back_content: data.card_content.back,
         },
-        concepts: data.concepts,
+        concepts_facts: data.concepts_facts,
         explanation: data.card_content.explanation,
-        facts: data.facts,
+        bloom_level: data.bloom_level,
       };
 
       return flashCardData;

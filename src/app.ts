@@ -15,7 +15,6 @@ import { parseBreadth } from "./generation-jobs/5.batch-parse/parse_breadth";
 import { parseDepth } from "./generation-jobs/5.batch-parse/parse_depth";
 import { cleanRequestsIdentifier } from "./utils/identifier_for_clearing_requests";
 import { getCardData } from "./generation-jobs/5.batch-parse/temp_card_gen_data";
-import express from "express";
 import { convertParsedArrayToDbOperations } from "./generation-jobs/6.bulk-write-results/prepare-ops/parsed_response_to_db_operations";
 
 // Connect to mongodb
@@ -107,6 +106,24 @@ export const populateQueueForNextRequest = async (
   };
 };
 
+(async () => {
+  // batch_68217c0ef9348190929c5945c6bd1a6d
+  //'batch_6821b377a2b48190aefd0304b6ae14b1'
+
+  setUpMongoClient(config.dbUri, config.dbName ?? "");
+  openai(config.openAiKey ?? "");
+  // const batchStatus = await getBatchStatus('batch_6821e19ad8dc819085cdf5eb3193e723');
+  // console.log(batchStatus);
+  // const prepareResponse = await prepareGenerationBatch('o3-mini');
+  // const createBatchResponse = await createBatchRequest(prepareResponse.inputFileList);
+  // const batchStatus = await getBatchStatus(createBatchResponse[0]?.id ?? '');
+  // console.log(batchStatus);
+  const fileContent = await getFileContent('file-CXZXxyPaMVEhRHnRMSVHtM');
+  const parsedData = await parseGeneratedData(fileContent);
+  console.log(parsedData);
+  // const writeToDb = await bulkWriteToDb(parsedData);
+  // console.log(writeToDb);
+})();
 
 //batch_67f8d48f26e48190b6067acfe86eb97c
 //batch_67f8d48f26e48190b6067acfe86eb97c

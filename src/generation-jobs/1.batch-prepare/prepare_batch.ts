@@ -11,7 +11,10 @@ import { parse } from "path";
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-export async function prepareBatch(model: string): Promise<Object> {
+export async function prepareBatch(model: string): Promise<{
+  sources: any[];
+  inputFileList: string[];
+}> {
   try {
     var inputFileList: string[] = [];
     let docs: any[] = [];
@@ -22,9 +25,10 @@ export async function prepareBatch(model: string): Promise<Object> {
     const generationDataCollection = database.collection(
       "_generation_requests"
     );
+
     docs = await generationDataCollection
-      .find({ status: "created", 'request_type.type': { $ne: 'embedding' } }).limit(400).toArray();
-    // .toArray();
+      .find({ status: "created", 'request_type.type': { $ne: 'embedding' }, _source: '6753b15092093afc979f1aa5' }).limit(400).toArray();
+
 
 
 
@@ -68,7 +72,6 @@ export async function prepareBatch(model: string): Promise<Object> {
       sources,
       inputFileList,
     };
-    return inputFileList;
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 

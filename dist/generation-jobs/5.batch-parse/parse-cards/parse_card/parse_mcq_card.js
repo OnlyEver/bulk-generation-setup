@@ -27,9 +27,9 @@ class ParseMcqCard {
                     question: data.card_content.prompt,
                     answers: mcqAnswers,
                 },
-                concepts: data.concepts,
-                facts: data.facts,
+                concepts_facts: data.concepts_facts,
                 explanation: data.card_content.explanation,
+                bloom_level: data.bloom_level,
             };
             //   return mcqCard;
             const isValid = this._validate(mcqCard);

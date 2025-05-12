@@ -28,9 +28,8 @@ class ParseMatchCard {
                 content: finalContent,
                 //  content: cardData.card_content,
                 displayTitle: displayTitle,
-                concepts: cardData.concepts,
-                facts: cardData.facts,
-                explanation: cardData.card_content.explanation,
+                concepts_facts: cardData.concepts_facts,
+                bloom_level: cardData.bloom_level,
             };
             return this._validateMatch(matchCard);
         }

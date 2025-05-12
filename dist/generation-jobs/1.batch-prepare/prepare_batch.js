@@ -34,8 +34,7 @@ function prepareBatch(model) {
             // } else {
             const generationDataCollection = connection_1.database.collection("_generation_requests");
             docs = yield generationDataCollection
-                .find({ status: "created", 'request_type.type': { $ne: 'embedding' } }).toArray();
-            // .toArray();
+                .find({ status: "created", 'request_type.type': { $ne: 'embedding' }, _source: '6753b15092093afc979f1aa5' }).limit(400).toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
             for (let i = 0; i < sources.length; i += sourcesPerBatch) {
@@ -63,7 +62,6 @@ function prepareBatch(model) {
                 sources,
                 inputFileList,
             };
-            return inputFileList;
         }
         catch (error) {
             console.error("Error occurred while preparing the batch file:", error);

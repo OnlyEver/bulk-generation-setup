@@ -110,17 +110,17 @@ export const populateQueueForNextRequest = async (
   // batch_68217c0ef9348190929c5945c6bd1a6d
   //'batch_6821b377a2b48190aefd0304b6ae14b1'
 
-  setUpMongoClient(config.dbUri, config.dbName ?? "");
-  openai(config.openAiKey ?? "");
+  // setUpMongoClient(config.dbUri, config.dbName ?? "");
+  // openai(config.openAiKey ?? "");
   // const batchStatus = await getBatchStatus('batch_6821e19ad8dc819085cdf5eb3193e723');
   // console.log(batchStatus);
   // const prepareResponse = await prepareGenerationBatch('o3-mini');
   // const createBatchResponse = await createBatchRequest(prepareResponse.inputFileList);
   // const batchStatus = await getBatchStatus(createBatchResponse[0]?.id ?? '');
   // console.log(batchStatus);
-  const fileContent = await getFileContent('file-CXZXxyPaMVEhRHnRMSVHtM');
-  const parsedData = await parseGeneratedData(fileContent);
-  console.log(parsedData);
+  // const fileContent = await getFileContent('file-CXZXxyPaMVEhRHnRMSVHtM');
+  // const parsedData = await parseGeneratedData(fileContent);
+  // console.log(parsedData);
   // const writeToDb = await bulkWriteToDb(parsedData);
   // console.log(writeToDb);
 })();

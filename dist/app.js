@@ -20,7 +20,6 @@ const parse_batch_1 = require("./generation-jobs/5.batch-parse/parse_batch");
 const write_to_do_1 = require("./generation-jobs/6.bulk-write-results/write_to_do");
 const clean_up_batch_data_1 = require("./generation-jobs/7.clean-batch-data/clean_up_batch_data");
 const populate_queue_1 = require("./generation-jobs/8.queue-next-request/populate_queue");
-const config_1 = require("./config");
 const identifier_for_clearing_requests_1 = require("./utils/identifier_for_clearing_requests");
 // Connect to mongodb
 /// initializing the mongo client and open ai is absolutely necessary before proceeding anything
@@ -93,18 +92,17 @@ exports.populateQueueForNextRequest = populateQueueForNextRequest;
 (() => __awaiter(void 0, void 0, void 0, function* () {
     // batch_68217c0ef9348190929c5945c6bd1a6d
     //'batch_6821b377a2b48190aefd0304b6ae14b1'
-    var _a, _b;
-    (0, exports.setUpMongoClient)(config_1.config.dbUri, (_a = config_1.config.dbName) !== null && _a !== void 0 ? _a : "");
-    (0, exports.openai)((_b = config_1.config.openAiKey) !== null && _b !== void 0 ? _b : "");
+    // setUpMongoClient(config.dbUri, config.dbName ?? "");
+    // openai(config.openAiKey ?? "");
     // const batchStatus = await getBatchStatus('batch_6821e19ad8dc819085cdf5eb3193e723');
     // console.log(batchStatus);
     // const prepareResponse = await prepareGenerationBatch('o3-mini');
     // const createBatchResponse = await createBatchRequest(prepareResponse.inputFileList);
     // const batchStatus = await getBatchStatus(createBatchResponse[0]?.id ?? '');
     // console.log(batchStatus);
-    const fileContent = yield (0, exports.getFileContent)('file-CXZXxyPaMVEhRHnRMSVHtM');
-    const parsedData = yield (0, exports.parseGeneratedData)(fileContent);
-    console.log(parsedData);
+    // const fileContent = await getFileContent('file-CXZXxyPaMVEhRHnRMSVHtM');
+    // const parsedData = await parseGeneratedData(fileContent);
+    // console.log(parsedData);
     // const writeToDb = await bulkWriteToDb(parsedData);
     // console.log(writeToDb);
 }))();

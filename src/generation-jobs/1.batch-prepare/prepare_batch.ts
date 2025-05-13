@@ -27,7 +27,7 @@ export async function prepareBatch(model: string): Promise<{
     );
 
     docs = await generationDataCollection
-      .find({ status: "created", 'request_type.type': { $ne: 'embedding' }, _source: '6753b15092093afc979f1aa5' }).limit(400).toArray();
+      .find({ status: "created", 'request_type.type': { $ne: 'embedding' }, }).limit(400).toArray();
 
 
 

@@ -27,7 +27,11 @@ type TypologyResponse = {
         state: boolean;
         reason: string;
     };
-    summary_cards: string[];
+    summary_cards: {
+        title: string;
+        text: string;
+        reference: string;
+    }[];
 };
 type CardGenResponse = {
     cards_data: any[];

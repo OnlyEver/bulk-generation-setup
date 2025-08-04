@@ -1,5 +1,4 @@
 export declare const cardGenDocs: {
-    role: string;
     role_bloom_1: string;
     role_bloom_2: string;
     role_bloom_3: string;
@@ -11,6 +10,7 @@ export declare const cardGenDocs: {
     generate_bloom_4: string;
     generate_bloom_5: string;
     generate_bloom_6: string;
+    steps: string;
     cloze: string;
     flash: string;
     match: string;

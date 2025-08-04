@@ -27,28 +27,33 @@ function prepareBatch(model) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             var inputFileList = [];
+            let docs = [];
+            let sourcesPerBatch = 100;
+            // if (breadthGeneration) {
+            //   docs = await filterDocsForBreadthGeneration();
+            // } else {
             const generationDataCollection = connection_1.database.collection("_generation_requests");
-            let docs = yield generationDataCollection
-                .find({ status: "created" })
-                .toArray();
+            docs = yield generationDataCollection
+                .find({ status: "created", 'request_type.type': { $ne: 'embedding' }, }).limit(400).toArray();
             let sources = yield fetchSourceDocuments(docs);
             const result = [];
-            for (let i = 0; i < sources.length; i += 300) {
+            for (let i = 0; i < sources.length; i += sourcesPerBatch) {
                 // Slice the array into chunks of maxCount elements
-                result.push(sources.slice(i, i + 300));
+                result.push(sources.slice(i, i + sourcesPerBatch));
             }
             yield Promise.all(result.map((element, index) => __awaiter(this, void 0, void 0, function* () {
-                const batchDataList = [];
+                var batchDataList = [];
                 yield Promise.all(element.map((elem) => __awaiter(this, void 0, void 0, function* () {
                     if (elem.request_type.type === "breadth") {
                         const batchData = yield prepareBatchForBreadth(elem, model);
                         batchDataList.push(batchData);
                     }
-                    else {
+                    else { //update else if function
                         const batchData = yield prepareBatchForDepth(elem, model);
                         batchDataList.push(batchData);
                     }
                 })));
+                // const filePath = `/tmp/batchinput${index}.jsonl`;
                 const filePath = `/tmp/batchinput${index}.jsonl`;
                 yield promises_1.default.writeFile(filePath, batchDataList.map((entry) => JSON.stringify(entry)).join("\n"), "utf-8");
                 inputFileList.push(filePath);
@@ -57,13 +62,27 @@ function prepareBatch(model) {
                 sources,
                 inputFileList,
             };
-            return inputFileList;
         }
         catch (error) {
             console.error("Error occurred while preparing the batch file:", error);
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
             throw new Error(`Failed to prepare batch file: ${errorMessage}`);
         }
+    });
+}
+function filterDocsForBreadthGeneration() {
+    return __awaiter(this, void 0, void 0, function* () {
+        var idsToEscape = [];
+        const generationDataCollection = connection_1.database.collection("_generation_requests");
+        const genDataDocs = yield generationDataCollection
+            .find()
+            .toArray();
+        idsToEscape = genDataDocs.map((doc) => doc._id);
+        const sourceDataCollection = connection_1.database.collection("_source");
+        const docs = yield sourceDataCollection
+            .find({ $nin: idsToEscape })
+            .toArray();
+        return docs;
     });
 }
 const getPrompt = (type, bloomLevel) => __awaiter(void 0, void 0, void 0, function* () {

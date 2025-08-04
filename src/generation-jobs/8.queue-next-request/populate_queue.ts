@@ -14,15 +14,19 @@ import {
  */
 export async function populateQueue(
   sourceId: string,
-  viewTimeThreshold: number
+  viewTimeThreshold: number,
+  generateBreadthOnly: boolean = false
 ) {
   const sourceCollection = database.collection("_source");
-  const generationRequests = database.collection("_generation_requests");
+  // const generationRequests = database.collection("_generation_requests");
   const cardCollection: Collection<Document> = database.collection("_card");
 
-  let documents = []; // Array of documents to be inserted in the generation_requests collection
+  let documents: any[] = []; // Array of documents to be inserted in the generation_requests collection
 
   try {
+    // if (generateBreadthOnly) {
+    //   await _generateBreadthRequest();
+    // } else {
     const source = await sourceCollection.findOne(
       {
         _id: new ObjectId(sourceId),
@@ -52,33 +56,63 @@ export async function populateQueue(
         // If the breadth request or source taxonomy exists
         if (lastBreadthRequest || sourceTaxonomy) {
           if (lastBreadthRequest.req_type.n <= calculatedViewTime) {
-            _insertBreadthRequest((lastBreadthRequest.req_type?.n ?? 0) + 1);
-          } else {
-            const depthDocuments = await handleDepthRequest(
-              sourceId,
-              sourceTaxonomy,
-              generationInfo,
-              aiCards,
-              cardCollection
+            _insertBreadthRequest(
+              (lastBreadthRequest.req_type?.n ?? 0) + 1,
+              sourceId
             );
-            documents.push(...depthDocuments);
+          } else {
+            if (!generateBreadthOnly) {
+              const depthDocuments = await handleDepthRequest(
+                sourceId,
+                sourceTaxonomy,
+                generationInfo,
+                aiCards,
+                cardCollection
+              );
+              documents.push(...depthDocuments);
+            }
           }
         } else {
           /// Insert the initial breadth request with n = 1
-          _insertBreadthRequest(1);
+          _insertBreadthRequest(1, sourceId);
         }
       } else {
-        _insertBreadthRequest(1);
+        _insertBreadthRequest(1, sourceId);
       }
     }
     const genReqs = await handleUniqueInsertions(documents);
     console.log("Documents: ", documents);
+    // }
   } catch (error) {
     console.log("Error while populating queue: ", error);
     throw Error;
   }
 
-  function _insertBreadthRequest(n: number) {
+  async function _generateBreadthRequest() {
+    try {
+      const sources = await sourceCollection.find({}).limit(10000).toArray();
+      for (const source of sources) {
+        const generationInfo = source.generation_info;
+        const viewTime = source.view_time;
+        if (viewTime > 700) {
+          if (Array.isArray(generationInfo) && generationInfo.length > 0) {
+            const lastBreadthRequest = findLastBreadthRequest(generationInfo);
+            _insertBreadthRequest(
+              (lastBreadthRequest.req_type?.n ?? 0) + 1,
+              source._id.toHexString()
+            );
+          }
+          _insertBreadthRequest(1, source._id.toHexString());
+        }
+      }
+      const genReqs = await handleUniqueInsertions(documents);
+      return genReqs;
+    } catch (e) {
+      console.error("Error while generating breadth request: ", e);
+    }
+  }
+
+  function _insertBreadthRequest(n: number, sourceId: string = "") {
     documents.push({
       _source: sourceId,
       ctime: new Date(),
@@ -92,7 +126,7 @@ export async function populateQueue(
 }
 
 /**
- * Handles the depth request generation by determining missing concepts and facts for each bloom level.
+ * Handles the depth request generation by determining mis sing concepts and facts for each bloom level.
  *
  * @async
  * @param sourceId - The `_id` of the source.
@@ -116,12 +150,20 @@ async function handleDepthRequest(
     const facts = sourceTaxonomy.facts ?? [];
 
     const conceptTextArray = concepts.map(
-      (concept: { concept_text: string; reference: string }) =>
+      (concept: { concept_text: string; reference: string; type?: string }) =>
         concept.concept_text
     );
-    const factTextArray = facts.map(
+    const oldfactTextArray = facts.map(
       (fact: { fact_text: string; reference: string }) => fact.fact_text
     );
+    const factTextArray = [...oldfactTextArray, ...concepts.map(
+      (concept: { concept_text: string; reference: string; type?: string }) => {
+        if (concept.type === "fact") {
+          return concept.concept_text;
+        }
+      }
+    )
+    ];
 
     const bloomLevelCards = await cardCollection
       .aggregate([
@@ -273,7 +315,12 @@ async function handleUniqueInsertions(documents: any[]) {
     });
 
     if (!existingDoc) {
-      await generationRequests.insertOne(doc);
+      try {
+        await generationRequests.insertOne(doc);
+      } catch (e) {
+        console.log(`Error while inserting document: ${JSON.stringify(doc)}`);
+        console.log(e);
+      }
       console.log(`Inserted document: ${JSON.stringify(doc)}`);
     } else {
       console.log(

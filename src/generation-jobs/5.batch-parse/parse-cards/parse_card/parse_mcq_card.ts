@@ -1,5 +1,13 @@
+import { MongoConceptFactCards } from "../../../../types/mongo_concept_fact_type";
+import { RawMcqCardResponseType } from "../../../../types/generate_card_response_type";
+
 export class ParseMcqCard {
-  parse(data: any): any {
+  parse(data: {
+    card_content: RawMcqCardResponseType;
+    type: string;
+    concepts_facts: MongoConceptFactCards[];
+    bloom_level: number;
+  }) {
     try {
       let mcqAnswers = [];
       if (
@@ -30,9 +38,9 @@ export class ParseMcqCard {
           question: data.card_content.prompt,
           answers: mcqAnswers,
         },
-        concepts: data.concepts,
-        facts: data.facts,
+        concepts_facts: data.concepts_facts,
         explanation: data.card_content.explanation,
+        bloom_level: data.bloom_level,
       };
       //   return mcqCard;
       const isValid = this._validate(mcqCard);

@@ -1,4 +1,6 @@
 import { match } from "assert";
+import { RawMatchCardResponseType } from "../../../../types/generate_card_response_type";
+import { MongoConceptFactCards } from "../../../../types/mongo_concept_fact_type";
 
 type InputItem = {
   left_item: string;
@@ -11,7 +13,12 @@ type OutputItem = {
 };
 
 export class ParseMatchCard {
-  parse(cardData: any): any {
+  parse(cardData: {
+    card_content: RawMatchCardResponseType;
+    type: string;
+    concepts_facts: MongoConceptFactCards[];
+    bloom_level: number;
+  }) {
     try {
       let content = cardData.card_content;
       const finalContent = this._parseMatchContent(content);
@@ -26,9 +33,8 @@ export class ParseMatchCard {
         content: finalContent,
         //  content: cardData.card_content,
         displayTitle: displayTitle,
-        concepts: cardData.concepts,
-        facts: cardData.facts,
-        explanation: cardData.card_content.explanation,
+        concepts_facts: cardData.concepts_facts,
+        bloom_level: cardData.bloom_level,
       };
 
       return this._validateMatch(matchCard);

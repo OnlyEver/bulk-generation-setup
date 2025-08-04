@@ -11,37 +11,52 @@ import { parse } from "path";
  * Prepares a batch file for processing by generating a set of data requests
  * from documents in the source collection and writing them to a local file.
  */
-export async function prepareBatch(model: string): Promise<Object> {
+export async function prepareBatch(model: string): Promise<{
+  sources: any[];
+  inputFileList: string[];
+}> {
   try {
     var inputFileList: string[] = [];
+    let docs: any[] = [];
+    let sourcesPerBatch = 100;
+    // if (breadthGeneration) {
+    //   docs = await filterDocsForBreadthGeneration();
+    // } else {
     const generationDataCollection = database.collection(
       "_generation_requests"
     );
-    let docs = await generationDataCollection
-      .find({ status: "created" })
-      .toArray();
+
+    docs = await generationDataCollection
+      .find({ status: "created", 'request_type.type': { $ne: 'embedding' }, }).limit(400).toArray();
+
+
+
+
     let sources = await fetchSourceDocuments(docs);
     const result = [];
 
-    for (let i = 0; i < sources.length; i += 300) {
+    for (let i = 0; i < sources.length; i += sourcesPerBatch) {
       // Slice the array into chunks of maxCount elements
-      result.push(sources.slice(i, i + 300));
+      result.push(sources.slice(i, i + sourcesPerBatch));
     }
+
     await Promise.all(
       result.map(async (element, index) => {
-        const batchDataList: any[] = [];
+        var batchDataList: any[] = [];
         await Promise.all(
           element.map(async (elem) => {
             if (elem.request_type.type === "breadth") {
               const batchData = await prepareBatchForBreadth(elem, model);
               batchDataList.push(batchData);
-            } else {
+            } else {//update else if function
               const batchData = await prepareBatchForDepth(elem, model);
               batchDataList.push(batchData);
             }
           })
         );
 
+
+        // const filePath = `/tmp/batchinput${index}.jsonl`;
         const filePath = `/tmp/batchinput${index}.jsonl`;
         await fsPromise.writeFile(
           filePath,
@@ -57,7 +72,6 @@ export async function prepareBatch(model: string): Promise<Object> {
       sources,
       inputFileList,
     };
-    return inputFileList;
   } catch (error) {
     console.error("Error occurred while preparing the batch file:", error);
 
@@ -65,6 +79,24 @@ export async function prepareBatch(model: string): Promise<Object> {
       error instanceof Error ? error.message : "Unknown error";
     throw new Error(`Failed to prepare batch file: ${errorMessage}`);
   }
+}
+
+async function filterDocsForBreadthGeneration() {
+  var idsToEscape = [];
+  const generationDataCollection = database.collection(
+    "_generation_requests"
+  );
+  const genDataDocs = await generationDataCollection
+    .find()
+    .toArray();
+  idsToEscape = genDataDocs.map((doc) => doc._id);
+  const sourceDataCollection = database.collection(
+    "_source"
+  );
+  const docs = await sourceDataCollection
+    .find({ $nin: idsToEscape })
+    .toArray();
+  return docs;
 }
 
 const getPrompt = async (

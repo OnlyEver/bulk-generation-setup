@@ -1,5 +1,13 @@
+import { MongoConceptFactCards } from "../../../../types/mongo_concept_fact_type";
+import { RawClozeCardResponseType } from "../../../../types/generate_card_response_type";
+
 export class ParseClozeCard {
-  parse(data: any): any {
+  parse(data: {
+    card_content: RawClozeCardResponseType;
+    type: string;
+    concepts_facts: MongoConceptFactCards[];
+    bloom_level: number;
+  }) {
     try {
       const content = data.card_content;
       let correctOptions = content.correct_options;
@@ -36,9 +44,9 @@ export class ParseClozeCard {
           question: finalQuestion,
           options: finalParsedOptions,
         },
-        concepts: data.concepts,
-        facts: data.facts,
+        concepts_facts: data.concepts_facts,
         explanation: data.card_content.explanation,
+        bloom_level: data.bloom_level,
       };
 
       return this._validateCloze(clozeCardData);

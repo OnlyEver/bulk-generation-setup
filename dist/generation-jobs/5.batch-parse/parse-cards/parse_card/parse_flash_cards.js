@@ -8,7 +8,7 @@ class ParseFlashCard {
             let flashCardData = {
                 type: {
                     category: "learning",
-                    sub_type: data.type,
+                    sub_type: "flash",
                 },
                 heading: "",
                 displayTitle: displayTitle,
@@ -16,9 +16,9 @@ class ParseFlashCard {
                     front_content: data.card_content.front,
                     back_content: data.card_content.back,
                 },
-                concepts: data.concepts,
+                concepts_facts: data.concepts_facts,
                 explanation: data.card_content.explanation,
-                facts: data.facts,
+                bloom_level: data.bloom_level,
             };
             return flashCardData;
         }

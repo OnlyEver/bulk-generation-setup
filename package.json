@@ -20,6 +20,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@qdrant/js-client-rest": "^1.14.0",
     "aws-sdk": "^2.1692.0",
     "dotenv": "^16.4.7",
     "mongodb": "^6.12.0",

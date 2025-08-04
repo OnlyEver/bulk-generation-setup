@@ -16,10 +16,12 @@ type TypologyResponse = {
         reconcile: boolean;
     }>;
     concepts: Array<{
-        concept_text: string;
+        id: string;
+        text: string;
+        type: string;
         reference: string;
     }>;
-    facts: Array<{
+    facts?: Array<{
         fact_text: string;
         reference: string;
     }>;

@@ -33,9 +33,9 @@ class ParseClozeCard {
                     question: finalQuestion,
                     options: finalParsedOptions,
                 },
-                concepts: data.concepts,
-                facts: data.facts,
+                concepts_facts: data.concepts_facts,
                 explanation: data.card_content.explanation,
+                bloom_level: data.bloom_level,
             };
             return this._validateCloze(clozeCardData);
         }

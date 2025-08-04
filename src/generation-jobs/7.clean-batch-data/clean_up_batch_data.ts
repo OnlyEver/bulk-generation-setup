@@ -19,7 +19,7 @@ export async function cleanUpBatchData({
     await generationDataCollection.deleteMany({
       $or: requestIdentifiers,
     });
-    await batchDataCollection.deleteMany({ status: "completed" });
+    await batchDataCollection.deleteMany({ status: "completed", endpoint: { $ne: '/v1/embeddings' } });
   } catch (error) {
     console.error("Error occurred while cleaning up the batch data:", error);
 

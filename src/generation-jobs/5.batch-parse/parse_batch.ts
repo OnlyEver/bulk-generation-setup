@@ -31,14 +31,14 @@ export async function parseBatchResponse(generatedResponses: any[]): Promise<{
           }
         );
 
-        const depth = parseDepth({
+        const depth = await parseDepth({
           rawResponse: rawResponse,
           sourceTaxonomy: taxonomyData?.source_taxonomy ?? {},
         });
         parsedData.push(depth);
       } else if (customId.request_type.type === "breadth") {
         // handle typology parsing
-        const parsedBreadth = parseBreadth(rawResponse);
+        const parsedBreadth = await parseBreadth(rawResponse);
         parsedData.push(parsedBreadth);
       }
     }

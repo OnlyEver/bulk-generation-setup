@@ -5,4 +5,4 @@
  * @param {RawResponse} rawResponse from batch response
  * @returns {ParsedResponse}
  */
-export declare function parseBreadth(rawResponse: RawResponse): ParsedResponse;
+export declare function parseBreadth(rawResponse: RawResponse): Promise<ParsedResponse>;

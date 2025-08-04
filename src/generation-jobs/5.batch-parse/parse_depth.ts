@@ -8,15 +8,16 @@ type parseDepth = {
   sourceTaxonomy: any;
 };
 
-export function parseDepth(params: parseDepth): ParsedResponse {
+export async function parseDepth(params: parseDepth): Promise<ParsedResponse> {
   try {
     const rawResponse = params.rawResponse;
     const requestId = rawResponse.request_id;
     const response = rawResponse.response.body;
     const usage = rawResponse.response.body.usage;
     const generatedData = JSON.parse(response.choices[0].message.content);
-    const cardData = new ParseCardResponse().parse(
+    const cardData = await new ParseCardResponse().parse(
       generatedData,
+      (requestId.request_type?.n ?? 1) > 1,
       params.sourceTaxonomy,
       requestId.request_type?.bloom_level ?? 1
     );
